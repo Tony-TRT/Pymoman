@@ -5,16 +5,17 @@ from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtCore import Qt
 
+from package.movie import Movie
+
 
 CURRENT_DIR = Path(__file__).resolve().parent
 RESOURCES_DIR = Path.joinpath(CURRENT_DIR, "resources")
 ICONS_DIR = Path.joinpath(RESOURCES_DIR, "icons")
-COLLECTIONS_DIR = Path.joinpath(CURRENT_DIR, "collections")
 
 
 class PyMoman(QtWidgets.QWidget):
 
-    user_collections = []
+    user_collections = Movie.retrieve_collections()
 
     def __init__(self):
 
@@ -27,6 +28,7 @@ class PyMoman(QtWidgets.QWidget):
         self.ui_load_icons()
         self.ui_apply_style()
         self.logic_connect_widgets()
+        self.logic_display_collections()
 
 
     def ui_manage_layouts_and_frames(self):
@@ -54,7 +56,7 @@ class PyMoman(QtWidgets.QWidget):
     def ui_manage_widgets(self):
 
         self.btn_create_col = QtWidgets.QPushButton("Create collection")
-        self.btn_save_col = QtWidgets.QPushButton("Save collections")
+        self.btn_save_col = QtWidgets.QPushButton("Save all collections")
         self.btn_scan_dir = QtWidgets.QPushButton("Scan directory")
         self.btn_add_movie = QtWidgets.QPushButton("Add movie")
         self.btn_remove_movie = QtWidgets.QPushButton("Remove movie")
@@ -124,11 +126,6 @@ class PyMoman(QtWidgets.QWidget):
         if name and name not in PyMoman.user_collections and value:
             PyMoman.user_collections.append(name)
             self.logic_display_collections()
-
-
-    def logic_retrieve_collections(self) -> list:
-
-        pass
 
 
     def logic_display_collections(self):
