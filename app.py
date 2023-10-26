@@ -3,14 +3,18 @@ from pathlib import Path
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QPixmap, QIcon
+from PySide6.QtCore import Qt
 
 
 CURRENT_DIR = Path(__file__).resolve().parent
 RESOURCES_DIR = Path.joinpath(CURRENT_DIR, "resources")
 ICONS_DIR = Path.joinpath(RESOURCES_DIR, "icons")
+COLLECTIONS_DIR = Path.joinpath(CURRENT_DIR, "collections")
 
 
 class PyMoman(QtWidgets.QWidget):
+
+    user_collections = []
 
     def __init__(self):
 
@@ -18,13 +22,14 @@ class PyMoman(QtWidgets.QWidget):
 
         self.setWindowTitle("PyMoman")
         self.setFixedSize(950, 450)
-        self.manage_layouts_and_frames()
-        self.manage_widgets()
-        self.load_icons()
-        self.apply_style()
+        self.ui_manage_layouts_and_frames()
+        self.ui_manage_widgets()
+        self.ui_load_icons()
+        self.ui_apply_style()
+        self.logic_connect_widgets()
 
 
-    def manage_layouts_and_frames(self):
+    def ui_manage_layouts_and_frames(self):
 
         self.mov_frm = QtWidgets.QFrame()
         self.mov_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -46,10 +51,10 @@ class PyMoman(QtWidgets.QWidget):
         self.gmovie_layout.addWidget(self.mov_frm)
 
 
-    def manage_widgets(self):
+    def ui_manage_widgets(self):
 
         self.btn_create_col = QtWidgets.QPushButton("Create collection")
-        self.btn_save_col = QtWidgets.QPushButton("Save collection")
+        self.btn_save_col = QtWidgets.QPushButton("Save collections")
         self.btn_scan_dir = QtWidgets.QPushButton("Scan directory")
         self.btn_add_movie = QtWidgets.QPushButton("Add movie")
         self.btn_remove_movie = QtWidgets.QPushButton("Remove movie")
@@ -82,7 +87,7 @@ class PyMoman(QtWidgets.QWidget):
         self.list_layout.addWidget(self.lw_main)
 
 
-    def load_icons(self):
+    def ui_load_icons(self):
 
         application_logo = QPixmap(str(RESOURCES_DIR / "logo.png"))
         btn_create_col_icon = QPixmap(str(ICONS_DIR / "create_collection.png"))
@@ -101,11 +106,39 @@ class PyMoman(QtWidgets.QWidget):
         self.le_search.addAction(le_search_icon, self.le_search.ActionPosition.LeadingPosition)
 
 
-    def apply_style(self):
+    def ui_apply_style(self):
 
         style = Path.joinpath(RESOURCES_DIR, "style.qss")
         with open(style, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
+
+
+    def logic_connect_widgets(self):
+
+        self.btn_create_col.clicked.connect(self.logic_create_collection)
+
+
+    def logic_create_collection(self):
+
+        name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
+        if name and name not in PyMoman.user_collections and value:
+            PyMoman.user_collections.append(name)
+            self.logic_display_collections()
+
+
+    def logic_retrieve_collections(self) -> list:
+
+        pass
+
+
+    def logic_display_collections(self):
+
+        PyMoman.user_collections = sorted(PyMoman.user_collections, key=str.casefold)
+        self.lw_main.clear()
+        for collection in PyMoman.user_collections:
+            collection = QtWidgets.QListWidgetItem(collection)
+            collection.setTextAlignment(Qt.AlignCenter)
+            self.lw_main.addItem(collection)
 
 
 if __name__ == '__main__':
