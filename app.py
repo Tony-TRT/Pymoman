@@ -59,6 +59,9 @@ class PyMoman(QtWidgets.QWidget):
         self.cbb_genre.addItem('Genre')
         self.cbb_actors = QtWidgets.QComboBox()
         self.cbb_actors.addItem('Actors')
+        self.progress_bar = QtWidgets.QProgressBar()
+        self.progress_bar.setFixedHeight(5)
+        self.progress_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.le_search = QtWidgets.QLineEdit()
         self.le_search.setClearButtonEnabled(True)
         self.le_search.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -74,6 +77,7 @@ class PyMoman(QtWidgets.QWidget):
         self.menu_layout.addWidget(self.label_filter)
         self.menu_layout.addWidget(self.cbb_genre)
         self.menu_layout.addWidget(self.cbb_actors)
+        self.menu_layout.addWidget(self.progress_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
 

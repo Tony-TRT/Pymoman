@@ -63,6 +63,20 @@ QScrollBar::handle:vertical
 }
 
 
+QProgressBar
+{
+	background-color: #3f3f3f;
+	border: none;
+	border-radius: 2px;
+}
+
+
+QProgressBar::chunk
+{
+	width:2px
+}
+
+
 QPushButton
 {
 	color: #ffa500;
