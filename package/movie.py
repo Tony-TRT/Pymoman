@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -6,14 +5,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Movie:
 
-    def __init__(self):
+    def __init__(self, title: str, path=None, rating: int=0):
 
-        pass
+        self.title = title
+        self.path = path
+        self.rating = rating
 
     def __str__(self):
 
-        pass
+        return self.title
 
     def __repr__(self):
 
-        pass
+        return f"{self.title}, {self.path}, {self.rating}/5"
