@@ -1,12 +1,13 @@
 from pathlib import Path
+from functools import partial
+from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QPixmap, QIcon
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap, QIcon, QAction
+from PySide6.QtCore import Qt, QEvent
 
-from package.movie import Movie
-
+from package.collection import Collection
 
 CURRENT_DIR = Path(__file__).resolve().parent
 RESOURCES_DIR = Path.joinpath(CURRENT_DIR, "resources")
@@ -14,8 +15,7 @@ ICONS_DIR = Path.joinpath(RESOURCES_DIR, "icons")
 
 
 class PyMoman(QtWidgets.QWidget):
-
-    user_collections = Movie.retrieve_collections()
+    all_collections: list[Collection] = Collection.retrieve_collections()
 
     def __init__(self):
 
@@ -29,7 +29,6 @@ class PyMoman(QtWidgets.QWidget):
         self.ui_apply_style()
         self.logic_connect_widgets()
         self.logic_display_collections()
-
 
     def ui_manage_layouts_and_frames(self):
 
@@ -52,7 +51,6 @@ class PyMoman(QtWidgets.QWidget):
         self.body_layout.addLayout(self.gmovie_layout)
         self.gmovie_layout.addWidget(self.mov_frm)
 
-
     def ui_manage_widgets(self):
 
         self.btn_create_col = QtWidgets.QPushButton("Create collection")
@@ -67,6 +65,7 @@ class PyMoman(QtWidgets.QWidget):
         self.cbb_actors = QtWidgets.QComboBox()
         self.cbb_actors.addItem('Actors')
         self.progress_bar = QtWidgets.QProgressBar()
+        self.progress_bar.setTextVisible(False)
         self.progress_bar.setFixedHeight(5)
         self.progress_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.le_search = QtWidgets.QLineEdit()
@@ -74,6 +73,7 @@ class PyMoman(QtWidgets.QWidget):
         self.le_search.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.le_search.setPlaceholderText("Search")
         self.lw_main = QtWidgets.QListWidget()
+        self.lw_main.installEventFilter(self)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.header_layout.addWidget(self.btn_create_col)
@@ -88,16 +88,18 @@ class PyMoman(QtWidgets.QWidget):
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
 
-
     def ui_load_icons(self):
 
         application_logo = QPixmap(str(RESOURCES_DIR / "logo.png"))
-        btn_create_col_icon = QPixmap(str(ICONS_DIR / "create_collection.png"))
-        btn_save_col_icon = QPixmap(str(ICONS_DIR / "save.png"))
-        btn_scan_dir_icon = QPixmap(str(ICONS_DIR / "scan_folder.png"))
+        self.rename_icon = btn_create_col_icon = QPixmap(str(ICONS_DIR / "create_collection.png"))
+        self.save_icon = btn_save_col_icon = QPixmap(str(ICONS_DIR / "save.png"))
+        self.open_icon = btn_scan_dir_icon = QPixmap(str(ICONS_DIR / "scan_folder.png"))
         btn_add_movie_icon = QPixmap(str(ICONS_DIR / "add_item.png"))
         btn_remove_movie_icon = QPixmap(str(ICONS_DIR / "remove_item.png"))
         le_search_icon = QIcon(str(ICONS_DIR / "search.png"))
+        self.collection_icon = QIcon(str(ICONS_DIR / "collection.png"))
+        self.export_icon = QIcon(str(ICONS_DIR / "export.png"))
+        self.delete_icon = QIcon(str(ICONS_DIR / "delete.png"))
 
         self.setWindowIcon(application_logo)
         self.btn_create_col.setIcon(btn_create_col_icon)
@@ -107,39 +109,118 @@ class PyMoman(QtWidgets.QWidget):
         self.btn_remove_movie.setIcon(btn_remove_movie_icon)
         self.le_search.addAction(le_search_icon, self.le_search.ActionPosition.LeadingPosition)
 
-
     def ui_apply_style(self):
 
         style = Path.joinpath(RESOURCES_DIR, "style.qss")
         with open(style, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
 
-
     def logic_connect_widgets(self):
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
-
+        self.btn_save_col.clicked.connect(self.logic_save_collection)
 
     def logic_create_collection(self):
 
-        name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
-        if name and name not in PyMoman.user_collections and value:
-            PyMoman.user_collections.append(name)
+        name, val = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
+        if name and name not in [col.name for col in PyMoman.all_collections] and val:
+            new_collection = Collection(name)
+            PyMoman.all_collections.append(new_collection)
             self.logic_display_collections()
 
+    def logic_open_collection(self):
+
+        pass
+
+    def logic_save_collection(self, collection_to_save: Collection):
+
+        self.progress_bar.setValue(50)
+        sleep(0.3)
+
+        if isinstance(self.sender(), QtWidgets.QPushButton):
+            for collection in PyMoman.all_collections:
+                collection.save()
+        else:
+            collection_to_save.save()
+
+        self.logic_display_collections()
+
+        self.progress_bar.setValue(100)
+        sleep(0.4)
+        self.progress_bar.setValue(0)
+
+    def logic_rename_collection(self, collection_to_rename: Collection):
+
+        n_name, val = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
+        if n_name and n_name not in [col.name for col in PyMoman.all_collections] and val:
+            collection_to_rename.rename(n_name)
+            self.logic_display_collections()
+
+    def logic_export_collection(self, collection_to_export: Collection):
+
+        dialog = QtWidgets.QFileDialog.getSaveFileName(self, 'PyMoman - Save text file')
+        if dialog[0]:
+            collection_to_export.export_as_txt(Path(f"{dialog[0]}.txt"))
+
+    def logic_delete_collection(self, collection_to_delete: Collection):
+
+        val = collection_to_delete.remove()
+        if val:
+            PyMoman.all_collections.remove(collection_to_delete)
+            self.logic_display_collections()
 
     def logic_display_collections(self):
 
-        PyMoman.user_collections = sorted(PyMoman.user_collections, key=str.casefold)
         self.lw_main.clear()
-        for collection in PyMoman.user_collections:
-            collection = QtWidgets.QListWidgetItem(collection)
-            collection.setTextAlignment(Qt.AlignCenter)
-            self.lw_main.addItem(collection)
+        for collection in PyMoman.all_collections:
+            lw_item = QtWidgets.QListWidgetItem(collection.name)
+            lw_item.attr = collection
+            lw_item.setTextAlignment(Qt.AlignCenter)
+            if lw_item.attr.path.exists():
+                lw_item.setIcon(self.collection_icon)
+            self.lw_main.addItem(lw_item)
+
+    def eventFilter(self, watched, event: QEvent) -> bool:
+
+        if event.type() == QEvent.ContextMenu and watched is self.lw_main:
+            list_item = watched.itemAt(event.pos())
+
+            if not list_item:
+                # Prevents harmless console errors
+                list_item = QtWidgets.QListWidgetItem("")
+                list_item.attr = None
+
+            collection_menu = QtWidgets.QMenu(self)
+
+            open_col = QAction(self.open_icon, "Open")
+            open_col.triggered.connect(self.logic_open_collection)
+
+            save = QAction(self.save_icon, "Save")
+            save.triggered.connect(partial(self.logic_save_collection, list_item.attr))
+
+            rename = QAction(self.rename_icon, "Rename")
+            rename.triggered.connect(partial(self.logic_rename_collection, list_item.attr))
+
+            export = QAction(self.export_icon, "Export as text")
+            export.triggered.connect(partial(self.logic_export_collection, list_item.attr))
+
+            delete = QAction(self.delete_icon, "Delete")
+            delete.triggered.connect(partial(self.logic_delete_collection, list_item.attr))
+
+            collection_menu.addAction(open_col)
+            collection_menu.addAction(save)
+            collection_menu.addAction(rename)
+            collection_menu.addAction(export)
+            collection_menu.addAction(delete)
+
+            if isinstance(list_item.attr, Collection):
+                collection_menu.exec(event.globalPos())
+                return True
+
+        return super().eventFilter(watched, event)
 
 
 if __name__ == '__main__':
-
     root = QtWidgets.QApplication()
     application = PyMoman()
     application.show()

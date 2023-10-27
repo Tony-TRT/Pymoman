@@ -1,6 +1,6 @@
 QWidget
 {
-	color: #000000;
+	color: #ffa500;
 	background-color: #242424;
 }
 
@@ -9,6 +9,12 @@ QWidget
 {
 	color: #ffa500;
 	background-color: #242424;
+}
+
+
+QMenu::item:selected
+{
+    background-color: #2b5370;
 }
 
 
@@ -35,8 +41,7 @@ QWidget
 {
 	color: #ffa500;
 	background-color: #3f3f3f;
-	border-top-left-radius: 20px;
-	border-bottom-left-radius: 20px;
+	border: none;
 }
 
 
