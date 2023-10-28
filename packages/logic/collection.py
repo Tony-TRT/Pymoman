@@ -2,7 +2,9 @@ import json
 from pathlib import Path
 from glob import glob
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from .movie import Movie
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 COLLECTIONS_DIR = Path.joinpath(BASE_DIR, "collections")
 
 
@@ -42,15 +44,17 @@ class Collection:
 
         return collections
 
-    def add_movie(self, movie):
+    def add_movie(self, movie: Movie):
 
-        self.mov_lst.append(movie)
+        self.mov_lst.append(
+            {"title": movie.title, "year": movie.year, "path": movie.path, "rating": movie.rating}
+        )
 
     def export_as_txt(self, output_file):
 
         with open(output_file, 'a', encoding="UTF-8") as text_file:
             for movie in self.mov_lst:
-                text_file.write(f"- {movie}\n")
+                text_file.write(f"- {movie.get("title")} ({movie.get("year")})\n")
 
     def remove(self) -> bool:
 
@@ -61,11 +65,10 @@ class Collection:
             return False
         return True
 
-    def remove_movie(self, movie):
+    def remove_movie(self, movie: Movie):
 
-        self.mov_lst.remove(movie)
-        if self.path.exists():
-            self.save()
+        movie_to_remove = next((mov for mov in self.mov_lst if mov.get("title") == movie.title), None)
+        self.mov_lst.remove(movie_to_remove)
 
     def rename(self, new_name: str):
 

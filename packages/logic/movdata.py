@@ -9,7 +9,7 @@ from PIL import Image
 import requests
 
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_POSTER = Path.joinpath(BASE_DIR, "resources", "default.jpg")
 CACHE = Path.joinpath(BASE_DIR, "cache")
 
@@ -37,6 +37,7 @@ class MovieScrapper:
     """MovieScrapper object can process input and retrieve information"""
 
     pic_website = "http://www.impawards.com/"
+    inf_website = "https://en.wikipedia.org/"
 
     def __init__(self, movie_title: str, movie_year: int):
 

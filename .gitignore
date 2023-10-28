@@ -1,3 +1,5 @@
 /env
 /cache
-/package/__pycache__
+/collections
+/package/logic/__pycache__
+/package/ui/__pycache__

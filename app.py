@@ -7,8 +7,10 @@ from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QPixmap, QIcon, QAction
 from PySide6.QtCore import Qt, QEvent
 
-from package.collection import Collection
-from package.movie import Movie
+from packages.logic.collection import Collection
+from packages.logic.movie import Movie
+from packages.ui.movtag import MovieTagDialog
+
 
 CURRENT_DIR = Path(__file__).resolve().parent
 RESOURCES_DIR = Path.joinpath(CURRENT_DIR, "resources")
@@ -77,6 +79,7 @@ class PyMoman(QtWidgets.QWidget):
         self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.custom_dialog = MovieTagDialog()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -126,6 +129,7 @@ class PyMoman(QtWidgets.QWidget):
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
         self.lw_main.itemClicked.connect(self.logic_go_back)
+        self.custom_dialog.btn_validate.clicked.connect(self.logic_get_returned_movie)
 
     def logic_create_collection(self):
 
@@ -203,12 +207,28 @@ class PyMoman(QtWidgets.QWidget):
         if not PyMoman.last_collection_opened:
             return False
 
+        self.custom_dialog.show()
+
+    def logic_get_returned_movie(self) -> bool:
+
         collection = PyMoman.last_collection_opened[0]
-        title, val = QtWidgets.QInputDialog.getText(self, f"{collection} - Add a movie", "Enter movie title:")
-        if title and title not in collection.mov_lst and val:
-            collection.add_movie(title)
-            self.logic_display_movies(collection)
-            return True
+        try:
+            movie = Movie(
+                title=self.custom_dialog.le_movie_title.text(),
+                year=int(self.custom_dialog.le_movie_year.text()),
+                rating=self.custom_dialog.cbb_movie_rating.currentText())
+        except ValueError:
+            self.custom_dialog.close()
+            return False
+        else:
+            if movie.title not in [mov.get("title") for mov in collection.mov_lst]:
+                collection.add_movie(movie)
+                self.custom_dialog.close()
+                self.logic_display_movies(collection)
+                return True
+            else:
+                self.custom_dialog.close()
+                return False
 
     def logic_remove_movie(self) -> bool:
 
@@ -225,7 +245,7 @@ class PyMoman(QtWidgets.QWidget):
             return False
         else:
             if isinstance(movie_to_remove, Movie):
-                collection.remove_movie(movie_to_remove.title)
+                collection.remove_movie(movie_to_remove)
                 del movie_to_remove
                 self.logic_display_movies(collection)
                 return True
@@ -239,7 +259,7 @@ class PyMoman(QtWidgets.QWidget):
         self.lw_main.addItem(previous_item)
 
         for movie in open_collection.mov_lst:
-            movie = Movie(movie)
+            movie = Movie(movie.get("title"), movie.get("year"), movie.get("path"), movie.get("rating"))
             lw_item = QtWidgets.QListWidgetItem(movie.title)
             lw_item.attr = movie
             lw_item.setTextAlignment(Qt.AlignCenter)
