@@ -1,15 +1,18 @@
+import threading
 from pathlib import Path
 from functools import partial
 from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QPixmap, QIcon, QAction
+from PySide6.QtGui import QPixmap, QIcon, QAction, QFont
 from PySide6.QtCore import Qt, QEvent
 
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
+import packages.logic.movdata as movdata
 from packages.ui.movtag import MovieTagDialog
+from packages.ui.movdisplay import MovieTagDisplay
 
 
 CURRENT_DIR = Path(__file__).resolve().parent
@@ -80,6 +83,7 @@ class PyMoman(QtWidgets.QWidget):
         self.lw_main.installEventFilter(self)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.custom_dialog = MovieTagDialog()
+        self.movie_tag_display = MovieTagDisplay()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -92,6 +96,7 @@ class PyMoman(QtWidgets.QWidget):
         self.menu_layout.addWidget(self.progress_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
+        self.mov_frm_layout.addWidget(self.movie_tag_display)
 
     def ui_load_icons(self):
 
@@ -130,7 +135,7 @@ class PyMoman(QtWidgets.QWidget):
         self.btn_save_col.clicked.connect(self.logic_save_collection)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
-        self.lw_main.itemClicked.connect(self.logic_go_back)
+        self.lw_main.itemClicked.connect(self.logic_single_click)
         self.custom_dialog.btn_validate.clicked.connect(self.logic_get_returned_movie)
 
     def logic_create_collection(self):
@@ -199,10 +204,17 @@ class PyMoman(QtWidgets.QWidget):
                 lw_item.setIcon(self.collection_icon)
             self.lw_main.addItem(lw_item)
 
-    def logic_go_back(self, clicked_item):
+    def logic_single_click(self, clicked_item):
 
-        if clicked_item.text() == "GO BACK":
+        try:
+            clicked_item.attr
+        except AttributeError:  # clicked_item is necessarily 'GO BACK'
             self.logic_display_collections()
+        else:
+            if isinstance(clicked_item.attr, Movie):
+                webscraper = movdata.MovieScrapper(clicked_item.attr.title, clicked_item.attr.year)
+                threading.Thread(target=webscraper.download_poster).start()
+                self.logic_display_panel(clicked_item.attr, webscraper)
 
     def logic_add_movie(self) -> bool:
 
@@ -278,6 +290,19 @@ class PyMoman(QtWidgets.QWidget):
             lw_item.setTextAlignment(Qt.AlignCenter)
             lw_item.setIcon(self.movie_icon)
             self.lw_main.addItem(lw_item)
+
+    def logic_display_panel(self, movie: Movie, scraper: movdata.MovieScrapper):
+
+        movie_cache_folder = Path(movdata.CACHE / scraper.sanitized_title)
+        if Path(movie_cache_folder / 'thumb.jpg').exists():
+            movie_poster = QPixmap(str(Path(movie_cache_folder / 'thumb.jpg')))
+        else:
+            movie_poster = QPixmap(str(Path(movie_cache_folder / 'default.jpg')))
+
+        self.movie_tag_display.poster_label.setPixmap(movie_poster)
+        self.movie_tag_display.rating_label.setText(movie.aesthetic_rating)
+        self.movie_tag_display.title_label.setText(movie.title.title())
+        self.movie_tag_display.title_label.setFont(QFont('Arial', 18))
 
     def clr_reset_custom_dialog(self):
 

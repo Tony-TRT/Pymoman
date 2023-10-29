@@ -28,7 +28,7 @@ def perfect_resize(poster: Path) -> bool:
         return False
 
     image = Image.open(str(poster))
-    resized = image.resize((200,300), Image.ANTIALIAS)
+    resized = image.resize((200, 300))
     resized.save(str(poster))
     return True
 
@@ -96,7 +96,7 @@ class MovieScrapper:
         storage = Path(CACHE / self.sanitized_title)
         storage.mkdir(exist_ok=True, parents=True)
 
-        if Path(storage / 'thumb.jpg').exists():
+        if Path(storage / 'thumb.jpg').exists() or Path(storage / 'default.jpg').exists():
             return True
 
         response = requests.get(self.default_download_link, timeout=8)
@@ -104,7 +104,9 @@ class MovieScrapper:
         if response.ok:
             with open(storage / 'thumb.jpg', "wb") as poster:
                 poster.write(response.content)
-                return True
+                res = perfect_resize(storage / 'thumb.jpg')
+                if res:
+                    return True
         else:
             links = self.generate_links()
             for link in links:
@@ -112,10 +114,9 @@ class MovieScrapper:
                 if response.ok:
                     with open(storage / 'thumb.jpg', "wb") as poster:
                         poster.write(response.content)
-                        return True
-
-        if Path(storage / 'default.jpg').exists():
-            return False
+                        res = perfect_resize(storage / 'thumb.jpg')
+                        if res:
+                            return True
 
         copy(str(DEFAULT_POSTER), str(storage))
         return False
