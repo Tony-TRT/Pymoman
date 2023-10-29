@@ -1,11 +1,12 @@
 import threading
 from pathlib import Path
+import json
 from functools import partial
 from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QPixmap, QIcon, QAction, QFont
+from PySide6.QtGui import QPixmap, QIcon, QAction
 from PySide6.QtCore import Qt, QEvent
 
 from packages.logic.collection import Collection
@@ -214,6 +215,7 @@ class PyMoman(QtWidgets.QWidget):
             if isinstance(clicked_item.attr, Movie):
                 webscraper = movdata.MovieScrapper(clicked_item.attr.title, clicked_item.attr.year)
                 threading.Thread(target=webscraper.download_poster).start()
+                threading.Thread(target=webscraper.download_info).start()
                 self.logic_display_panel(clicked_item.attr, webscraper)
 
     def logic_add_movie(self) -> bool:
@@ -297,12 +299,23 @@ class PyMoman(QtWidgets.QWidget):
         if Path(movie_cache_folder / 'thumb.jpg').exists():
             movie_poster = QPixmap(str(Path(movie_cache_folder / 'thumb.jpg')))
         else:
-            movie_poster = QPixmap(str(Path(movie_cache_folder / 'default.jpg')))
+            movie_poster = QPixmap(str(movdata.DEFAULT_POSTER))
+
+        if Path(movie_cache_folder / 'data.json').exists():
+            with open(Path(movie_cache_folder / 'data.json'), 'r', encoding="UTF-8") as file:
+                data = json.load(file)
+                title = data.get('title')
+                summary = data.get('summary')
+        else:
+            title = movie.title.title()
+            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
 
         self.movie_tag_display.poster_label.setPixmap(movie_poster)
         self.movie_tag_display.rating_label.setText(movie.aesthetic_rating)
-        self.movie_tag_display.title_label.setText(movie.title.title())
-        self.movie_tag_display.title_label.setFont(QFont('Arial', 18))
+        self.movie_tag_display.title_label.setText(title)
+        self.movie_tag_display.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.movie_tag_display.summary_label.setText(summary)
+        self.movie_tag_display.summary_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def clr_reset_custom_dialog(self):
 

@@ -2,9 +2,10 @@
 This module retrieves movies information
 """
 
+import json
 from pathlib import Path
-from shutil import copy
 
+import wikipedia
 from PIL import Image
 import requests
 
@@ -37,7 +38,6 @@ class MovieScrapper:
     """MovieScrapper object can process input and retrieve information"""
 
     pic_website = "http://www.impawards.com/"
-    inf_website = "https://en.wikipedia.org/"
 
     def __init__(self, movie_title: str, movie_year: int):
 
@@ -96,7 +96,7 @@ class MovieScrapper:
         storage = Path(CACHE / self.sanitized_title)
         storage.mkdir(exist_ok=True, parents=True)
 
-        if Path(storage / 'thumb.jpg').exists() or Path(storage / 'default.jpg').exists():
+        if Path(storage / 'thumb.jpg').exists():
             return True
 
         response = requests.get(self.default_download_link, timeout=8)
@@ -118,5 +118,34 @@ class MovieScrapper:
                         if res:
                             return True
 
-        copy(str(DEFAULT_POSTER), str(storage))
         return False
+
+    def download_info(self) -> bool:
+
+        data_file = Path(CACHE / self.sanitized_title / 'data.json')
+        data_file.parent.mkdir(exist_ok=True, parents=True)
+
+        if data_file.exists():
+            return True
+
+        try:
+            page = wikipedia.page(f"{self.movie_title} {self.movie_year}")
+        except :
+            title = self.movie_title
+        else:
+            title = page.title
+
+        wikipedia.set_lang("en")
+        try:
+            summary = wikipedia.summary(f"{self.movie_title} {self.movie_year}", 2)
+        except :
+            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
+
+        data = {"title": title, "summary": summary}
+
+        with open(data_file, 'w', encoding="UTF-8") as file:
+            json.dump(data, file)
+
+        if not data_file.exists():
+            return False
+        return True

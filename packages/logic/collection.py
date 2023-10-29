@@ -54,7 +54,7 @@ class Collection:
 
         with open(output_file, 'a', encoding="UTF-8") as text_file:
             for movie in self.mov_lst:
-                text_file.write(f"- {movie.get("title")} ({movie.get("year")})\n")
+                text_file.write(f"- {movie.get('title')} ({movie.get('year')})\n")
 
     def remove(self) -> bool:
 
