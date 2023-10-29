@@ -9,13 +9,13 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/c201543e-b2d4-4e26-9750-206e23093e63)
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/aa1df8dd-2994-4577-8674-dcdc159dcad9)
 
 
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/4981fd91-7d9e-4dc4-86f6-4c7a37f85667)
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/6f49ade9-445c-4b15-8ed6-cf2feea1c648)
 
 
-![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/fd027f2e-c189-4254-8495-6d1cc723e1eb)
+![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/9c445c3b-6dd1-4ae8-b430-17cad91f60fe)
 
 ## How to install
 I've barely tested it on Linux, but it should work well on Windows.
