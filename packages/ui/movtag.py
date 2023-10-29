@@ -33,7 +33,7 @@ class MovieTagDialog(QtWidgets.QWidget):
         self.le_movie_year.setPlaceholderText("Year the movie was released (Required)")
         self.movie_rating_label = QtWidgets.QLabel("Rate the movie (Optional)")
         self.cbb_movie_rating = QtWidgets.QComboBox()
-        self.cbb_movie_rating.addItems(["---", '1', '2', '3', '4', '5'])
+        self.cbb_movie_rating.addItems(["-", '1', '2', '3', '4', '5'])
         self.btn_validate = QtWidgets.QPushButton("Validate")
 
         self.main_layout.addWidget(self.le_movie_title)

@@ -28,7 +28,7 @@ def perfect_resize(poster: Path) -> bool:
         return False
 
     image = Image.open(str(poster))
-    resized = image.resize((200,300))
+    resized = image.resize((200,300), Image.ANTIALIAS)
     resized.save(str(poster))
     return True
 

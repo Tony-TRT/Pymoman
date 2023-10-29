@@ -1,5 +1,6 @@
 /env
 /cache
 /collections
+/.idea
 /package/logic/__pycache__
 /package/ui/__pycache__

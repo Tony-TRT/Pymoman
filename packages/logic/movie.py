@@ -2,6 +2,14 @@ from pathlib import Path
 from datetime import datetime
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+RATINGS = {
+    "-": "☆☆☆☆☆",
+    "1": "★☆☆☆☆",
+    "2": "★★☆☆☆",
+    "3": "★★★☆☆",
+    "4": "★★★★☆",
+    "5": "★★★★★"
+}
 
 
 class Movie:
@@ -18,6 +26,10 @@ class Movie:
         self.year = year
         self.path = path
         self.rating = rating
+
+        for key, value in RATINGS.items():
+            if rating == key:
+                self.aesthetic_rating = value
 
     def __str__(self):
 

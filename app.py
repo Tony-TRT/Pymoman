@@ -107,6 +107,8 @@ class PyMoman(QtWidgets.QWidget):
         self.previous_icon = QIcon(str(ICONS_DIR / "previous.png"))
         self.export_icon = QIcon(str(ICONS_DIR / "export.png"))
         self.delete_icon = QIcon(str(ICONS_DIR / "delete.png"))
+        self.official_icon = QIcon(str(ICONS_DIR / "official.png"))
+        self.star_icon = QIcon(str(ICONS_DIR / "star.png"))
 
         self.setWindowIcon(application_logo)
         self.btn_create_col.setIcon(self.note_icon)
@@ -219,16 +221,27 @@ class PyMoman(QtWidgets.QWidget):
                 rating=self.custom_dialog.cbb_movie_rating.currentText())
         except ValueError:
             self.custom_dialog.close()
+            self.clr_reset_custom_dialog()
             return False
         else:
             if movie.title not in [mov.get("title") for mov in collection.mov_lst]:
                 collection.add_movie(movie)
                 self.custom_dialog.close()
+                self.clr_reset_custom_dialog()
                 self.logic_display_movies(collection)
                 return True
             else:
                 self.custom_dialog.close()
+                self.clr_reset_custom_dialog()
                 return False
+
+    def logic_rename_movie(self, movie: Movie):
+
+        pass
+
+    def logic_edit_movie_rating(self, movie: Movie):
+
+        pass
 
     def logic_remove_movie(self) -> bool:
 
@@ -260,11 +273,17 @@ class PyMoman(QtWidgets.QWidget):
 
         for movie in open_collection.mov_lst:
             movie = Movie(movie.get("title"), movie.get("year"), movie.get("path"), movie.get("rating"))
-            lw_item = QtWidgets.QListWidgetItem(movie.title)
+            lw_item = QtWidgets.QListWidgetItem(f"{movie.title} ({movie.year})")
             lw_item.attr = movie
             lw_item.setTextAlignment(Qt.AlignCenter)
             lw_item.setIcon(self.movie_icon)
             self.lw_main.addItem(lw_item)
+
+    def clr_reset_custom_dialog(self):
+
+        self.custom_dialog.le_movie_title.clear()
+        self.custom_dialog.le_movie_year.clear()
+        self.custom_dialog.cbb_movie_rating.setCurrentIndex(0)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 
@@ -301,9 +320,25 @@ class PyMoman(QtWidgets.QWidget):
             collection_menu.addAction(export)
             collection_menu.addAction(delete)
 
+            movie_menu = QtWidgets.QMenu(self)
+
+            rename_mov = QAction(self.note_icon, "Rename")
+            rename_mov.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
+
+            official_title = QAction(self.official_icon, "Assign official title")
+            official_title.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
+
+            edit_rating = QAction(self.star_icon, "Edit rating")
+            edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, list_item.attr))
+
+            movie_menu.addAction(official_title)
+            movie_menu.addAction(rename_mov)
+            movie_menu.addAction(edit_rating)
+
             if isinstance(list_item.attr, Collection):
                 collection_menu.exec(event.globalPos())
-                return True
+            elif isinstance(list_item.attr, Movie):
+                movie_menu.exec(event.globalPos())
 
         return super().eventFilter(watched, event)
 
