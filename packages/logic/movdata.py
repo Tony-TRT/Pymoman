@@ -15,22 +15,22 @@ DEFAULT_POSTER = Path.joinpath(BASE_DIR, "resources", "default.jpg")
 CACHE = Path.joinpath(BASE_DIR, "cache")
 
 
-def perfect_resize(poster: Path) -> bool:
-    """Resize movie poster to the perfect display size
+def modify_raw_poster(poster: Path) -> bool:
+    """Prepare movie poster to be displayed
 
     Args:
-        poster (Path): file path
+        poster (Path): raw file path
 
     Returns:
-        bool: True = succes, False = problem
+        bool: True = good, False = input file does not exist
     """
 
     if not poster.exists():
         return False
 
-    image = Image.open(str(poster))
-    resized = image.resize((200, 300))
-    resized.save(str(poster))
+    movie_poster = Image.open(poster)
+    movie_poster_resized = movie_poster.resize((185, 275))
+    movie_poster_resized.save(poster)
     return True
 
 
@@ -104,7 +104,7 @@ class MovieScrapper:
         if response.ok:
             with open(storage / 'thumb.jpg', "wb") as poster:
                 poster.write(response.content)
-                res = perfect_resize(storage / 'thumb.jpg')
+                res = modify_raw_poster(storage / 'thumb.jpg')
                 if res:
                     return True
         else:
@@ -114,7 +114,7 @@ class MovieScrapper:
                 if response.ok:
                     with open(storage / 'thumb.jpg', "wb") as poster:
                         poster.write(response.content)
-                        res = perfect_resize(storage / 'thumb.jpg')
+                        res = modify_raw_poster(storage / 'thumb.jpg')
                         if res:
                             return True
 
