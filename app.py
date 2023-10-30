@@ -213,7 +213,7 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
         else:
             if isinstance(clicked_item.attr, Movie):
-                webscraper = movdata.MovieScrapper(clicked_item.attr.title, clicked_item.attr.year)
+                webscraper = movdata.MovieScraper(clicked_item.attr.title, clicked_item.attr.year)
                 threading.Thread(target=webscraper.download_poster).start()
                 threading.Thread(target=webscraper.download_info).start()
                 self.logic_display_panel(clicked_item.attr, webscraper)
@@ -293,7 +293,7 @@ class PyMoman(QtWidgets.QWidget):
             lw_item.setIcon(self.movie_icon)
             self.lw_main.addItem(lw_item)
 
-    def logic_display_panel(self, movie: Movie, scraper: movdata.MovieScrapper):
+    def logic_display_panel(self, movie: Movie, scraper: movdata.MovieScraper):
 
         movie_cache_folder = Path(movdata.CACHE / scraper.sanitized_title)
         if Path(movie_cache_folder / 'thumb.jpg').exists():
@@ -307,7 +307,7 @@ class PyMoman(QtWidgets.QWidget):
                 title = data.get('title')
                 summary = data.get('summary')
         else:
-            title = movie.title.title()
+            title = f"{movie.title.title()} ({movie.year})"
             summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
 
         self.movie_tag_display.poster_label.setPixmap(movie_poster)
