@@ -4,6 +4,7 @@ This module only contains code used to retrieve information from the internet
 
 import json
 from pathlib import Path
+from time import sleep
 
 import wikipedia
 from bs4 import BeautifulSoup
@@ -129,6 +130,23 @@ class MovieScraper:
             return False
         return True
 
+    @staticmethod
+    def get_actors(page: wikipedia.WikipediaPage) -> list[str]:
+        """Retrieves movie's actors from the wikipedia page
+
+        Returns:
+            list[str]: actors names
+        """
+
+        soup = BeautifulSoup(page.html(), 'html.parser')
+        starring_element = soup.find('th', string='Starring')
+
+        if starring_element:
+            ul_element = starring_element.find_next('ul')
+            if ul_element:
+                return [li.text for li in ul_element.find_all('li')]
+        return []
+
     def download_poster(self) -> bool:
         """Downloads movie poster
 
@@ -151,6 +169,7 @@ class MovieScraper:
                 break
             else:
                 value = False
+                sleep(1)
                 continue
 
         return value
@@ -167,6 +186,7 @@ class MovieScraper:
 
         official_title = None
         summary = None
+        actors = []
 
         query = f"{self.movie_title} {self.movie_year}"
         # Let's try 2 times
@@ -186,6 +206,8 @@ class MovieScraper:
                 continue
             else:
                 official_title = page.title
+                actors = self.get_actors(page)
+                break
 
         wikipedia.set_lang("en")
 
@@ -205,6 +227,9 @@ class MovieScraper:
             except wikipedia.exceptions.RedirectError:
                 query = f"{self.movie_title} film"
                 continue
+            else:
+                if len(summary) < 230:
+                    summary = wikipedia.summary(query, 3)
 
         if official_title is None:
             official_title = f"{self.movie_title.title()} ({self.movie_year})"
@@ -212,10 +237,10 @@ class MovieScraper:
         if summary is None:
             summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
 
-        data = {"title": official_title, "summary": summary}
+        data = {"title": official_title, "summary": summary, "actors": actors}
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=4)
 
         if not self.data_file.exists():
             return False
