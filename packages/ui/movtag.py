@@ -1,10 +1,7 @@
-from pathlib import Path
-
 from PySide6 import QtWidgets
 from PySide6.QtGui import QPixmap
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-RESOURCES_DIR = Path.joinpath(BASE_DIR, "resources")
+from ..constants import constants
 
 
 class MovieTagDialog(QtWidgets.QWidget):
@@ -28,7 +25,7 @@ class MovieTagDialog(QtWidgets.QWidget):
 
         self.le_movie_title = QtWidgets.QLineEdit()
         self.le_movie_title.setPlaceholderText("Enter movie title here (Required)")
-        self.year_label = QtWidgets.QLabel("Year of release is required in order to collect information from the internet")
+        self.year_label = QtWidgets.QLabel("Release year is essential for internet data collection")
         self.le_movie_year = QtWidgets.QLineEdit()
         self.le_movie_year.setPlaceholderText("Year the movie was released (Required)")
         self.movie_rating_label = QtWidgets.QLabel("Rate the movie (Optional)")
@@ -45,14 +42,13 @@ class MovieTagDialog(QtWidgets.QWidget):
 
     def ui_load_icons(self):
 
-        application_logo = QPixmap(str(RESOURCES_DIR / "logo.png"))
-        save_icon = QPixmap(str(RESOURCES_DIR / "icons" / "save.png"))
+        application_logo = QPixmap(constants.LOGO)
+        save_icon = QPixmap(constants.SAVE)
 
         self.setWindowIcon(application_logo)
         self.btn_validate.setIcon(save_icon)
 
     def ui_apply_style(self):
 
-        style = Path.joinpath(RESOURCES_DIR, "style.qss")
-        with open(style, 'r', encoding="UTF-8") as style_file:
+        with open(constants.STR_STYLE, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())

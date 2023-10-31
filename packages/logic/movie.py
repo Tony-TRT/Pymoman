@@ -2,7 +2,9 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from ..constants import constants
+
+
 RATINGS = {
     "-": "☆☆☆☆☆",
     "1": "★☆☆☆☆",
@@ -53,7 +55,7 @@ class Movie:
             movie_folder = movie_folder[4:]
 
         try:
-            with open(Path.joinpath(BASE_DIR, "cache", movie_folder, "data.json"), 'r', encoding="UTF-8") as f:
+            with open(Path.joinpath(constants.CACHE, movie_folder, "data.json"), 'r', encoding="UTF-8") as f:
                 content = json.load(f)
                 actors_list = content.get('actors', [''])
         except FileNotFoundError:

@@ -1,11 +1,8 @@
 import json
 from pathlib import Path
-from glob import glob
 
+from ..constants import constants
 from .movie import Movie
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-COLLECTIONS_DIR = Path.joinpath(BASE_DIR, "collections")
 
 
 class Collection:
@@ -28,14 +25,13 @@ class Collection:
     @property
     def path(self):
 
-        return Path.joinpath(COLLECTIONS_DIR, self.name.replace(' ', '_') + ".json")
+        return Path.joinpath(constants.COLLECTIONS, self.name.replace(' ', '_') + ".json")
 
     @staticmethod
     def retrieve_collections() -> list:
 
         collections = []
-        files = glob(str(Path.joinpath(COLLECTIONS_DIR, "*.json")))
-        for file in files:
+        for file in constants.COLLECTION_FILES:
             with open(file, 'r', encoding="UTF-8") as json_file:
                 mov_list = json.load(json_file)
                 name = Path(file).stem.replace('_', ' ')
@@ -81,7 +77,7 @@ class Collection:
 
     def save(self):
 
-        COLLECTIONS_DIR.mkdir(exist_ok=True)
+        constants.COLLECTIONS.mkdir(exist_ok=True)
 
         with open(self.path, 'w', encoding="UTF-8") as save_file:
             json.dump(self.mov_lst, save_file, indent=4)

@@ -1,5 +1,5 @@
 """
-This module only contains code used to process data collected from the internet
+This module is designed for the processing of data obtained from the internet.
 """
 
 from pathlib import Path

@@ -1,11 +1,6 @@
-from pathlib import Path
-
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-RESOURCES_DIR = Path.joinpath(BASE_DIR, "resources")
 
 
 class MovieTagDisplay(QtWidgets.QWidget):

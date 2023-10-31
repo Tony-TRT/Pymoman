@@ -1,5 +1,5 @@
-import threading
 import json
+import threading
 from pathlib import Path
 from functools import partial
 from time import sleep
@@ -9,17 +9,13 @@ from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QPixmap, QIcon, QAction
 from PySide6.QtCore import Qt, QEvent
 
+from packages.constants import constants
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-from packages.logic.dataimport import load_actors_list, load_movies
 import packages.logic.dataretrieve as dtr
+import packages.logic.dataimport as dti
 from packages.ui.movtag import MovieTagDialog
 from packages.ui.movdisplay import MovieTagDisplay
-
-
-CURRENT_DIR = Path(__file__).resolve().parent
-RESOURCES_DIR = Path.joinpath(CURRENT_DIR, "resources")
-ICONS_DIR = Path.joinpath(RESOURCES_DIR, "icons")
 
 
 class PyMoman(QtWidgets.QWidget):
@@ -50,15 +46,15 @@ class PyMoman(QtWidgets.QWidget):
         self.menu_layout = QtWidgets.QVBoxLayout()
         self.list_layout = QtWidgets.QVBoxLayout()
         self.list_layout.setContentsMargins(10, 0, 0, 0)
-        self.gmovie_layout = QtWidgets.QHBoxLayout()
+        self.global_movie_layout = QtWidgets.QHBoxLayout()
         self.mov_frm_layout = QtWidgets.QHBoxLayout(self.mov_frm)
 
         self.main_layout.addLayout(self.header_layout)
         self.main_layout.addLayout(self.body_layout)
         self.body_layout.addLayout(self.menu_layout)
         self.body_layout.addLayout(self.list_layout)
-        self.body_layout.addLayout(self.gmovie_layout)
-        self.gmovie_layout.addWidget(self.mov_frm)
+        self.body_layout.addLayout(self.global_movie_layout)
+        self.global_movie_layout.addWidget(self.mov_frm)
 
     def ui_manage_widgets(self):
 
@@ -101,20 +97,20 @@ class PyMoman(QtWidgets.QWidget):
 
     def ui_load_icons(self):
 
-        application_logo = QPixmap(str(RESOURCES_DIR / "logo.png"))
-        self.note_icon = QPixmap(str(ICONS_DIR / "create_collection.png"))
-        self.save_icon = QPixmap(str(ICONS_DIR / "save.png"))
-        self.open_icon = QPixmap(str(ICONS_DIR / "folder.png"))
-        self.collection_icon = QPixmap(str(ICONS_DIR / "collection.png"))
-        self.movie_icon = QPixmap(str(ICONS_DIR / "movie.png"))
-        btn_add_movie_icon = QPixmap(str(ICONS_DIR / "add_item.png"))
-        btn_remove_movie_icon = QPixmap(str(ICONS_DIR / "remove_item.png"))
-        le_search_icon = QIcon(str(ICONS_DIR / "search.png"))
-        self.previous_icon = QIcon(str(ICONS_DIR / "previous.png"))
-        self.export_icon = QIcon(str(ICONS_DIR / "export.png"))
-        self.delete_icon = QIcon(str(ICONS_DIR / "delete.png"))
-        self.official_icon = QIcon(str(ICONS_DIR / "official.png"))
-        self.star_icon = QIcon(str(ICONS_DIR / "star.png"))
+        application_logo = QPixmap(constants.LOGO)
+        self.note_icon = QPixmap(constants.NOTE)
+        self.save_icon = QPixmap(constants.SAVE)
+        self.open_icon = QPixmap(constants.FOLDER)
+        self.collection_icon = QPixmap(constants.COLLECTION_ICN)
+        self.movie_icon = QPixmap(constants.MOVIE_ICN)
+        btn_add_movie_icon = QPixmap(constants.ADD_ICN)
+        btn_remove_movie_icon = QPixmap(constants.REM_ICN)
+        le_search_icon = QIcon(constants.SEARCH)
+        self.previous_icon = QIcon(constants.PREVIOUS)
+        self.export_icon = QIcon(constants.EXPORT)
+        self.delete_icon = QIcon(constants.DELETE)
+        self.official_icon = QIcon(constants.OFFICIAL)
+        self.star_icon = QIcon(constants.STAR)
 
         self.setWindowIcon(application_logo)
         self.btn_create_col.setIcon(self.note_icon)
@@ -126,8 +122,7 @@ class PyMoman(QtWidgets.QWidget):
 
     def ui_apply_style(self):
 
-        style = Path.joinpath(RESOURCES_DIR, "style.qss")
-        with open(style, 'r', encoding="UTF-8") as style_file:
+        with open(constants.STR_STYLE, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
 
     def logic_connect_widgets(self):
@@ -289,7 +284,7 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
             return
 
-        all_movies = load_movies()
+        all_movies = dti.load_movies()
         matching_movies = [mov for mov in all_movies if query in mov.actors]
 
         self.btn_add_movie.setEnabled(False)
@@ -329,7 +324,7 @@ class PyMoman(QtWidgets.QWidget):
         if scraper.thumb.exists():
             movie_poster = QPixmap(str(scraper.thumb))
         else:
-            movie_poster = QPixmap(str(dtr.DEFAULT_POSTER))
+            movie_poster = QPixmap(constants.STR_DEFAULT_POSTER)
 
         if scraper.data_file.exists():
             with open(scraper.data_file, 'r', encoding="UTF-8") as file:
@@ -360,7 +355,7 @@ class PyMoman(QtWidgets.QWidget):
 
         self.cbb_actors.clear()
         self.cbb_actors.addItem('Actors')
-        self.cbb_actors.addItems(load_actors_list())
+        self.cbb_actors.addItems(dti.load_actors_list())
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 

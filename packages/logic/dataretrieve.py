@@ -1,5 +1,6 @@
 """
-This module only contains code used to retrieve information from the internet
+This module is dedicated to retrieving information from the internet.
+It provides functions and tools to access and gather data from various online sources.
 """
 
 import json
@@ -10,12 +11,8 @@ import wikipedia
 from bs4 import BeautifulSoup
 import requests
 
+from ..constants import constants
 from .dataprocess import modify_raw_poster
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DEFAULT_POSTER = Path.joinpath(BASE_DIR, "resources", "default.jpg")
-CACHE = Path.joinpath(BASE_DIR, "cache")
 
 
 class MovieScraper:
@@ -65,7 +62,7 @@ class MovieScraper:
             Path: data storage folder path
         """
 
-        return Path(CACHE / self.sanitized_title)
+        return Path(constants.CACHE / self.sanitized_title)
 
     @property
     def thumb(self) -> Path:
@@ -189,6 +186,8 @@ class MovieScraper:
         actors = []
 
         query = f"{self.movie_title} {self.movie_year}"
+        wikipedia.set_lang("en")
+
         # Let's try 2 times
         for _ in range(2):
             try:
@@ -208,8 +207,6 @@ class MovieScraper:
                 official_title = page.title
                 actors = self.get_actors(page)
                 break
-
-        wikipedia.set_lang("en")
 
         query = f"{self.movie_title} {self.movie_year}"
         # Let's try 2 times again

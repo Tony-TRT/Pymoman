@@ -1,13 +1,12 @@
 """
-This module only contains code used to organize data collected from the internet
+This module is dedicated to the organization and classification of data.
+It provides functions and utilities to parse, structure, and categorize information.
 """
 
 import json
-from pathlib import Path
 
 from .movie import Movie
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from ..constants import constants
 
 
 def load_actors_list() -> list[str]:
@@ -17,10 +16,9 @@ def load_actors_list() -> list[str]:
         list[str]: actors names
     """
 
-    root = Path.joinpath(BASE_DIR, 'cache')
     full_list = set()
 
-    for file_path in root.glob('**/data.json'):
+    for file_path in constants.CACHE.glob('**/data.json'):
         try:
             with open(file_path, 'r', encoding="UTF-8") as data_file:
                 content = json.load(data_file)
@@ -41,10 +39,9 @@ def load_movies() -> list[Movie]:
         list[Movie]: movies
     """
 
-    root = Path.joinpath(BASE_DIR, 'collections')
     full_list = []
 
-    for file_path in root.glob('**/*.json'):
+    for file_path in constants.COLLECTIONS.glob('**/*.json'):
         try:
             with open(file_path, 'r', encoding="UTF-8") as data_file:
                 content = json.load(data_file)
