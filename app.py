@@ -11,6 +11,7 @@ from PySide6.QtCore import Qt, QEvent
 
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
+from packages.logic.dataimport import load_actors_list, load_movies
 import packages.logic.dataretrieve as dtr
 from packages.ui.movtag import MovieTagDialog
 from packages.ui.movdisplay import MovieTagDisplay
@@ -69,9 +70,8 @@ class PyMoman(QtWidgets.QWidget):
         self.label_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
         self.label_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
-        self.cbb_genre.addItem('Genre')
         self.cbb_actors = QtWidgets.QComboBox()
-        self.cbb_actors.addItem('Actors')
+        self.clr_reset_cbb()
         self.progress_bar = QtWidgets.QProgressBar()
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setFixedHeight(5)
@@ -138,6 +138,7 @@ class PyMoman(QtWidgets.QWidget):
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
         self.lw_main.itemClicked.connect(self.logic_single_click)
         self.custom_dialog.btn_validate.clicked.connect(self.logic_get_returned_movie)
+        self.cbb_actors.currentTextChanged.connect(self.logic_filter_by_actor)
 
     def logic_create_collection(self):
 
@@ -197,6 +198,9 @@ class PyMoman(QtWidgets.QWidget):
 
         self.lw_main.clear()
         self.last_collection_opened.clear()
+        self.btn_add_movie.setEnabled(True)
+        self.btn_remove_movie.setEnabled(True)
+
         for collection in PyMoman.all_collections:
             lw_item = QtWidgets.QListWidgetItem(collection.name)
             lw_item.attr = collection
@@ -277,6 +281,33 @@ class PyMoman(QtWidgets.QWidget):
                 self.logic_display_movies(collection)
                 return True
 
+    def logic_filter_by_actor(self):
+
+        query = self.cbb_actors.currentText()
+
+        if query == "Actors":
+            self.logic_display_collections()
+            return
+
+        all_movies = load_movies()
+        matching_movies = [mov for mov in all_movies if query in mov.actors]
+
+        self.btn_add_movie.setEnabled(False)
+        self.btn_remove_movie.setEnabled(False)
+
+        self.lw_main.clear()
+        previous_item = QtWidgets.QListWidgetItem("GO BACK")
+        previous_item.setTextAlignment(Qt.AlignCenter)
+        previous_item.setIcon(self.previous_icon)
+        self.lw_main.addItem(previous_item)
+
+        for matching_movie in matching_movies:
+            lw_item = QtWidgets.QListWidgetItem(matching_movie.title)
+            lw_item.attr = matching_movie
+            lw_item.setTextAlignment(Qt.AlignCenter)
+            lw_item.setIcon(self.movie_icon)
+            self.lw_main.addItem(lw_item)
+
     def logic_display_movies(self, open_collection: Collection):
 
         self.lw_main.clear()
@@ -287,7 +318,7 @@ class PyMoman(QtWidgets.QWidget):
 
         for movie in open_collection.mov_lst:
             movie = Movie(movie.get("title"), movie.get("year"), movie.get("path"), movie.get("rating"))
-            lw_item = QtWidgets.QListWidgetItem(f"{movie.title} ({movie.year})")
+            lw_item = QtWidgets.QListWidgetItem(movie.title)
             lw_item.attr = movie
             lw_item.setTextAlignment(Qt.AlignCenter)
             lw_item.setIcon(self.movie_icon)
@@ -321,6 +352,15 @@ class PyMoman(QtWidgets.QWidget):
         self.custom_dialog.le_movie_title.clear()
         self.custom_dialog.le_movie_year.clear()
         self.custom_dialog.cbb_movie_rating.setCurrentIndex(0)
+
+    def clr_reset_cbb(self):
+
+        self.cbb_genre.clear()
+        self.cbb_genre.addItem('Genre')
+
+        self.cbb_actors.clear()
+        self.cbb_actors.addItem('Actors')
+        self.cbb_actors.addItems(load_actors_list())
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 

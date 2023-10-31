@@ -32,7 +32,7 @@ class MovieTagDisplay(QtWidgets.QWidget):
         self.rating_label.setAlignment(Qt.AlignRight)
         self.poster_label = QtWidgets.QLabel()
         self.title_label = QtWidgets.QLabel()
-        self.title_label.setFont(QFont("Arial", 18))
+        self.title_label.setFont(QFont("Arial", 16))
         self.title_label.setAlignment(Qt.AlignTop)
         self.title_label.setWordWrap(True)
         self.summary_label = QtWidgets.QLabel()

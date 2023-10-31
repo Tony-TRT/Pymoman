@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from datetime import datetime
 
@@ -38,3 +39,26 @@ class Movie:
     def __repr__(self):
 
         return f"{self.title}, {self.year}, {self.path}, {self.rating}/5"
+
+    @property
+    def actors(self) -> list[str]:
+        """Retrieves movie's actors from the data file
+
+        Returns:
+            list[str]: actors names
+        """
+
+        movie_folder = self.title.strip().lower().replace(' ', '_')
+        if movie_folder.startswith('the_'):
+            movie_folder = movie_folder[4:]
+
+        try:
+            with open(Path.joinpath(BASE_DIR, "cache", movie_folder, "data.json"), 'r', encoding="UTF-8") as f:
+                content = json.load(f)
+                actors_list = content.get('actors', [''])
+        except FileNotFoundError:
+            return ['']
+        except json.JSONDecodeError:
+            return ['']
+        else:
+            return actors_list
