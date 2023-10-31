@@ -2,5 +2,6 @@
 /cache
 /collections
 /.idea
+/packages/__pycache__
 /package/logic/__pycache__
 /package/ui/__pycache__

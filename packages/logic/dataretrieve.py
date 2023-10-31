@@ -1,38 +1,20 @@
 """
-This module retrieves movies information
+This module only contains code used to retrieve information from the internet
 """
 
 import json
 from pathlib import Path
 
 import wikipedia
-from PIL import Image
 from bs4 import BeautifulSoup
 import requests
+
+from .dataprocess import modify_raw_poster
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DEFAULT_POSTER = Path.joinpath(BASE_DIR, "resources", "default.jpg")
 CACHE = Path.joinpath(BASE_DIR, "cache")
-
-
-def modify_raw_poster(poster: Path) -> bool:
-    """Prepares movie poster to be displayed
-
-    Args:
-        poster (Path): raw file path
-
-    Returns:
-        bool: success or failure
-    """
-
-    if not poster.exists():
-        return False
-
-    movie_poster = Image.open(poster)
-    movie_poster_resized = movie_poster.resize((185, 275))
-    movie_poster_resized.save(poster)
-    return True
 
 
 class MovieScraper:

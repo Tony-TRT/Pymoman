@@ -1,6 +1,6 @@
 import threading
-from pathlib import Path
 import json
+from pathlib import Path
 from functools import partial
 from time import sleep
 
@@ -11,7 +11,7 @@ from PySide6.QtCore import Qt, QEvent
 
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-import packages.logic.movdata as movdata
+import packages.logic.dataretrieve as dtr
 from packages.ui.movtag import MovieTagDialog
 from packages.ui.movdisplay import MovieTagDisplay
 
@@ -213,10 +213,10 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
         else:
             if isinstance(clicked_item.attr, Movie):
-                webscraper = movdata.MovieScraper(clicked_item.attr.title, clicked_item.attr.year)
-                threading.Thread(target=webscraper.download_poster).start()
-                threading.Thread(target=webscraper.download_info).start()
-                self.logic_display_panel(clicked_item.attr, webscraper)
+                scraper = dtr.MovieScraper(clicked_item.attr.title, clicked_item.attr.year)
+                threading.Thread(target=scraper.download_poster).start()
+                threading.Thread(target=scraper.download_info).start()
+                self.logic_display_panel(clicked_item.attr, scraper)
 
     def logic_add_movie(self) -> bool:
 
@@ -293,16 +293,15 @@ class PyMoman(QtWidgets.QWidget):
             lw_item.setIcon(self.movie_icon)
             self.lw_main.addItem(lw_item)
 
-    def logic_display_panel(self, movie: Movie, scraper: movdata.MovieScraper):
+    def logic_display_panel(self, movie: Movie, scraper: dtr.MovieScraper):
 
-        movie_cache_folder = Path(movdata.CACHE / scraper.sanitized_title)
-        if Path(movie_cache_folder / 'thumb.jpg').exists():
-            movie_poster = QPixmap(str(Path(movie_cache_folder / 'thumb.jpg')))
+        if scraper.thumb.exists():
+            movie_poster = QPixmap(str(scraper.thumb))
         else:
-            movie_poster = QPixmap(str(movdata.DEFAULT_POSTER))
+            movie_poster = QPixmap(str(dtr.DEFAULT_POSTER))
 
-        if Path(movie_cache_folder / 'data.json').exists():
-            with open(Path(movie_cache_folder / 'data.json'), 'r', encoding="UTF-8") as file:
+        if scraper.data_file.exists():
+            with open(scraper.data_file, 'r', encoding="UTF-8") as file:
                 data = json.load(file)
                 title = data.get('title')
                 summary = data.get('summary')
