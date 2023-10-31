@@ -139,9 +139,8 @@ class MovieScraper:
         starring_element = soup.find('th', string='Starring')
 
         if starring_element:
-            ul_element = starring_element.find_next('ul')
-            if ul_element:
-                return [li.text for li in ul_element.find_all('li')]
+            starring_element_parent = starring_element.parent
+            return [a.text for a in starring_element_parent.find_all('a')]
         return []
 
     def download_poster(self) -> bool:
