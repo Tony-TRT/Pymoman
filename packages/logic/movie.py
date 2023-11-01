@@ -3,6 +3,7 @@ from shutil import rmtree
 from datetime import datetime
 from pathlib import Path
 
+from . import dataimport as dti
 from ..constants import constants
 
 
@@ -66,9 +67,8 @@ class Movie:
             list[str]: actors names
         """
 
-        from .dataimport import load_file_content
         try:
-            content = load_file_content(Path(self.storage / "data.json"))
+            content = dti.load_file_content(Path(self.storage / "data.json"))
             actors_list = content.get('actors', [''])
         except FileNotFoundError:
             return ['']
