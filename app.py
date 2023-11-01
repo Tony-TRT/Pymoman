@@ -1,21 +1,20 @@
-import json
 import threading
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 from time import sleep
 
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QPixmap, QIcon, QAction
 from PySide6.QtCore import Qt, QEvent
+from PySide6.QtGui import QPixmap, QIcon, QAction
+from PySide6.QtWidgets import QSizePolicy
 
+import packages.logic.dataimport as dti
+import packages.logic.dataretrieve as dtr
 from packages.constants import constants
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-import packages.logic.dataretrieve as dtr
-import packages.logic.dataimport as dti
-from packages.ui.movtag import MovieTagDialog
 from packages.ui.movdisplay import MovieTagDisplay
+from packages.ui.movtag import MovieTagDialog
 
 
 class PyMoman(QtWidgets.QWidget):
@@ -147,7 +146,7 @@ class PyMoman(QtWidgets.QWidget):
 
         PyMoman.last_collection_opened.clear()
         PyMoman.last_collection_opened.append(open_collection)
-        self.logic_display_movies(open_collection)
+        self.logic_display_movies(open_collection.mov_lst)
 
     def logic_save_collection(self, collection_to_save: Collection):
 
@@ -212,7 +211,7 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
         else:
             if isinstance(clicked_item.attr, Movie):
-                scraper = dtr.MovieScraper(clicked_item.attr.title, clicked_item.attr.year)
+                scraper = dtr.MovieScraper(clicked_item.attr)
                 threading.Thread(target=scraper.download_poster).start()
                 threading.Thread(target=scraper.download_info).start()
                 self.logic_display_panel(clicked_item.attr, scraper)
@@ -237,11 +236,11 @@ class PyMoman(QtWidgets.QWidget):
             self.clr_reset_custom_dialog()
             return False
         else:
-            if movie.title not in [mov.get("title") for mov in collection.mov_lst]:
+            if movie.title not in [mov.title for mov in collection.mov_lst]:
                 collection.add_movie(movie)
                 self.custom_dialog.close()
                 self.clr_reset_custom_dialog()
-                self.logic_display_movies(collection)
+                self.logic_display_movies(collection.mov_lst)
                 return True
             else:
                 self.custom_dialog.close()
@@ -272,8 +271,9 @@ class PyMoman(QtWidgets.QWidget):
         else:
             if isinstance(movie_to_remove, Movie):
                 collection.remove_movie(movie_to_remove)
+                movie_to_remove.remove_cache()
                 del movie_to_remove
-                self.logic_display_movies(collection)
+                self.logic_display_movies(collection.mov_lst)
                 return True
 
     def logic_filter_by_actor(self):
@@ -284,40 +284,33 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
             return
 
-        all_movies = dti.load_movies()
+        all_movies = dti.load_all_movies()
         matching_movies = [mov for mov in all_movies if query in mov.actors]
 
         self.btn_add_movie.setEnabled(False)
         self.btn_remove_movie.setEnabled(False)
 
+        self.logic_display_movies(matching_movies)
+
+    def logic_display_movies(self, mov_lst: list[Movie]):
+
         self.lw_main.clear()
+        list_to_display: list[QtWidgets.QListWidgetItem] = []
+
         previous_item = QtWidgets.QListWidgetItem("GO BACK")
         previous_item.setTextAlignment(Qt.AlignCenter)
         previous_item.setIcon(self.previous_icon)
-        self.lw_main.addItem(previous_item)
+        list_to_display.append(previous_item)
 
-        for matching_movie in matching_movies:
-            lw_item = QtWidgets.QListWidgetItem(matching_movie.title)
-            lw_item.attr = matching_movie
-            lw_item.setTextAlignment(Qt.AlignCenter)
-            lw_item.setIcon(self.movie_icon)
-            self.lw_main.addItem(lw_item)
-
-    def logic_display_movies(self, open_collection: Collection):
-
-        self.lw_main.clear()
-        previous_item = QtWidgets.QListWidgetItem("GO BACK")
-        previous_item.setTextAlignment(Qt.AlignCenter)
-        previous_item.setIcon(self.previous_icon)
-        self.lw_main.addItem(previous_item)
-
-        for movie in open_collection.mov_lst:
-            movie = Movie(movie.get("title"), movie.get("year"), movie.get("path"), movie.get("rating"))
+        for movie in mov_lst:
             lw_item = QtWidgets.QListWidgetItem(movie.title)
             lw_item.attr = movie
             lw_item.setTextAlignment(Qt.AlignCenter)
             lw_item.setIcon(self.movie_icon)
-            self.lw_main.addItem(lw_item)
+            list_to_display.append(lw_item)
+
+        for item in list_to_display:
+            self.lw_main.addItem(item)
 
     def logic_display_panel(self, movie: Movie, scraper: dtr.MovieScraper):
 
@@ -327,10 +320,9 @@ class PyMoman(QtWidgets.QWidget):
             movie_poster = QPixmap(constants.STR_DEFAULT_POSTER)
 
         if scraper.data_file.exists():
-            with open(scraper.data_file, 'r', encoding="UTF-8") as file:
-                data = json.load(file)
-                title = data.get('title')
-                summary = data.get('summary')
+            data = dti.load_file_content(scraper.data_file)
+            title = data.get('title')
+            summary = data.get('summary')
         else:
             title = f"{movie.title.title()} ({movie.year})"
             summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
@@ -355,7 +347,7 @@ class PyMoman(QtWidgets.QWidget):
 
         self.cbb_actors.clear()
         self.cbb_actors.addItem('Actors')
-        self.cbb_actors.addItems(dti.load_actors_list())
+        self.cbb_actors.addItems(dti.load_all_actors())
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 

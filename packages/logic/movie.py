@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
+from shutil import rmtree
 from datetime import datetime
+from pathlib import Path
 
 from ..constants import constants
 
@@ -43,6 +44,21 @@ class Movie:
         return f"{self.title}, {self.year}, {self.path}, {self.rating}/5"
 
     @property
+    def storage(self) -> Path:
+        """Returns storage folder path
+
+        Returns:
+            Path: data storage folder path
+        """
+
+        m_folder = self.title.strip().lower()
+        if m_folder.startswith('the '):
+            m_folder = m_folder[4:]
+        m_folder = m_folder.replace(' ', '_')
+
+        return Path(constants.CACHE / m_folder)
+
+    @property
     def actors(self) -> list[str]:
         """Retrieves movie's actors from the data file
 
@@ -50,17 +66,18 @@ class Movie:
             list[str]: actors names
         """
 
-        movie_folder = self.title.strip().lower().replace(' ', '_')
-        if movie_folder.startswith('the_'):
-            movie_folder = movie_folder[4:]
-
+        from .dataimport import load_file_content
         try:
-            with open(Path.joinpath(constants.CACHE, movie_folder, "data.json"), 'r', encoding="UTF-8") as f:
-                content = json.load(f)
-                actors_list = content.get('actors', [''])
+            content = load_file_content(Path(self.storage / "data.json"))
+            actors_list = content.get('actors', [''])
         except FileNotFoundError:
             return ['']
         except json.JSONDecodeError:
             return ['']
         else:
             return actors_list
+
+    def remove_cache(self):
+
+        if self.storage.exists():
+            rmtree(self.storage)

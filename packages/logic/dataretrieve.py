@@ -7,15 +7,15 @@ import json
 from pathlib import Path
 from time import sleep
 
+import requests
 import wikipedia
 from bs4 import BeautifulSoup
-import requests
 
-from ..constants import constants
 from .dataprocess import modify_raw_poster
+from .movie import Movie
 
 
-class MovieScraper:
+class MovieScraper(Movie):
     """MovieScraper object can process input and retrieve information"""
 
     sources_websites = {
@@ -23,10 +23,9 @@ class MovieScraper:
         "SB": "https://www.movieposterdb.com/search?q={}&imdb=0"
     }
 
-    def __init__(self, movie_title: str, movie_year: int):
+    def __init__(self, movie: Movie):
+        super().__init__(movie.title, movie.year)
 
-        self.movie_title = movie_title
-        self.movie_year = movie_year
         self.imp_suffixes = (
             "_ver2",
             "_ver3",
@@ -48,21 +47,11 @@ class MovieScraper:
             str: sanitized title
         """
 
-        sanitized_title = self.movie_title.strip().lower()
+        sanitized_title = self.title.strip().lower()
         if sanitized_title.startswith('the '):
             sanitized_title = sanitized_title[4:]
 
         return sanitized_title.replace(' ', '_')
-
-    @property
-    def storage(self) -> Path:
-        """Returns storage folder path
-
-        Returns:
-            Path: data storage folder path
-        """
-
-        return Path(constants.CACHE / self.sanitized_title)
 
     @property
     def thumb(self) -> Path:
@@ -91,7 +80,7 @@ class MovieScraper:
             list[str]: links in a list
         """
 
-        def_imp_link = f"{MovieScraper.sources_websites.get('SA')}{self.movie_year}/posters/{self.sanitized_title}.jpg"
+        def_imp_link = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{self.sanitized_title}.jpg"
         links = [f"{def_imp_link[:-4]}{suffix}.jpg" for suffix in self.imp_suffixes]
         links.insert(0, def_imp_link)
         return links
@@ -103,7 +92,7 @@ class MovieScraper:
             list[str]: download link
         """
 
-        movie_pdb_title = self.movie_title.replace(' ', '%20')
+        movie_pdb_title = self.title.replace(' ', '%20')
         url = MovieScraper.sources_websites.get('SB').format(movie_pdb_title)
 
         page = requests.get(url, timeout=10)
@@ -184,7 +173,7 @@ class MovieScraper:
         summary = None
         actors = []
 
-        query = f"{self.movie_title} {self.movie_year}"
+        query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
 
         # Let's try 2 times
@@ -192,43 +181,43 @@ class MovieScraper:
             try:
                 page = wikipedia.page(query)
             except wikipedia.exceptions.DisambiguationError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             except wikipedia.exceptions.HTTPTimeoutError:
                 break
             except wikipedia.exceptions.PageError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             except wikipedia.exceptions.RedirectError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             else:
                 official_title = page.title
                 actors = self.get_actors(page)
                 break
 
-        query = f"{self.movie_title} {self.movie_year}"
+        query = f"{self.title} {self.year}"
         # Let's try 2 times again
         for _ in range(2):
             try:
                 summary = wikipedia.summary(query, 2)
             except wikipedia.exceptions.DisambiguationError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             except wikipedia.exceptions.HTTPTimeoutError:
                 break
             except wikipedia.exceptions.PageError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             except wikipedia.exceptions.RedirectError:
-                query = f"{self.movie_title} film"
+                query = f"{self.title} film"
                 continue
             else:
                 if len(summary) < 230:
                     summary = wikipedia.summary(query, 3)
 
         if official_title is None:
-            official_title = f"{self.movie_title.title()} ({self.movie_year})"
+            official_title = f"{self.title.title()} ({self.year})"
 
         if summary is None:
             summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"

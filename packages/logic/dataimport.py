@@ -9,6 +9,22 @@ from .movie import Movie
 from ..constants import constants
 
 
+def make_movie(title: str, year: int, path, rating) -> tuple:
+    """Creates Movie object in a tuple
+
+    Returns:
+        tuple: tuple containing Movie object or False
+    """
+
+    movie = (False,)
+    try:
+        movie = (Movie(title, year, path, rating),)
+    except ValueError:
+        movie = (False,)
+    finally:
+        return movie
+
+
 def load_file_content(input_file):
     """Loads a json file and returns its content
     """
@@ -17,7 +33,7 @@ def load_file_content(input_file):
         return json.load(file)
 
 
-def load_actors_list() -> list[str]:
+def load_all_actors() -> list[str]:
     """Retrieves all actors from data.json files
 
     Returns:
@@ -39,8 +55,20 @@ def load_actors_list() -> list[str]:
     return full_list
 
 
-def load_movies() -> list[Movie]:
-    """Retrieves all movies from collections folder
+def load_collection_movies(c_path: str) -> list[Movie]:
+    """Returns a list of Movie objects from a collection's path
+
+    Returns
+        list[Movie]: movies
+    """
+
+    content = load_file_content(c_path)
+    mvs = [make_movie(el.get('title'), el.get('year'), el.get('path'), el.get('rating'))[0] for el in content]
+    return [mov for mov in mvs if mov]
+
+
+def load_all_movies() -> list[Movie]:
+    """Returns a list of Movie objects from all collections
 
     Returns:
         list[Movie]: movies
@@ -48,18 +76,6 @@ def load_movies() -> list[Movie]:
 
     full_list = []
 
-    for file_path in constants.COLLECTIONS.glob('**/*.json'):
-        try:
-            content = load_file_content(file_path)
-            for stored_movie in content:
-                mov = Movie(
-                    title=stored_movie.get('title'),
-                    year=stored_movie.get('year'),
-                    path=stored_movie.get('path'),
-                    rating=stored_movie.get('rating')
-                )
-                full_list.append(mov)
-        except json.JSONDecodeError:
-            continue
-
+    for file_path in constants.COLLECTION_FILES:
+        full_list.extend(load_collection_movies(file_path))
     return full_list

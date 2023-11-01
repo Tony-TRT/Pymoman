@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+from typing import Self
 
+from .dataimport import load_collection_movies
 from ..constants import constants
 from .movie import Movie
 
@@ -27,30 +29,25 @@ class Collection:
 
         return Path.joinpath(constants.COLLECTIONS, self.name.replace(' ', '_') + ".json")
 
-    @staticmethod
-    def retrieve_collections() -> list:
+    @classmethod
+    def retrieve_collections(cls) -> list[Self]:
 
         collections = []
         for file in constants.COLLECTION_FILES:
-            with open(file, 'r', encoding="UTF-8") as json_file:
-                mov_list = json.load(json_file)
-                name = Path(file).stem.replace('_', ' ')
-                collection = Collection(name=name, mov_lst=mov_list)
-                collections.append(collection)
-
+            mov_lst = load_collection_movies(file)
+            name = Path(file).stem.replace('_', ' ')
+            collections.append(Collection(name=name, mov_lst=mov_lst))
         return collections
 
     def add_movie(self, movie: Movie):
 
-        self.mov_lst.append(
-            {"title": movie.title, "year": movie.year, "path": movie.path, "rating": movie.rating}
-        )
+        self.mov_lst.append(movie)
 
     def export_as_txt(self, output_file):
 
         with open(output_file, 'a', encoding="UTF-8") as text_file:
             for movie in self.mov_lst:
-                text_file.write(f"- {movie.get('title')} ({movie.get('year')})\n")
+                text_file.write(f"- {movie.title} ({movie.year})\n")
 
     def remove(self) -> bool:
 
@@ -63,8 +60,7 @@ class Collection:
 
     def remove_movie(self, movie: Movie):
 
-        movie_to_remove = next((mov for mov in self.mov_lst if mov.get("title") == movie.title), None)
-        self.mov_lst.remove(movie_to_remove)
+        self.mov_lst.remove(movie)
 
     def rename(self, new_name: str):
 
@@ -78,6 +74,16 @@ class Collection:
     def save(self):
 
         constants.COLLECTIONS.mkdir(exist_ok=True)
+        data_to_dump = []
+
+        for movie in self.mov_lst:
+            dictionary = {
+                'title': movie.title,
+                'year': movie.year,
+                'path': movie.path,
+                'rating': movie.rating
+            }
+            data_to_dump.append(dictionary)
 
         with open(self.path, 'w', encoding="UTF-8") as save_file:
-            json.dump(self.mov_lst, save_file, indent=4)
+            json.dump(data_to_dump, save_file, indent=4)
