@@ -129,8 +129,20 @@ class MovieScraper(Movie):
 
         if starring_element:
             starring_element_parent = starring_element.parent
-            return [a.text for a in starring_element_parent.find_all('a')]
-        return []
+            ul_element = starring_element.find_next('ul')
+        else:
+            return []
+
+        try_a = [a.text for a in starring_element_parent.find_all('a')]
+        try_a = [el for el in try_a if not any(char.isdigit() for char in el)]
+        if not ul_element:
+            return sorted(try_a, key=str.casefold)
+
+        try_b = [li.text for li in ul_element.find_all('li')]
+        try_b = [el for el in try_b if not any(char.isdigit() for char in el)]
+        final_try: set[str] = set().union(try_a, try_b)
+
+        return sorted([actor for actor in final_try], key=str.casefold)
 
     def download_poster(self) -> bool:
         """Downloads movie poster
