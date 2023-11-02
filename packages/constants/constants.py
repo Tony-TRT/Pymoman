@@ -45,6 +45,10 @@ EXPORT: final(str) = str(Path.joinpath(ICONS, "export.png"))
 DELETE: final(str) = str(Path.joinpath(ICONS, "delete.png"))
 OFFICIAL: final(str) = str(Path.joinpath(ICONS, "official.png"))
 STAR: final(str) = str(Path.joinpath(ICONS, "star.png"))
+TRAILER: final(str) = str(Path.joinpath(ICONS, "trailer.png"))
+WISHLIST: final(str) = str(Path.joinpath(ICONS, "wishlist.png"))
+LOAD_NEW_POSTER: final(str) = str(Path.joinpath(ICONS, "new_poster.png"))
+LOAD_DEFAULT_POSTER: final(str) = str(Path.joinpath(ICONS, "default_poster.png"))
 
 MOVIE_GENRES: final(list[str]) = [
     "Action",

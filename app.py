@@ -114,6 +114,10 @@ class PyMoman(QtWidgets.QWidget):
         self.delete_icon = QIcon(constants.DELETE)
         self.official_icon = QIcon(constants.OFFICIAL)
         self.star_icon = QIcon(constants.STAR)
+        self.set_default_poster_icon = QIcon(constants.LOAD_DEFAULT_POSTER)
+        self.load_new_poster_icon = QIcon(constants.LOAD_NEW_POSTER)
+        self.wishlist_icon = QIcon(constants.WISHLIST)
+        self.trailer_icon = QIcon(constants.TRAILER)
 
         self.setWindowIcon(application_logo)
         self.btn_create_col.setIcon(self.note_icon)
@@ -127,6 +131,10 @@ class PyMoman(QtWidgets.QWidget):
 
         with open(constants.STR_STYLE, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
+
+    def ui_load_poster(self):
+
+        pass
 
     def logic_connect_widgets(self):
 
@@ -261,6 +269,14 @@ class PyMoman(QtWidgets.QWidget):
 
         pass
 
+    def logic_add_to_wishlist(self):
+
+        pass
+
+    def logic_watch_trailer(self):
+
+        pass
+
     def logic_remove_movie(self) -> bool:
 
         if not PyMoman.last_collection_opened:
@@ -375,24 +391,18 @@ class PyMoman(QtWidgets.QWidget):
             try:
                 list_item.attr
             except AttributeError:
-                # Prevents harmless console errors
-                list_item = QtWidgets.QListWidgetItem("")
-                list_item.attr = None
+                return False
 
             collection_menu = QtWidgets.QMenu(self)
 
             open_col = QAction(self.open_icon, "Open")
             open_col.triggered.connect(partial(self.logic_open_collection, list_item.attr))
-
             save = QAction(self.save_icon, "Save")
             save.triggered.connect(partial(self.logic_save_collection, list_item.attr))
-
             rename = QAction(self.note_icon, "Rename")
             rename.triggered.connect(partial(self.logic_rename_collection, list_item.attr))
-
             export = QAction(self.export_icon, "Export as text")
             export.triggered.connect(partial(self.logic_export_collection, list_item.attr))
-
             delete = QAction(self.delete_icon, "Delete")
             delete.triggered.connect(partial(self.logic_delete_collection, list_item.attr))
 
@@ -406,16 +416,26 @@ class PyMoman(QtWidgets.QWidget):
 
             rename_mov = QAction(self.note_icon, "Rename")
             rename_mov.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
-
             official_title = QAction(self.official_icon, "Assign official title")
             official_title.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
-
             edit_rating = QAction(self.star_icon, "Edit rating")
             edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, list_item.attr))
+            new_poster = QAction(self.load_new_poster_icon, "Load new poster")
+            new_poster.triggered.connect(partial(self.ui_load_poster, list_item.attr))
+            default_poster = QAction(self.set_default_poster_icon, "Set default poster")
+            default_poster.triggered.connect(partial(self.ui_load_poster, list_item.attr))
+            wishlist = QAction(self.wishlist_icon, "Add to Wishlist")
+            wishlist.triggered.connect(partial(self.logic_add_to_wishlist, list_item.attr))
+            watch_trailer = QAction(self.trailer_icon, "Watch trailer")
+            watch_trailer.triggered.connect(partial(self.logic_watch_trailer, list_item.attr))
 
             movie_menu.addAction(official_title)
             movie_menu.addAction(rename_mov)
             movie_menu.addAction(edit_rating)
+            movie_menu.addAction(new_poster)
+            movie_menu.addAction(default_poster)
+            movie_menu.addAction(wishlist)
+            movie_menu.addAction(watch_trailer)
 
             if isinstance(list_item.attr, Collection):
                 collection_menu.exec(event.globalPos())
