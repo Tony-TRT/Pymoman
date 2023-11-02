@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 
 from .dataprocess import modify_raw_poster
 from .movie import Movie
+from ..constants import constants
 
 
 class MovieScraper(Movie):
@@ -184,6 +185,7 @@ class MovieScraper(Movie):
         official_title = None
         summary = None
         actors = []
+        genre = "Other"
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -234,7 +236,12 @@ class MovieScraper(Movie):
         if summary is None:
             summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
 
-        data = {"title": official_title, "summary": summary, "actors": actors}
+        for movie_genre in constants.MOVIE_GENRES:
+            if movie_genre.casefold() in summary.casefold().replace(self.title.casefold(), ''):
+                genre = movie_genre
+                break
+
+        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genre}
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)

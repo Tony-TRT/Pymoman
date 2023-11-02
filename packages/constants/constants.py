@@ -45,3 +45,24 @@ EXPORT: final(str) = str(Path.joinpath(ICONS, "export.png"))
 DELETE: final(str) = str(Path.joinpath(ICONS, "delete.png"))
 OFFICIAL: final(str) = str(Path.joinpath(ICONS, "official.png"))
 STAR: final(str) = str(Path.joinpath(ICONS, "star.png"))
+
+MOVIE_GENRES: final(list[str]) = [
+    "Action",
+    "Adventure",
+    "Animation",
+    "Comedy",
+    "Crime",
+    "Documentary",
+    "Drama",
+    "Experimental",
+    "Fantasy",
+    "Historical",
+    "Horror",
+    "Martial Arts",
+    "Mistery",
+    "Romance",
+    "Science Fiction",
+    "Thriller",
+    "War",
+    "Western",
+]

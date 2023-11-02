@@ -68,7 +68,7 @@ def load_collection_movies(c_path: str) -> list[Movie]:
 
 
 def load_all_movies() -> list[Movie]:
-    """Returns a list of Movie objects from all collections
+    """Returns a list of Movie objects from all saved collections
 
     Returns:
         list[Movie]: movies

@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QSizePolicy
 
 import packages.logic.dataimport as dti
 import packages.logic.dataretrieve as dtr
+import packages.logic.dataprocess as dtp
 from packages.constants import constants
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
@@ -24,6 +25,8 @@ class PyMoman(QtWidgets.QWidget):
     def __init__(self):
 
         super().__init__()
+
+        dtp.clear_cache()
 
         self.setWindowTitle("PyMoman")
         self.setFixedSize(950, 450)
@@ -65,8 +68,9 @@ class PyMoman(QtWidgets.QWidget):
         self.label_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
         self.label_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
+        self.cbb_genre.addItems(["Genre"] + constants.MOVIE_GENRES)
         self.cbb_actors = QtWidgets.QComboBox()
-        self.clr_reset_cbb()
+        self.clr_reload_cbb_actors()
         self.progress_bar = QtWidgets.QProgressBar()
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setFixedHeight(5)
@@ -130,9 +134,10 @@ class PyMoman(QtWidgets.QWidget):
         self.btn_save_col.clicked.connect(self.logic_save_collection)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
+        self.cbb_genre.currentTextChanged.connect(self.logic_filter)
+        self.cbb_actors.currentTextChanged.connect(self.logic_filter)
         self.lw_main.itemClicked.connect(self.logic_single_click)
         self.custom_dialog.btn_validate.clicked.connect(self.logic_get_returned_movie)
-        self.cbb_actors.currentTextChanged.connect(self.logic_filter_by_actor)
 
     def logic_create_collection(self):
 
@@ -153,7 +158,7 @@ class PyMoman(QtWidgets.QWidget):
         self.progress_bar.setValue(50)
         sleep(0.3)
 
-        if isinstance(self.sender(), QtWidgets.QPushButton):
+        if self.sender() is self.btn_save_col:
             for collection in PyMoman.all_collections:
                 collection.save()
         else:
@@ -211,6 +216,7 @@ class PyMoman(QtWidgets.QWidget):
             self.logic_display_collections()
         else:
             if isinstance(clicked_item.attr, Movie):
+                self.clr_reload_cbb_actors()
                 scraper = dtr.MovieScraper(clicked_item.attr)
                 threading.Thread(target=scraper.download_poster).start()
                 threading.Thread(target=scraper.download_info).start()
@@ -276,16 +282,30 @@ class PyMoman(QtWidgets.QWidget):
                 self.logic_display_movies(collection.mov_lst)
                 return True
 
-    def logic_filter_by_actor(self):
+    def logic_filter(self):
 
-        query = self.cbb_actors.currentText()
+        all_movies = [mov for col in PyMoman.all_collections for mov in col.mov_lst]
 
-        if query == "Actors":
+        if self.sender() is self.cbb_genre and self.cbb_actors.currentText() == "Actors":
+            query = self.cbb_genre.currentText()
+            matching_movies = [mov for mov in all_movies if query == mov.genre]
+        elif self.sender() is self.cbb_genre and self.cbb_actors.currentText() != "Actors":
+            query = self.cbb_genre.currentText()
+            actor_filter = self.cbb_actors.currentText()
+            filtered_movies = [mov for mov in all_movies if actor_filter in mov.actors]
+            matching_movies = [mov for mov in filtered_movies if query == mov.genre]
+        elif self.sender() is self.cbb_actors and self.cbb_genre.currentText() == "Genre":
+            query = self.cbb_actors.currentText()
+            matching_movies = [mov for mov in all_movies if query in mov.actors]
+        else:
+            query = self.cbb_actors.currentText()
+            genre_filter = self.cbb_genre.currentText()
+            filtered_movies = [mov for mov in all_movies if genre_filter == mov.genre]
+            matching_movies = [mov for mov in filtered_movies if query in mov.actors]
+
+        if query == "Genre" or query == "Actors":
             self.logic_display_collections()
             return
-
-        all_movies = dti.load_all_movies()
-        matching_movies = [mov for mov in all_movies if query in mov.actors]
 
         self.btn_add_movie.setEnabled(False)
         self.btn_remove_movie.setEnabled(False)
@@ -340,14 +360,12 @@ class PyMoman(QtWidgets.QWidget):
         self.custom_dialog.le_movie_year.clear()
         self.custom_dialog.cbb_movie_rating.setCurrentIndex(0)
 
-    def clr_reset_cbb(self):
+    def clr_reload_cbb_actors(self):
 
-        self.cbb_genre.clear()
-        self.cbb_genre.addItem('Genre')
-
+        self.cbb_actors.blockSignals(True)
         self.cbb_actors.clear()
-        self.cbb_actors.addItem('Actors')
-        self.cbb_actors.addItems(dti.load_all_actors())
+        self.cbb_actors.addItems(["Actors"] + dti.load_all_actors())
+        self.cbb_actors.blockSignals(False)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 

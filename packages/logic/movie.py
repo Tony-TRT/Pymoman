@@ -77,6 +77,24 @@ class Movie:
         else:
             return actors_list
 
+    @property
+    def genre(self) -> str:
+        """Retrieves the movie genre from data file
+
+        Returns:
+            str: movie genre
+        """
+
+        try:
+            content = dti.load_file_content(Path(self.storage / "data.json"))
+            genre = content.get("genre", "Other")
+        except FileNotFoundError:
+            return "Other"
+        except json.JSONDecodeError:
+            return "Other"
+        else:
+            return genre
+
     def remove_cache(self):
 
         if self.storage.exists():
