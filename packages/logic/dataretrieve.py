@@ -21,7 +21,8 @@ class MovieScraper(Movie):
 
     sources_websites = {
         "SA": "http://www.impawards.com/",
-        "SB": "https://www.movieposterdb.com/search?q={}&imdb=0"
+        "SB": "https://www.movieposterdb.com/search?q={}&imdb=0",
+        "SC": "https://www.cinematerial.com"
     }
 
     def __init__(self, movie: Movie):
@@ -102,6 +103,34 @@ class MovieScraper(Movie):
         links = [img_cont['data-src']]
         return links
 
+    def generate_cnm_link(self) -> str:
+        """Generates download link
+
+        Returns:
+            str: download link
+        """
+
+        sanitized_query = self.title.replace(' ', '+')
+        results_link = f"{self.sources_websites.get('SC')}/search?q={sanitized_query}"
+        poster_link = ""
+
+        results_page = requests.get(results_link, timeout=5)
+        if results_page.ok:
+            soup = BeautifulSoup(results_page.text, 'html.parser')
+            div_element = soup.find('div', class_='table-responsive')
+            td_element = div_element.find_all('td')[1]
+            page_link = td_element.find('a')['href']
+            full_link = f"{self.sources_websites.get('SC')}{page_link}"
+        else:
+            return poster_link
+
+        posters_page = requests.get(full_link, timeout=5)
+        if posters_page.ok:
+            soup = BeautifulSoup(posters_page.text, 'html.parser')
+            poster_link = soup.find('img', class_="lazy")['data-src']
+
+        return poster_link
+
     def _write_img_on_disk(self, url: requests.Response) -> bool:
         """Writes image to disk
 
@@ -172,6 +201,22 @@ class MovieScraper(Movie):
 
         return value
 
+    def download_cnm_poster(self) -> bool:
+        """Downloads movie poster
+
+        Returns:
+            bool: success or failure
+        """
+
+        cnm_link = self.generate_cnm_link()
+        if not cnm_link:
+            return False
+
+        resp = requests.get(cnm_link, timeout=7)
+        if resp.ok:
+            value = self._write_img_on_disk(resp)
+            return value
+
     def download_info(self) -> bool:
         """Downloads movie info using wikipedia module
 
@@ -182,8 +227,7 @@ class MovieScraper(Movie):
         if self.data_file.exists():
             return True
 
-        official_title = None
-        summary = None
+        official_title = summary = None
         actors = []
         genre = "Other"
 

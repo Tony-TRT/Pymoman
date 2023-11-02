@@ -132,9 +132,13 @@ class PyMoman(QtWidgets.QWidget):
         with open(constants.STR_STYLE, 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
 
-    def ui_load_poster(self):
+    def ui_load_poster(self, clicked_item):
 
-        pass
+        self.progress_bar.setValue(100)
+        cnm_scraper = dtr.MovieScraper(clicked_item)
+        threading.Thread(target=cnm_scraper.download_cnm_poster).start()
+        sleep(0.3)
+        self.progress_bar.setValue(0)
 
     def logic_connect_widgets(self):
 
