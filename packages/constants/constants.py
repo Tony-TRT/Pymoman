@@ -64,9 +64,26 @@ MOVIE_GENRES: final(list[str]) = [
     "Horror",
     "Martial Arts",
     "Mistery",
+    "Other",
     "Romance",
     "Science Fiction",
     "Thriller",
     "War",
     "Western",
 ]
+
+MOVIE_RATINGS: final(dict) = {
+    "-": "☆☆☆☆☆",
+    "1": "★☆☆☆☆",
+    "2": "★★☆☆☆",
+    "3": "★★★☆☆",
+    "4": "★★★★☆",
+    "5": "★★★★★"
+}
+
+CACHE_WARNING: final(str) = """
+Regrettably, no data was found for this movie, or it seems
+that an error occurred while attempting to copy cached information.
+Rest assured, this situation merely necessitates a fresh
+retrieval of the movie data from the internet.
+"""

@@ -4,7 +4,6 @@ It provides functions and tools to access and gather data from various online so
 """
 
 import json
-from pathlib import Path
 from time import sleep
 
 import requests
@@ -42,7 +41,7 @@ class MovieScraper(Movie):
         self.storage.mkdir(exist_ok=True, parents=True)
 
     @property
-    def sanitized_title(self) -> str:
+    def imp_sanitized_title(self) -> str:
         """Returns sanitized title
 
         Returns:
@@ -55,26 +54,6 @@ class MovieScraper(Movie):
 
         return sanitized_title.replace(' ', '_')
 
-    @property
-    def thumb(self) -> Path:
-        """Returns thumbnail path
-
-        Returns:
-            Path: thumbnail path
-        """
-
-        return Path(self.storage / 'thumb.jpg')
-
-    @property
-    def data_file(self) -> Path:
-        """Returns data file path
-
-        Returns:
-            Path: data file path
-        """
-
-        return Path(self.storage / 'data.json')
-
     def generate_imp_links(self) -> list[str]:
         """Generates download links
 
@@ -82,7 +61,7 @@ class MovieScraper(Movie):
             list[str]: links in a list
         """
 
-        def_imp_link = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{self.sanitized_title}.jpg"
+        def_imp_link = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{self.imp_sanitized_title}.jpg"
         links = [f"{def_imp_link[:-4]}{suffix}.jpg" for suffix in self.imp_suffixes]
         links.insert(0, def_imp_link)
         return links

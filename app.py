@@ -265,9 +265,23 @@ class PyMoman(QtWidgets.QWidget):
                 self.clr_reset_custom_dialog()
                 return False
 
-    def logic_rename_movie(self, movie: Movie):
+    def logic_rename_movie(self, movie: Movie, operation: str):
 
-        pass
+        value = True
+        if operation == 'O':
+            value = movie.rename(movie.official_title)
+        elif operation == 'R':
+            n_name, val = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
+            if n_name and val:
+                value = movie.rename(n_name)
+
+        if not value:
+            QtWidgets.QMessageBox.about(self, "Warning", constants.CACHE_WARNING)
+
+        refresh = [self.lw_main.item(i) for i in range(self.lw_main.count())][1:]
+        refresh = [mov.attr for mov in refresh]
+
+        self.logic_display_movies(refresh)
 
     def logic_edit_movie_rating(self, movie: Movie):
 
@@ -278,6 +292,10 @@ class PyMoman(QtWidgets.QWidget):
         pass
 
     def logic_watch_trailer(self):
+
+        pass
+
+    def logic_delete_movie_cache(self):
 
         pass
 
@@ -407,9 +425,9 @@ class PyMoman(QtWidgets.QWidget):
             movie_menu = QtWidgets.QMenu(self)
 
             rename_mov = QAction(self.note_icon, "Rename")
-            rename_mov.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
+            rename_mov.triggered.connect(partial(self.logic_rename_movie, list_item.attr, 'R'))
             official_title = QAction(self.official_icon, "Assign official title")
-            official_title.triggered.connect(partial(self.logic_rename_movie, list_item.attr))
+            official_title.triggered.connect(partial(self.logic_rename_movie, list_item.attr, 'O'))
             edit_rating = QAction(self.star_icon, "Edit rating")
             edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, list_item.attr))
             new_poster = QAction(self.load_new_poster_icon, "Load new poster")
@@ -420,6 +438,8 @@ class PyMoman(QtWidgets.QWidget):
             wishlist.triggered.connect(partial(self.logic_add_to_wishlist, list_item.attr))
             watch_trailer = QAction(self.trailer_icon, "Watch trailer")
             watch_trailer.triggered.connect(partial(self.logic_watch_trailer, list_item.attr))
+            delete_cache = QAction(self.delete_icon, "Delete cached data")
+            delete_cache.triggered.connect(partial(self.logic_delete_movie_cache, list_item.attr))
 
             movie_menu.addAction(official_title)
             movie_menu.addAction(rename_mov)
@@ -428,6 +448,7 @@ class PyMoman(QtWidgets.QWidget):
             movie_menu.addAction(default_poster)
             movie_menu.addAction(wishlist)
             movie_menu.addAction(watch_trailer)
+            movie_menu.addAction(delete_cache)
 
             if isinstance(list_item.attr, Collection):
                 collection_menu.exec(event.globalPos())
