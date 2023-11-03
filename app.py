@@ -305,27 +305,17 @@ class PyMoman(QtWidgets.QWidget):
     def logic_filter(self):
 
         all_movies = [mov for col in PyMoman.all_collections for mov in col.mov_lst]
+        query_g = self.cbb_genre.currentText()
+        query_a = self.cbb_actors.currentText()
 
-        if self.sender() is self.cbb_genre and self.cbb_actors.currentText() == "Actors":
-            query = self.cbb_genre.currentText()
-            matching_movies = [mov for mov in all_movies if query == mov.genre]
-        elif self.sender() is self.cbb_genre and self.cbb_actors.currentText() != "Actors":
-            query = self.cbb_genre.currentText()
-            actor_filter = self.cbb_actors.currentText()
-            filtered_movies = [mov for mov in all_movies if actor_filter in mov.actors]
-            matching_movies = [mov for mov in filtered_movies if query == mov.genre]
-        elif self.sender() is self.cbb_actors and self.cbb_genre.currentText() == "Genre":
-            query = self.cbb_actors.currentText()
-            matching_movies = [mov for mov in all_movies if query in mov.actors]
+        if query_g == "Genre" and query_a != "Actors":
+            matching_movies = [mov for mov in all_movies if query_a in mov.actors]
+        elif query_g != "Genre" and query_a == "Actors":
+            matching_movies = [mov for mov in all_movies if query_g == mov.genre]
+        elif query_g != "Genre" and query_a != "Actors":
+            matching_movies = [mov for mov in all_movies if (query_g == mov.genre) and (query_a in mov.actors)]
         else:
-            query = self.cbb_actors.currentText()
-            genre_filter = self.cbb_genre.currentText()
-            filtered_movies = [mov for mov in all_movies if genre_filter == mov.genre]
-            matching_movies = [mov for mov in filtered_movies if query in mov.actors]
-
-        if query == "Genre" or query == "Actors":
-            self.logic_display_collections()
-            return
+            matching_movies = all_movies
 
         self.btn_add_movie.setEnabled(False)
         self.btn_remove_movie.setEnabled(False)
@@ -354,18 +344,16 @@ class PyMoman(QtWidgets.QWidget):
 
     def logic_display_panel(self, movie: Movie, scraper: dtr.MovieScraper):
 
+        movie_poster = QPixmap(constants.STR_DEFAULT_POSTER)
         if scraper.thumb.exists():
             movie_poster = QPixmap(str(scraper.thumb))
-        else:
-            movie_poster = QPixmap(constants.STR_DEFAULT_POSTER)
 
+        title = f"{movie.title.title()} ({movie.year})"
+        summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
         if scraper.data_file.exists():
             data = dti.load_file_content(scraper.data_file)
             title = data.get('title')
             summary = data.get('summary')
-        else:
-            title = f"{movie.title.title()} ({movie.year})"
-            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
 
         self.movie_tag_display.poster_label.setPixmap(movie_poster)
         self.movie_tag_display.rating_label.setText(movie.aesthetic_rating)
