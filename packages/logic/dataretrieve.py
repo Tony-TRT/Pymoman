@@ -207,8 +207,7 @@ class MovieScraper(Movie):
             return True
 
         official_title = summary = None
-        actors = []
-        genre = "Other"
+        actors = genre = []
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -261,8 +260,7 @@ class MovieScraper(Movie):
 
         for movie_genre in constants.MOVIE_GENRES:
             if movie_genre.casefold() in summary.casefold().replace(self.title.casefold(), ''):
-                genre = movie_genre
-                break
+                genre.append(movie_genre)
 
         data = {"title": official_title, "summary": summary, "actors": actors, "genre": genre}
 

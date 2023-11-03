@@ -64,7 +64,6 @@ MOVIE_GENRES: final(list[str]) = [
     "Horror",
     "Martial Arts",
     "Mistery",
-    "Other",
     "Romance",
     "Science Fiction",
     "Thriller",

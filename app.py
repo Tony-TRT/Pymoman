@@ -295,9 +295,10 @@ class PyMoman(QtWidgets.QWidget):
 
         pass
 
-    def logic_delete_movie_cache(self):
+    @staticmethod
+    def logic_delete_movie_cache(movie: Movie):
 
-        pass
+        movie.remove_cache()
 
     def logic_remove_movie(self) -> bool:
 
@@ -329,9 +330,9 @@ class PyMoman(QtWidgets.QWidget):
         if query_g == "Genre" and query_a != "Actors":
             matching_movies = [mov for mov in all_movies if query_a in mov.actors]
         elif query_g != "Genre" and query_a == "Actors":
-            matching_movies = [mov for mov in all_movies if query_g == mov.genre]
+            matching_movies = [mov for mov in all_movies if query_g in mov.genre]
         elif query_g != "Genre" and query_a != "Actors":
-            matching_movies = [mov for mov in all_movies if (query_g == mov.genre) and (query_a in mov.actors)]
+            matching_movies = [mov for mov in all_movies if (query_g in mov.genre) and (query_a in mov.actors)]
         else:
             matching_movies = all_movies
 

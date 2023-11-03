@@ -110,20 +110,20 @@ class Movie:
             return actors_list
 
     @property
-    def genre(self) -> str:
-        """Retrieves the movie genre from data file
+    def genre(self) -> list[str]:
+        """Retrieves the movie genre(s) from data file
 
         Returns:
-            str: movie genre
+            list[str]: movie genre(s)
         """
 
         try:
             content = dti.load_file_content(self.data_file)
-            genre = content.get("genre", "Other")
+            genre = content.get("genre", [])
         except FileNotFoundError:
-            return "Other"
+            return []
         except json.JSONDecodeError:
-            return "Other"
+            return []
         else:
             return genre
 
