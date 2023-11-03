@@ -18,9 +18,10 @@ While there's still work to be done to refine the code and add more features, Py
 ![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/9c445c3b-6dd1-4ae8-b430-17cad91f60fe)
 
 ## How to install
-I've barely tested it on Linux, but it works well on Windows.
+It works on Windows and Linux (tested on Debian Sid), although there are some minor display issues on Linux.
+I recommend using Python 3.11 because that's the version I work with.
 
-It works perfectly with python 3.11, use this version if you can.
+It does not work with Python 3.12 (strange display glitches) and has not been tested with other versions.
 
 Please keep in mind that this is an ongoing project, and many features are yet to be implemented.
 
