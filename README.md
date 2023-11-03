@@ -12,7 +12,7 @@ While there's still work to be done to refine the code and add more features, Py
 ![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/aa1df8dd-2994-4577-8674-dcdc159dcad9)
 
 
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/7482c3c5-c1e3-493b-9e99-4581a57d178d)
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/da2de7f1-8abb-43e9-b72d-c6cfb4a6500b)
 
 
 ![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/9c445c3b-6dd1-4ae8-b430-17cad91f60fe)
