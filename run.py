@@ -1,10 +1,13 @@
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt
 
 
 from packages.logic import dataimport
 from packages.logic import dataprocess
 from packages.logic.collection import Collection
+from packages.logic.movie import Movie
 from packages.ui.movdisplay import MovieTagDisplay
 from packages.ui.movtag import MovieTagDialog
 from packages.constants import constants
@@ -12,7 +15,7 @@ from packages.constants import constants
 
 class MainWindow(QtWidgets.QWidget):
     all_collections: list[Collection] = Collection.retrieve_collections()
-    last_collection_opened: list[Collection] = None
+    last_collection_opened: list[Collection] = []
 
     def __init__(self):
         super().__init__()
@@ -56,6 +59,55 @@ class MainWindow(QtWidgets.QWidget):
         self.mvt_display = None
 
         self.ui_manage_widgets()
+
+        ##################################################
+        # Icons.
+        ##################################################
+
+        self.icons = {}
+
+        self.ui_manage_icons()
+
+        ##################################################
+        # Style.
+        ##################################################
+
+        self.ui_apply_style()
+
+        ##################################################
+        # Connections.
+        ##################################################
+
+        self.logic_connect_widgets()
+
+    def ui_apply_style(self) -> None:
+        """Style is managed here.
+
+        Returns:
+            None: None.
+        """
+
+        with open(constants.STYLE, 'r', encoding="UTF-8") as style_file:
+            self.setStyleSheet(style_file.read())
+
+    def ui_manage_icons(self) -> None:
+        """Icons are managed here.
+
+        Returns:
+            None: None.
+        """
+
+        for icn_name, icn_path in constants.ICONS.items():
+            icon = QIcon(str(icn_path))
+            self.icons[icn_name] = icon
+
+        self.setWindowIcon(self.icons.get('logo'))
+        self.btn_create_col.setIcon(self.icons.get('note'))
+        self.btn_save_col.setIcon(self.icons.get('save'))
+        self.btn_scan_dir.setIcon(self.icons.get('folder'))
+        self.btn_add_movie.setIcon(self.icons.get('add'))
+        self.btn_remove_movie.setIcon(self.icons.get('rem'))
+        self.le_search.addAction(self.icons.get('search'), self.le_search.ActionPosition.LeadingPosition)
 
     def ui_manage_layouts_and_frames(self) -> None:
         """Frames and layouts are managed here.
@@ -127,6 +179,68 @@ class MainWindow(QtWidgets.QWidget):
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
         self.mov_frm_layout.addWidget(self.mvt_display)
+
+    def logic_connect_widgets(self) -> None:
+        """Connections are managed here.
+
+        Returns:
+            None: None.
+        """
+
+        self.btn_create_col.clicked.connect(self.logic_create_collection)
+
+    def logic_create_collection(self) -> None:
+        """Creates a new collection.
+
+        Returns:
+            None: None.
+        """
+
+        name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
+        if name and name not in [c.name for c in self.all_collections] and value:
+            new_collection = Collection(name)
+            self.all_collections.append(new_collection)
+
+            self.logic_list_display(self.all_collections)
+
+    def logic_list_display(self, items: list) -> None:
+        """All display logic for the list widget is managed here.
+
+        Args:
+            items (list): List of Collection objects or Movie objects.
+
+        Returns:
+            None: None.
+        """
+
+        list_to_display: list[QtWidgets.QListWidgetItem] = []
+        self.lw_main.clear()
+
+        if all(isinstance(item, Collection) for item in items):
+            self.last_collection_opened.clear()
+            for collection in items:
+                lw_item = QtWidgets.QListWidgetItem(collection.name)
+                lw_item.attr = collection
+                lw_item.setTextAlignment(Qt.AlignCenter)
+                if lw_item.attr.path.exists():
+                    lw_item.setIcon(self.icons.get('collection'))
+                list_to_display.append(lw_item)
+
+        else:
+            previous_item = QtWidgets.QListWidgetItem("GO BACK")
+            previous_item.setTextAlignment(Qt.AlignCenter)
+            previous_item.setIcon(self.icons.get('previous'))
+            list_to_display.append(previous_item)
+
+            for movie in items:
+                lw_item = QtWidgets.QListWidgetItem(movie.title)
+                lw_item.attr = movie
+                lw_item.setTextAlignment(Qt.AlignCenter)
+                lw_item.setIcon(self.icons.get('movie'))
+                list_to_display.append(lw_item)
+
+        for item in list_to_display:
+            self.lw_main.addItem(item)
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
