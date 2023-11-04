@@ -40,6 +40,6 @@ def clear_cache():
     saved_movies = dti.load_all_movies()
     saved_movies_c_path = [movie.storage for movie in saved_movies]
 
-    for directory in constants.CACHE.iterdir():
-        if directory not in saved_movies_c_path:
-            rmtree(directory)
+    for path in constants.CACHE.iterdir():
+        if path not in saved_movies_c_path and path.is_dir():
+            rmtree(path)
