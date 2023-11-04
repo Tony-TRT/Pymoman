@@ -35,101 +35,92 @@ class Movie:
         return f"{self.title}, {self.year}, {self.path}, {self.rating}/5"
 
     @property
-    def storage(self) -> Path:
-        """Returns storage folder path
+    def actors(self) -> list[str]:
+        """Retrieves movie's actors from the data file.
 
         Returns:
-            Path: data storage folder path
+            list[str]: Actors names.
         """
 
-        m_folder = self.title.lower().replace(' ', '_')
-        if m_folder.startswith('the_'):
-            m_folder = m_folder[4:]
-
-        return Path(constants.CACHE / m_folder)
+        content: dict = self.load_data_file()
+        return content.get('actors', [])
 
     @property
     def data_file(self) -> Path:
-        """Returns data file path
+        """Returns the data file's path.
 
         Returns:
-            Path: data file path
+            Path: Data file's path.
         """
 
         return Path(self.storage / 'data.json')
 
     @property
-    def thumb(self) -> Path:
-        """Returns thumbnail path
+    def genre(self) -> list[str]:
+        """Retrieves the movie genre(s) from data file.
 
         Returns:
-            Path: thumbnail path
+            list[str]: Movie genre(s).
         """
 
-        return Path(self.storage / 'thumb.jpg')
+        content: dict = self.load_data_file()
+        return content.get('genre', [])
+
+    def load_data_file(self) -> dict:
+        """Loads data file and returns its content.
+
+        Returns:
+            dict: Data file's content.
+        """
+
+        try:
+            content: dict = dti.load_file_content(self.data_file)
+        except FileNotFoundError:
+            return {}
+        except json.JSONDecodeError:
+            return {}
+        else:
+            return content
 
     @property
     def official_title(self) -> str:
-        """Returns official movie title
+        """Returns official movie title.
 
         Returns:
-            str: official title
+            str: Official title.
         """
 
-        official_title = self.title.title()
+        official_title: str = self.title.title()
         if not self.data_file.exists():
             return official_title
 
-        data = dti.load_file_content(self.data_file)
-        official_title = data.get('title', official_title)
+        content: dict = self.load_data_file()
+        official_title = content.get('title', official_title)
         rem_expr = {
             '(film)': '', 'film': '', ' )': ')', '( ': '(', '()': '', '/': '', '\\': '', ': ': ' - ', '  ': ' '
         }
 
-        for k, v in rem_expr.items():
-            official_title = official_title.replace(k, v)
+        for key, value in rem_expr.items():
+            official_title = official_title.replace(key, value)
 
         return official_title.strip()
 
-    @property
-    def actors(self) -> list[str]:
-        """Retrieves movie's actors from the data file
-
-        Returns:
-            list[str]: actors names
+    def remove_cache(self):
+        """Remove cached data.
         """
 
-        try:
-            content = dti.load_file_content(self.data_file)
-            actors_list = content.get('actors', [''])
-        except FileNotFoundError:
-            return ['']
-        except json.JSONDecodeError:
-            return ['']
-        else:
-            return actors_list
-
-    @property
-    def genre(self) -> list[str]:
-        """Retrieves the movie genre(s) from data file
-
-        Returns:
-            list[str]: movie genre(s)
-        """
-
-        try:
-            content = dti.load_file_content(self.data_file)
-            genre = content.get("genre", [])
-        except FileNotFoundError:
-            return []
-        except json.JSONDecodeError:
-            return []
-        else:
-            return genre
+        if self.storage.exists():
+            shutil.rmtree(self.storage)
 
     def rename(self, new_title: str) -> bool:
+        """Changes the movie title.
 
-        old_storage = self.storage
+        Returns:
+            bool: True or False depending on whether the cache folder was moved successfully or not.
+            Can also return False if the title contains prohibited characters.
+        """
+
+        old_storage: Path = self.storage
 
         b_char = '&"(-_='
         if any(new_title.startswith(char) or new_title.endswith(char) for char in b_char):
@@ -146,7 +137,25 @@ class Movie:
             return False
         return True
 
-    def remove_cache(self):
+    @property
+    def storage(self) -> Path:
+        """Returns storage folder's path.
 
-        if self.storage.exists():
-            shutil.rmtree(self.storage)
+        Returns:
+            Path: Data storage folder's path.
+        """
+
+        folder_name = self.title.lower().replace(' ', '_')
+        folder_name = folder_name[4:] if folder_name.startswith('the_') else folder_name
+
+        return Path(constants.CACHE / folder_name)
+
+    @property
+    def thumb(self) -> Path:
+        """Returns thumbnail's path.
+
+        Returns:
+            Path: Thumbnail's path.
+        """
+
+        return Path(self.storage / 'thumb.jpg')
