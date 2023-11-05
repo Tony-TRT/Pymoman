@@ -25,7 +25,12 @@ class Collection:
         return f"{self.name} {self.mov_lst}"
 
     @property
-    def path(self):
+    def path(self) -> Path:
+        """Returns the path of the instance's file on disk.
+
+        Returns:
+            Path: File's path.
+        """
 
         return Path.joinpath(constants.COLLECTIONS, self.name.replace(' ', '_') + ".json")
 
