@@ -1,3 +1,5 @@
+from time import sleep
+
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QIcon
@@ -186,6 +188,20 @@ class MainWindow(QtWidgets.QWidget):
         self.list_layout.addWidget(self.lw_main)
         self.mov_frm_layout.addWidget(self.mvt_display)
 
+    def ui_progress_bar_animation(self) -> None:
+        """Creates a small animation for the progress bar.
+
+        Returns:
+            None: None.
+        """
+
+        for i in range(1, 101):         # The interface freezes for
+            self.prg_bar.setValue(i)    # such a short time that using a
+            sleep(0.003)                # thread here seems unnecessary.
+
+        sleep(0.3)
+        self.prg_bar.reset()
+
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
 
@@ -275,6 +291,7 @@ class MainWindow(QtWidgets.QWidget):
         else:
             collection_to_save.save()
 
+        self.ui_progress_bar_animation()
         self.logic_update_list_widget()
 
     def logic_update_list_widget(self) -> None:
