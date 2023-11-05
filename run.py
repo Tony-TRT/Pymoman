@@ -188,6 +188,7 @@ class MainWindow(QtWidgets.QWidget):
         """
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
+        self.btn_save_col.clicked.connect(self.logic_save_collection)
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -203,6 +204,29 @@ class MainWindow(QtWidgets.QWidget):
 
             self.logic_list_display(self.all_collections)
 
+    def logic_generate_list_item(self, item) -> QtWidgets.QListWidgetItem:
+        """Generates a QListWidgetItem from the received object.
+
+        Args:
+            item: Collection or Movie object.
+
+        Returns:
+            QtWidgets.QListWidgetItem: Item ready for display.
+        """
+
+        if isinstance(item, Collection):
+            lw_item = QtWidgets.QListWidgetItem(item.name)
+            if item.path.exists():
+                lw_item.setIcon(self.icons.get('collection'))
+
+        else:
+            lw_item = QtWidgets.QListWidgetItem(item.title)
+            lw_item.setIcon(self.icons.get('movie'))
+
+        lw_item.setTextAlignment(Qt.AlignCenter)
+        lw_item.attr = item
+        return lw_item
+
     def logic_list_display(self, items: list) -> None:
         """All display logic for the list widget is managed here.
 
@@ -213,34 +237,28 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        list_to_display: list[QtWidgets.QListWidgetItem] = []
+        previous_item = QtWidgets.QListWidgetItem("GO BACK")
+        previous_item.attr = None
+        previous_item.setTextAlignment(Qt.AlignCenter)
+        previous_item.setIcon(self.icons.get('previous'))
         self.lw_main.clear()
 
         if all(isinstance(item, Collection) for item in items):
             self.last_collection_opened.clear()
-            for collection in items:
-                lw_item = QtWidgets.QListWidgetItem(collection.name)
-                lw_item.attr = collection
-                lw_item.setTextAlignment(Qt.AlignCenter)
-                if lw_item.attr.path.exists():
-                    lw_item.setIcon(self.icons.get('collection'))
-                list_to_display.append(lw_item)
+            display_list = [self.logic_generate_list_item(collection) for collection in items]
 
-        else:
-            previous_item = QtWidgets.QListWidgetItem("GO BACK")
-            previous_item.setTextAlignment(Qt.AlignCenter)
-            previous_item.setIcon(self.icons.get('previous'))
-            list_to_display.append(previous_item)
+        elif all(isinstance(item, Movie) for item in items):
+            display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
 
-            for movie in items:
-                lw_item = QtWidgets.QListWidgetItem(movie.title)
-                lw_item.attr = movie
-                lw_item.setTextAlignment(Qt.AlignCenter)
-                lw_item.setIcon(self.icons.get('movie'))
-                list_to_display.append(lw_item)
+        else:  # A list of Movie objects including the previous_item
+            display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items[1:]]
 
-        for item in list_to_display:
+        for item in display_list:
             self.lw_main.addItem(item)
+
+    def logic_save_collection(self):
+
+        pass
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
