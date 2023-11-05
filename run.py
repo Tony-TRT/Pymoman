@@ -438,7 +438,7 @@ class MainWindow(QtWidgets.QWidget):
         new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
         if new_name and new_name not in [c.name for c in self.all_collections] and value:
             collection.rename(new_name)
-            self.logic_update_list_widget()
+            self.logic_update_list_widget(show_previous_icn=False)
 
     def logic_rename_movie(self, movie: Movie) -> None:
 
@@ -466,8 +466,11 @@ class MainWindow(QtWidgets.QWidget):
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
 
-    def logic_update_list_widget(self) -> None:
+    def logic_update_list_widget(self, show_previous_icn: bool = True) -> None:
         """Refreshes the current items in the list widget.
+
+        Args:
+            show_previous_icn (bool, optional): Whether to display the previous item. Defaults to True.
 
         Returns:
             None: None.
@@ -475,7 +478,7 @@ class MainWindow(QtWidgets.QWidget):
 
         items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
         items = [it.attr for it in items if it.attr is not None]
-        self.logic_list_display(items)
+        self.logic_list_display(items, show_previous_icn)
 
     def logic_watch_trailer(self, movie: Movie) -> None:
 
