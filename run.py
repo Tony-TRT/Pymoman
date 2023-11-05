@@ -88,7 +88,7 @@ class MainWindow(QtWidgets.QWidget):
         # Display.
         ##################################################
 
-        self.logic_list_display(self.all_collections)
+        self.logic_list_display(self.all_collections, show_previous_icn=False)
 
     def ui_apply_style(self) -> None:
         """Style is managed here.
@@ -230,7 +230,7 @@ class MainWindow(QtWidgets.QWidget):
             new_collection = Collection(name)
             self.all_collections.append(new_collection)
 
-            self.logic_list_display(self.all_collections)
+            self.logic_list_display(self.all_collections, show_previous_icn=False)
 
     def logic_create_collection_menu(self, pos, item: Collection) -> None:
         """Create a context menu for collections.
@@ -267,6 +267,7 @@ class MainWindow(QtWidgets.QWidget):
         collection_menu.addAction(delete_collection)
 
         collection_menu.exec(pos)
+        collection_menu.deleteLater()
 
     def logic_create_movie_menu(self, pos, item: Movie) -> None:
         """Create a context menu for movies.
@@ -312,6 +313,7 @@ class MainWindow(QtWidgets.QWidget):
         movie_menu.addAction(delete_cache)
 
         movie_menu.exec(pos)
+        movie_menu.deleteLater()
 
     def logic_delete_collection(self, collection: Collection) -> None:
 
@@ -352,11 +354,12 @@ class MainWindow(QtWidgets.QWidget):
         lw_item.attr = item
         return lw_item
 
-    def logic_list_display(self, items: list) -> None:
+    def logic_list_display(self, items: list, show_previous_icn: bool = True) -> None:
         """All display logic for the list widget is managed here.
 
         Args:
             items (list): List of Collection objects or Movie objects.
+            show_previous_icn (bool, optional): Whether to display the previous item. Defaults to True.
 
         Returns:
             None: None.
@@ -368,7 +371,10 @@ class MainWindow(QtWidgets.QWidget):
         previous_item.setIcon(self.icons.get('previous'))
         self.lw_main.clear()
 
-        if all(isinstance(item, Collection) for item in items):
+        if not items and show_previous_icn:
+            display_list = [previous_item]
+
+        elif all(isinstance(item, Collection) for item in items):
             self.last_collection_opened.clear()
             display_list = [self.logic_generate_list_item(collection) for collection in items]
 
@@ -383,8 +389,18 @@ class MainWindow(QtWidgets.QWidget):
         pass
 
     def logic_open_collection(self, collection: Collection) -> None:
+        """Allows to open a collection.
 
-        pass
+        Args:
+            collection (Collection): Collection to open.
+
+        Returns:
+            None: None.
+        """
+
+        self.last_collection_opened.clear()
+        self.last_collection_opened.append(collection)
+        self.logic_list_display(collection.mov_lst)
 
     def logic_rename_collection(self, collection: Collection) -> None:
 
@@ -403,6 +419,9 @@ class MainWindow(QtWidgets.QWidget):
         Returns:
             None: None.
         """
+
+        if not self.all_collections:
+            return
 
         if self.sender() is self.btn_save_col:
             for collection in self.all_collections:
