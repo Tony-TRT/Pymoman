@@ -1,4 +1,5 @@
 from functools import partial
+from pathlib import Path
 from time import sleep
 
 
@@ -316,8 +317,20 @@ class MainWindow(QtWidgets.QWidget):
         movie_menu.deleteLater()
 
     def logic_delete_collection(self, collection: Collection) -> None:
+        """Allows to delete a collection.
 
-        pass
+        Args:
+            collection (Collection): Collection to delete.
+
+        Returns:
+            None: None.
+        """
+
+        value = collection.remove()
+
+        if value:
+            self.all_collections.remove(collection)
+            self.logic_list_display(self.all_collections, show_previous_icn=False)
 
     def logic_delete_movie_cache(self, movie: Movie) -> None:
 
@@ -328,8 +341,18 @@ class MainWindow(QtWidgets.QWidget):
         pass
 
     def logic_export_collection(self, collection: Collection) -> None:
+        """Allows to export a collection.
 
-        pass
+        Args:
+            collection (Collection): Collection to export.
+
+        Returns:
+            None: None.
+        """
+
+        dialog = QtWidgets.QFileDialog.getSaveFileName(self, 'Python Movie Manager - Save text file')
+        if dialog[0]:
+            collection.export_as_txt(Path(f"{dialog[0]}.txt"))
 
     def logic_generate_list_item(self, item) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
@@ -403,8 +426,19 @@ class MainWindow(QtWidgets.QWidget):
         self.logic_list_display(collection.mov_lst)
 
     def logic_rename_collection(self, collection: Collection) -> None:
+        """Allows to rename a collection.
 
-        pass
+        Args:
+            collection (Collection): Collection to rename.
+
+        Returns:
+            None: None.
+        """
+
+        new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
+        if new_name and new_name not in [c.name for c in self.all_collections] and value:
+            collection.rename(new_name)
+            self.logic_update_list_widget()
 
     def logic_rename_movie(self, movie: Movie) -> None:
 
