@@ -1,9 +1,11 @@
+from functools import partial
 from time import sleep
+
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QIcon
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QAction
+from PySide6.QtCore import Qt, QEvent
 
 
 from packages.logic import dataimport
@@ -202,6 +204,10 @@ class MainWindow(QtWidgets.QWidget):
         sleep(0.3)
         self.prg_bar.reset()
 
+    def logic_add_to_wishlist(self, movie: Movie) -> None:
+
+        pass
+
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
 
@@ -225,6 +231,103 @@ class MainWindow(QtWidgets.QWidget):
             self.all_collections.append(new_collection)
 
             self.logic_list_display(self.all_collections)
+
+    def logic_create_collection_menu(self, pos, item: Collection) -> None:
+        """Create a context menu for collections.
+
+        This method generates a context menu with specific actions for collections
+        within the QListWidget. It is triggered by a right-click event at the given
+        position 'pos' within the list widget.
+
+        Args:
+            pos: Event position.
+            item (Collection): Clicked item.
+
+        Returns:
+            None: None.
+        """
+
+        collection_menu = QtWidgets.QMenu(self)
+
+        open_collection = QAction(self.icons.get('folder'), "Open")
+        open_collection.triggered.connect(partial(self.logic_open_collection, item))
+        save_collection = QAction(self.icons.get('save'), "Save")
+        save_collection.triggered.connect(partial(self.logic_save_collection, item))
+        rename_collection = QAction(self.icons.get('note'), "Rename")
+        rename_collection.triggered.connect(partial(self.logic_rename_collection, item))
+        export_collection = QAction(self.icons.get('export'), "Export as text")
+        export_collection.triggered.connect(partial(self.logic_export_collection, item))
+        delete_collection = QAction(self.icons.get('delete'), "Delete")
+        delete_collection.triggered.connect(partial(self.logic_delete_collection, item))
+
+        collection_menu.addAction(open_collection)
+        collection_menu.addAction(save_collection)
+        collection_menu.addAction(rename_collection)
+        collection_menu.addAction(export_collection)
+        collection_menu.addAction(delete_collection)
+
+        collection_menu.exec(pos)
+
+    def logic_create_movie_menu(self, pos, item: Movie) -> None:
+        """Create a context menu for movies.
+
+        This method generates a context menu with specific actions for movies
+        within the QListWidget. It is triggered by a right-click event at the given
+        position 'pos' within the list widget.
+
+        Args:
+            pos: Event position.
+            item (Movie): Clicked item.
+
+        Returns:
+            None: None.
+        """
+
+        movie_menu = QtWidgets.QMenu(self)
+
+        rename_movie = QAction(self.icons.get('note'), "Rename")
+        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, False))
+        official_title = QAction(self.icons.get('official'), "Assign official title")
+        official_title.triggered.connect(partial(self.logic_rename_movie, item, True))
+        edit_rating = QAction(self.icons.get('star'), "Edit rating")
+        edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, item))
+        load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
+        load_new_poster.triggered.connect(partial(self.logic_modify_poster, item))
+        load_default_poster = QAction(self.icons.get('default_poster'), "Set default poster")
+        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item))
+        wishlist = QAction(self.icons.get('wishlist'), "Add to Wishlist")
+        wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
+        watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
+        watch_trailer.triggered.connect(partial(self.logic_watch_trailer, item))
+        delete_cache = QAction(self.icons.get('delete'), "Delete cached data")
+        delete_cache.triggered.connect(partial(self.logic_delete_movie_cache, item))
+
+        movie_menu.addAction(official_title)
+        movie_menu.addAction(rename_movie)
+        movie_menu.addAction(edit_rating)
+        movie_menu.addAction(load_new_poster)
+        movie_menu.addAction(load_default_poster)
+        movie_menu.addAction(wishlist)
+        movie_menu.addAction(watch_trailer)
+        movie_menu.addAction(delete_cache)
+
+        movie_menu.exec(pos)
+
+    def logic_delete_collection(self, collection: Collection) -> None:
+
+        pass
+
+    def logic_delete_movie_cache(self, movie: Movie) -> None:
+
+        pass
+
+    def logic_edit_movie_rating(self, movie: Movie) -> None:
+
+        pass
+
+    def logic_export_collection(self, collection: Collection) -> None:
+
+        pass
 
     def logic_generate_list_item(self, item) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
@@ -275,6 +378,22 @@ class MainWindow(QtWidgets.QWidget):
         for item in display_list:
             self.lw_main.addItem(item)
 
+    def logic_modify_poster(self, movie: Movie) -> None:
+
+        pass
+
+    def logic_open_collection(self, collection: Collection) -> None:
+
+        pass
+
+    def logic_rename_collection(self, collection: Collection) -> None:
+
+        pass
+
+    def logic_rename_movie(self, movie: Movie) -> None:
+
+        pass
+
     def logic_save_collection(self, collection_to_save: Collection) -> None:
         """Saves the created collections.
 
@@ -305,6 +424,10 @@ class MainWindow(QtWidgets.QWidget):
         items = [it.attr for it in items if it.attr is not None]
         self.logic_list_display(items)
 
+    def logic_watch_trailer(self, movie: Movie) -> None:
+
+        pass
+
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
 
@@ -316,6 +439,22 @@ class MainWindow(QtWidgets.QWidget):
         self.cbb_actors.clear()
         self.cbb_actors.addItems(["Actors"] + dataimport.load_all_actors())
         self.cbb_actors.blockSignals(False)
+
+    def eventFilter(self, watched, event: QEvent) -> bool:
+
+        if event.type() == QEvent.ContextMenu and watched is self.lw_main:
+            list_item = watched.itemAt(event.pos())
+
+            if list_item is None:
+                return False
+
+            if isinstance(list_item.attr, Collection):
+                self.logic_create_collection_menu(event.globalPos(), list_item.attr)
+
+            elif isinstance(list_item.attr, Movie):  # Can't put 'else' because of previous_item
+                self.logic_create_movie_menu(event.globalPos(), list_item.attr)
+
+        return super().eventFilter(watched, event)
 
 
 if __name__ == '__main__':
