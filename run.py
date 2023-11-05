@@ -80,6 +80,12 @@ class MainWindow(QtWidgets.QWidget):
 
         self.logic_connect_widgets()
 
+        ##################################################
+        # Display.
+        ##################################################
+
+        self.logic_list_display(self.all_collections)
+
     def ui_apply_style(self) -> None:
         """Style is managed here.
 
@@ -247,18 +253,40 @@ class MainWindow(QtWidgets.QWidget):
             self.last_collection_opened.clear()
             display_list = [self.logic_generate_list_item(collection) for collection in items]
 
-        elif all(isinstance(item, Movie) for item in items):
+        else:
             display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
-
-        else:  # A list of Movie objects including the previous_item
-            display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items[1:]]
 
         for item in display_list:
             self.lw_main.addItem(item)
 
-    def logic_save_collection(self):
+    def logic_save_collection(self, collection_to_save: Collection) -> None:
+        """Saves the created collections.
 
-        pass
+        Args:
+            collection_to_save (Collection): Collection to save.
+
+        Returns:
+            None: None.
+        """
+
+        if self.sender() is self.btn_save_col:
+            for collection in self.all_collections:
+                collection.save()
+        else:
+            collection_to_save.save()
+
+        self.logic_update_list_widget()
+
+    def logic_update_list_widget(self) -> None:
+        """Refreshes the current items in the list widget.
+
+        Returns:
+            None: None.
+        """
+
+        items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
+        items = [it.attr for it in items if it.attr is not None]
+        self.logic_list_display(items)
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
