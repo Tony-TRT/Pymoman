@@ -9,13 +9,16 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/aa1df8dd-2994-4577-8674-dcdc159dcad9)
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/2f27452e-b9a5-4ed7-933a-36a78f11c6f2)
 
 
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/da2de7f1-8abb-43e9-b72d-c6cfb4a6500b)
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/c58bd31c-1aaa-4136-bb90-c43219014558)
 
 
-![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/9c445c3b-6dd1-4ae8-b430-17cad91f60fe)
+![03](https://github.com/Tony-TRT/Pymoman/assets/146631446/3e3de780-e653-4037-8178-49dd1503d2a1)
+
+
+![04](https://github.com/Tony-TRT/Pymoman/assets/146631446/4bef1ee2-2f07-4650-b01a-d8c672060715)
 
 ## How to install
 It works on Windows and Linux (tested on Debian Sid), although there are some minor display issues on Linux.
@@ -39,7 +42,7 @@ Please keep in mind that this is an ongoing project, and many features are yet t
 
    `pip install -r requirements.txt`
 
-3) Make sure to use the virtual environment and run 'app.py'.
+3) Make sure to use the virtual environment and run 'run.py'.
 
 ## How to use
 You must first create a collection, open it, and then add movies.
