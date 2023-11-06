@@ -34,12 +34,12 @@ def clear_cache():
     """Clear unused cache data
     """
 
-    if not constants.CACHE.exists():
+    if not constants.PATHS.get('cache').exists():
         return
 
     saved_movies = dti.load_all_movies()
     saved_movies_c_path = [movie.storage for movie in saved_movies]
 
-    for path in constants.CACHE.iterdir():
+    for path in constants.PATHS.get('cache').iterdir():
         if path not in saved_movies_c_path and path.is_dir():
             rmtree(path)

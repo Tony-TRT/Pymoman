@@ -4,6 +4,8 @@ It provides functions and utilities to parse, structure, and categorize informat
 """
 
 import json
+from glob import glob
+from pathlib import Path
 
 from .movie import Movie
 from ..constants import constants
@@ -42,7 +44,7 @@ def load_all_actors() -> list[str]:
 
     full_list = set()
 
-    for file_path in constants.CACHE.glob('**/data.json'):
+    for file_path in constants.PATHS.get('cache').glob('**/data.json'):
         try:
             content = load_file_content(file_path)
             actors = content.get('actors', ['Unknown'])
@@ -76,6 +78,6 @@ def load_all_movies() -> list[Movie]:
 
     full_list = []
 
-    for file_path in constants.COLLECTION_FILES:
+    for file_path in glob(str(Path.joinpath(constants.PATHS.get('collections'), "*.json"))):
         full_list.extend(load_collection_movies(file_path))
     return full_list

@@ -52,5 +52,5 @@ class MovieTagDialog(QtWidgets.QWidget):
 
     def ui_apply_style(self):
 
-        with open(constants.STYLE, 'r', encoding="UTF-8") as style_file:
+        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())

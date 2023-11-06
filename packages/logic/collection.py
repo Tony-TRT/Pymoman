@@ -1,6 +1,8 @@
 import json
+from glob import glob
 from pathlib import Path
 from typing import Self
+
 
 from .dataimport import load_collection_movies
 from ..constants import constants
@@ -27,13 +29,13 @@ class Collection:
     @property
     def path(self):
 
-        return Path.joinpath(constants.COLLECTIONS, self.name.replace(' ', '_') + ".json")
+        return Path.joinpath(constants.PATHS.get('collections'), self.name.replace(' ', '_') + ".json")
 
     @classmethod
     def retrieve_collections(cls) -> list[Self]:
 
         collections = []
-        for file in constants.COLLECTION_FILES:
+        for file in glob(str(Path.joinpath(constants.PATHS.get('collections'), "*.json"))):
             mov_lst = load_collection_movies(file)
             name = Path(file).stem.replace('_', ' ')
             collections.append(Collection(name=name, mov_lst=mov_lst))
@@ -73,7 +75,7 @@ class Collection:
 
     def save(self):
 
-        constants.COLLECTIONS.mkdir(exist_ok=True)
+        constants.PATHS.get('collections').mkdir(exist_ok=True)
         data_to_dump = []
 
         for movie in self.mov_lst:

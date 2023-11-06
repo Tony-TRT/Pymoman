@@ -1,3 +1,4 @@
+import threading
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -5,12 +6,13 @@ from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtGui import QIcon, QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 
 from packages.logic import dataimport
 from packages.logic import dataprocess
+from packages.logic import dataretrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.ui.movdisplay import MovieTagDisplay
@@ -98,8 +100,45 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        with open(constants.STYLE, 'r', encoding="UTF-8") as style_file:
+        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
+
+    def ui_information_panel(self, item) -> None:
+        """Right information panel that displays information about the selected item.
+
+        Args:
+            item: Collection or Movie object.
+
+        Returns:
+            None: None.
+        """
+
+        image = QPixmap(constants.STR_PATHS.get('default poster'))
+
+        if isinstance(item, Collection):
+            title = f"→ {item.name.upper()}"
+            summary = "\n".join([f"- {movie.title}" for movie in item.mov_lst[:7]] + ['...'])
+            top_right_text = f"{len(item.mov_lst)} movie{'s' if len(item.mov_lst) > 1 else ''}."
+
+        else:
+            if item.thumb.exists():
+                image = QPixmap(str(item.thumb))
+
+            title = f"{item.title.title()} ({item.year})"
+            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
+            top_right_text = item.aesthetic_rating
+
+            if item.data_file.exists():
+                content = dataimport.load_file_content(item.data_file)
+                title = content.get('title')
+                summary = content.get('summary')
+
+        self.mvt_display.poster_label.setPixmap(image)
+        self.mvt_display.rating_label.setText(top_right_text)
+        self.mvt_display.title_label.setText(title)
+        self.mvt_display.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.mvt_display.summary_label.setText(summary)
+        self.mvt_display.summary_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
@@ -108,8 +147,8 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        for icn_name, icn_path in constants.ICONS.items():
-            icon = QIcon(str(icn_path))
+        for icn_name, icn_path in constants.STR_ICONS.items():
+            icon = QIcon(icn_path)
             self.icons[icn_name] = icon
 
         self.setWindowIcon(self.icons.get('logo'))
@@ -257,6 +296,7 @@ class MainWindow(QtWidgets.QWidget):
         self.btn_save_col.clicked.connect(self.logic_save_collection)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
+        self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -504,6 +544,26 @@ class MainWindow(QtWidgets.QWidget):
 
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
+
+    def logic_single_click(self, clicked_item) -> None:
+        """Handle a single click on items in the QListWidget.
+
+        Returns:
+            None: None.
+        """
+
+        if isinstance(clicked_item.attr, Collection):
+            self.ui_information_panel(clicked_item.attr)
+
+        elif isinstance(clicked_item.attr, Movie):
+            self.clr_reload_cbb_actors()
+            scraper = dataretrieve.MovieScraper(clicked_item.attr)
+            threading.Thread(target=scraper.download_poster, daemon=True).start()
+            threading.Thread(target=scraper.download_info, daemon=True).start()
+            self.ui_information_panel(clicked_item.attr)
+
+        else:  # clicked_item is 'GO BACK'
+            self.logic_list_display(MainWindow.all_collections)
 
     def logic_update_list_widget(self, show_previous_icn: bool = True) -> None:
         """Refreshes the current items in the list widget.

@@ -148,7 +148,7 @@ class Movie:
         folder_name = self.title.lower().replace(' ', '_')
         folder_name = folder_name[4:] if folder_name.startswith('the_') else folder_name
 
-        return Path(constants.CACHE / folder_name)
+        return Path(constants.PATHS.get('cache') / folder_name)
 
     @property
     def thumb(self) -> Path:
