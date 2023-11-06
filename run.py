@@ -89,7 +89,7 @@ class MainWindow(QtWidgets.QWidget):
         # Display.
         ##################################################
 
-        self.logic_list_display(self.all_collections, show_previous_icn=False)
+        self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
 
     def ui_apply_style(self) -> None:
         """Style is managed here.
@@ -205,6 +205,43 @@ class MainWindow(QtWidgets.QWidget):
         sleep(0.3)
         self.prg_bar.reset()
 
+    def logic_add_movie(self) -> None:
+        """Opens the window which allows to add a movie.
+
+        Returns:
+            None: None.
+        """
+
+        if not MainWindow.last_collection_opened:
+            return
+
+        self.cst_dialog.show()
+
+    def logic_add_movie_validation(self) -> None:
+        """Validate whether to add the movie or not based on whether the user input is correct or incorrect.
+
+        Returns:
+            None: None.
+        """
+
+        collection = MainWindow.last_collection_opened[0]
+        try:
+            movie = Movie(
+                title=self.cst_dialog.le_movie_title.text(),
+                year=int(self.cst_dialog.le_movie_year.text()),
+                rating=self.cst_dialog.cbb_movie_rating.currentText())
+        except ValueError:
+            self.cst_dialog.close()
+        else:
+            if movie.title not in [mov.title for mov in collection.mov_lst]:
+                collection.add_movie(movie)
+                self.cst_dialog.close()
+                self.logic_list_display(collection.mov_lst)
+            else:
+                self.cst_dialog.close()
+
+        self.clr_reset_cst_dialog()
+
     def logic_add_to_wishlist(self, movie: Movie) -> None:
 
         pass
@@ -218,6 +255,8 @@ class MainWindow(QtWidgets.QWidget):
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
         self.btn_save_col.clicked.connect(self.logic_save_collection)
+        self.btn_add_movie.clicked.connect(self.logic_add_movie)
+        self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -227,11 +266,11 @@ class MainWindow(QtWidgets.QWidget):
         """
 
         name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
-        if name and name not in [c.name for c in self.all_collections] and value:
+        if name and name not in [c.name for c in MainWindow.all_collections] and value:
             new_collection = Collection(name)
-            self.all_collections.append(new_collection)
+            MainWindow.all_collections.append(new_collection)
 
-            self.logic_list_display(self.all_collections, show_previous_icn=False)
+            self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
 
     def logic_create_collection_menu(self, pos, item: Collection) -> None:
         """Create a context menu for collections.
@@ -329,8 +368,8 @@ class MainWindow(QtWidgets.QWidget):
         value = collection.remove()
 
         if value:
-            self.all_collections.remove(collection)
-            self.logic_list_display(self.all_collections, show_previous_icn=False)
+            MainWindow.all_collections.remove(collection)
+            self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
 
     def logic_delete_movie_cache(self, movie: Movie) -> None:
 
@@ -436,7 +475,7 @@ class MainWindow(QtWidgets.QWidget):
         """
 
         new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
-        if new_name and new_name not in [c.name for c in self.all_collections] and value:
+        if new_name and new_name not in [c.name for c in MainWindow.all_collections] and value:
             collection.rename(new_name)
             self.logic_update_list_widget(show_previous_icn=False)
 
@@ -454,11 +493,11 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        if not self.all_collections:
+        if not MainWindow.all_collections:
             return
 
         if self.sender() is self.btn_save_col:
-            for collection in self.all_collections:
+            for collection in MainWindow.all_collections:
                 collection.save()
         else:
             collection_to_save.save()
@@ -495,6 +534,17 @@ class MainWindow(QtWidgets.QWidget):
         self.cbb_actors.clear()
         self.cbb_actors.addItems(["Actors"] + dataimport.load_all_actors())
         self.cbb_actors.blockSignals(False)
+
+    def clr_reset_cst_dialog(self) -> None:
+        """Reset the fields of cst_dialog.
+
+        Returns:
+            None: None.
+        """
+
+        self.cst_dialog.le_movie_title.clear()
+        self.cst_dialog.le_movie_year.clear()
+        self.cst_dialog.cbb_movie_rating.setCurrentIndex(0)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 
