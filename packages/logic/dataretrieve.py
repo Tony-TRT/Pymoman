@@ -106,7 +106,8 @@ class MovieScraper(Movie):
         posters_page = requests.get(full_link, timeout=5)
         if posters_page.ok:
             soup = BeautifulSoup(posters_page.text, 'html.parser')
-            poster_link = soup.find('img', class_="lazy")['data-src']
+            cont_poster_link = soup.find('img', class_="lazy")
+            poster_link = cont_poster_link['data-src'] if cont_poster_link else ""
 
         return poster_link
 

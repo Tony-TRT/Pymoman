@@ -4,51 +4,51 @@ These constants can be imported and used throughout the project to maintain
 consistency and ease of updates.
 """
 
+
 from typing import final
 from pathlib import Path
-from glob import glob
 
 
-BASE_DIR: final(Path) = Path(__file__).resolve().parent.parent.parent
-STR_BASE_DIR: final(str) = str(BASE_DIR)
+BASE: final(Path) = Path(__file__).resolve().parent.parent.parent
 
-CACHE: final(Path) = Path.joinpath(BASE_DIR, "cache")
-STR_CACHE: final(str) = str(CACHE)
+STR_PATHS = {}
+PATHS: final(dict) = {
+    'base': BASE,
+    'cache': Path(BASE / "cache"),
+    'collections': Path(BASE / "collections"),
+    'resources': Path(BASE / "resources"),
+    'default poster': Path(BASE / "resources" / "default.jpg"),
+    'style': Path(BASE / "resources" / "style.qss"),
+    'icons': Path(BASE / "resources" / "icons")
+}
 
-COLLECTIONS: final(Path) = Path.joinpath(BASE_DIR, "collections")
-STR_COLLECTIONS: final(str) = str(COLLECTIONS)
-COLLECTION_FILES: final(list[str]) = glob(str(Path.joinpath(COLLECTIONS, "*.json")))
+for key, value in PATHS.items():
+    STR_PATHS[key] = str(value)
 
-RESOURCES: final(Path) = Path.joinpath(BASE_DIR, "resources")
-STR_RESOURCES: final(str) = str(RESOURCES)
+STR_ICONS = {}
+ICONS: final(dict) = {
+    'logo': Path(PATHS.get('resources') / "logo.png"),
+    'save': Path(PATHS.get('icons') / "save.png"),
+    'note': Path(PATHS.get('icons') / "create_collection.png"),
+    'folder': Path(PATHS.get('icons') / "folder.png"),
+    'collection': Path(PATHS.get('icons') / "collection.png"),
+    'movie': Path(PATHS.get('icons') / "movie.png"),
+    'add': Path(PATHS.get('icons') / "add_item.png"),
+    'rem': Path(PATHS.get('icons') / "remove_item.png"),
+    'search': Path(PATHS.get('icons') / "search.png"),
+    'previous': Path(PATHS.get('icons') / "previous.png"),
+    'export': Path(PATHS.get('icons') / "export.png"),
+    'delete': Path(PATHS.get('icons') / "delete.png"),
+    'official': Path(PATHS.get('icons') / "official.png"),
+    'star': Path(PATHS.get('icons') / "star.png"),
+    'trailer': Path(PATHS.get('icons') / "trailer.png"),
+    'wishlist': Path(PATHS.get('icons') / "wishlist.png"),
+    'new_poster': Path(PATHS.get('icons') / "new_poster.png"),
+    'default_poster': Path(PATHS.get('icons') / "default_poster.png")
+}
 
-DEFAULT_POSTER: final(Path) = Path.joinpath(RESOURCES, "default.jpg")
-STR_DEFAULT_POSTER: final(str) = str(DEFAULT_POSTER)
-
-LOGO: final(str) = str(Path.joinpath(RESOURCES, "logo.png"))
-
-STR_STYLE: final(str) = str(Path.joinpath(RESOURCES, "style.qss"))
-
-ICONS: final(Path) = Path.joinpath(RESOURCES, "icons")
-STR_ICONS: final(str) = str(ICONS)
-
-SAVE: final(str) = str(Path.joinpath(ICONS, "save.png"))
-NOTE: final(str) = str(Path.joinpath(ICONS, "create_collection.png"))
-FOLDER: final(str) = str(Path.joinpath(ICONS, "folder.png"))
-COLLECTION_ICN: final(str) = str(Path.joinpath(ICONS, "collection.png"))
-MOVIE_ICN: final(str) = str(Path.joinpath(ICONS, "movie.png"))
-ADD_ICN: final(str) = str(Path.joinpath(ICONS, "add_item.png"))
-REM_ICN: final(str) = str(Path.joinpath(ICONS, "remove_item.png"))
-SEARCH: final(str) = str(Path.joinpath(ICONS, "search.png"))
-PREVIOUS: final(str) = str(Path.joinpath(ICONS, "previous.png"))
-EXPORT: final(str) = str(Path.joinpath(ICONS, "export.png"))
-DELETE: final(str) = str(Path.joinpath(ICONS, "delete.png"))
-OFFICIAL: final(str) = str(Path.joinpath(ICONS, "official.png"))
-STAR: final(str) = str(Path.joinpath(ICONS, "star.png"))
-TRAILER: final(str) = str(Path.joinpath(ICONS, "trailer.png"))
-WISHLIST: final(str) = str(Path.joinpath(ICONS, "wishlist.png"))
-LOAD_NEW_POSTER: final(str) = str(Path.joinpath(ICONS, "new_poster.png"))
-LOAD_DEFAULT_POSTER: final(str) = str(Path.joinpath(ICONS, "default_poster.png"))
+for key, value in ICONS.items():
+    STR_ICONS[key] = str(value)
 
 MOVIE_GENRES: final(list[str]) = [
     "Action",
