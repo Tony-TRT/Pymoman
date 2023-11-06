@@ -367,9 +367,9 @@ class MainWindow(QtWidgets.QWidget):
         movie_menu = QtWidgets.QMenu(self)
 
         rename_movie = QAction(self.icons.get('note'), "Rename")
-        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, False))
+        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, True))
         official_title = QAction(self.icons.get('official'), "Assign official title")
-        official_title.triggered.connect(partial(self.logic_rename_movie, item, True))
+        official_title.triggered.connect(partial(self.logic_rename_movie, item, False))
         edit_rating = QAction(self.icons.get('star'), "Edit rating")
         edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, item))
         load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
@@ -487,8 +487,19 @@ class MainWindow(QtWidgets.QWidget):
             self.lw_main.addItem(item)
 
     def logic_modify_poster(self, movie: Movie) -> None:
+        """Allows the user to download a new image for the movie -
+        (for example if they don't like the current image.)
 
-        pass
+        Args:
+            movie (Movie): Movie to work on.
+
+        Returns:
+            None: None.
+        """
+
+        cnm_scraper = dataretrieve.MovieScraper(movie)
+        threading.Thread(target=cnm_scraper.download_cnm_poster, daemon=True).start()
+        self.ui_progress_bar_animation()
 
     def logic_open_collection(self, collection: Collection) -> None:
         """Allows to open a collection.
@@ -519,9 +530,31 @@ class MainWindow(QtWidgets.QWidget):
             collection.rename(new_name)
             self.logic_update_list_widget(show_previous_icn=False)
 
-    def logic_rename_movie(self, movie: Movie) -> None:
+    def logic_rename_movie(self, movie: Movie, user_choice: bool) -> None:
+        """Allows to rename a movie.
 
-        pass
+        Args:
+            movie (Movie): Movie to rename.
+            user_choice (bool): True for personal renaming, False to automatically rename with the official title.
+
+        Returns:
+            None: None.
+        """
+
+        res = True
+        if user_choice:
+            new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
+
+            if new_name and value:              # User can use a title that already exists when renaming.
+                res = movie.rename(new_name)    # However he cannot when adding a new movie.
+
+        else:
+            res = movie.rename(movie.official_title)
+
+        if not res:
+            QtWidgets.QMessageBox.about(self, "Warning", constants.CACHE_WARNING)
+
+        self.logic_update_list_widget()
 
     def logic_save_collection(self, collection_to_save: Collection) -> None:
         """Saves the created collections.
