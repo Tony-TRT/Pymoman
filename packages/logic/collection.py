@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Self
 
+
 from .dataimport import load_collection_movies
 from ..constants import constants
 from .movie import Movie
@@ -13,7 +14,8 @@ class Collection:
 
         if mov_lst is None:
             mov_lst = []
-        self.name = name
+
+        self.name = self._name_filter(name)
         self.mov_lst = mov_lst
 
     def __str__(self):
@@ -23,6 +25,11 @@ class Collection:
     def __repr__(self):
 
         return f"{self.name} {self.mov_lst}"
+
+    @staticmethod
+    def _name_filter(name: str) -> str:
+
+        return "".join(char for char in name if char not in "/\\:'\"")
 
     @property
     def path(self) -> Path:
@@ -70,7 +77,7 @@ class Collection:
     def rename(self, new_name: str):
 
         old_path = self.path
-        self.name = new_name
+        self.name = self._name_filter(new_name)
 
         if old_path.exists():
             self.save()
