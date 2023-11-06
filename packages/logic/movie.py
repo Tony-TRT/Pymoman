@@ -3,7 +3,8 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-from . import dataimport as dti
+
+from . import dataimport
 from ..constants import constants
 
 
@@ -74,7 +75,7 @@ class Movie:
         """
 
         try:
-            content: dict = dti.load_file_content(self.data_file)
+            content: dict = dataimport.load_file_content(self.data_file)
         except FileNotFoundError:
             return {}
         except json.JSONDecodeError:
@@ -105,8 +106,11 @@ class Movie:
 
         return official_title.strip()
 
-    def remove_cache(self):
+    def remove_cache(self) -> None:
         """Remove cached data.
+
+        Returns:
+            None: None.
         """
 
         if self.storage.exists():
@@ -127,13 +131,16 @@ class Movie:
             return False
 
         self.title = new_title.strip()
+
+        if self.storage == old_storage:
+            return True
+
         try:
             shutil.copytree(old_storage, self.storage)
         except FileNotFoundError:
             return False
         except FileExistsError:
-            self.remove_cache()
-            shutil.copytree(old_storage, self.storage)
+            return False
         except shutil.Error:
             return False
         return True
