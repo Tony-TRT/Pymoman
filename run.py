@@ -196,7 +196,9 @@ class MainWindow(QtWidgets.QWidget):
         self.btn_save_col = QtWidgets.QPushButton("Save all collections")
         self.btn_scan_dir = QtWidgets.QPushButton("Scan directory")
         self.btn_add_movie = QtWidgets.QPushButton("Add movie")
+        self.btn_add_movie.setEnabled(False)
         self.btn_remove_movie = QtWidgets.QPushButton("Remove movie")
+        self.btn_remove_movie.setEnabled(False)
         self.lbl_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
         self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
@@ -296,6 +298,9 @@ class MainWindow(QtWidgets.QWidget):
         self.btn_save_col.clicked.connect(self.logic_save_collection)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
+        self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
+        self.cbb_genre.currentTextChanged.connect(self.logic_filter)
+        self.cbb_actors.currentTextChanged.connect(self.logic_filter)
         self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_create_collection(self) -> None:
@@ -411,9 +416,10 @@ class MainWindow(QtWidgets.QWidget):
             MainWindow.all_collections.remove(collection)
             self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
 
-    def logic_delete_movie_cache(self, movie: Movie) -> None:
+    @staticmethod
+    def logic_delete_movie_cache(movie: Movie) -> None:
 
-        pass
+        movie.remove_cache()
 
     def logic_edit_movie_rating(self, movie: Movie) -> None:
 
@@ -432,6 +438,28 @@ class MainWindow(QtWidgets.QWidget):
         dialog = QtWidgets.QFileDialog.getSaveFileName(self, 'Python Movie Manager - Save text file')
         if dialog[0]:
             collection.export_as_txt(Path(f"{dialog[0]}.txt"))
+
+    def logic_filter(self) -> None:
+        """Filters logic is managed here.
+
+        Returns:
+            None: None.
+        """
+
+        all_movies = [mov for col in MainWindow.all_collections for mov in col.mov_lst]
+        query_g = self.cbb_genre.currentText()
+        query_a = self.cbb_actors.currentText()
+
+        if query_g == "Genre" and query_a != "Actors":
+            matching_movies = [mov for mov in all_movies if query_a in mov.actors]
+        elif query_g != "Genre" and query_a == "Actors":
+            matching_movies = [mov for mov in all_movies if query_g in mov.genre]
+        elif query_g != "Genre" and query_a != "Actors":
+            matching_movies = [mov for mov in all_movies if (query_g in mov.genre) and (query_a in mov.actors)]
+        else:
+            matching_movies = all_movies
+
+        self.logic_list_display(matching_movies)
 
     def logic_generate_list_item(self, item) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
@@ -514,6 +542,33 @@ class MainWindow(QtWidgets.QWidget):
         self.last_collection_opened.clear()
         self.last_collection_opened.append(collection)
         self.logic_list_display(collection.mov_lst)
+        self.btn_add_movie.setEnabled(True)
+        self.btn_remove_movie.setEnabled(True)
+
+    def logic_remove_movie(self) -> None:
+        """Allows to remove a movie.
+
+        Returns:
+            None: None.
+        """
+
+        if not MainWindow.last_collection_opened:
+            return
+
+        collection = MainWindow.last_collection_opened[0]
+
+        try:
+            movie_to_remove = self.lw_main.selectedItems()[0].attr
+        except AttributeError:
+            pass
+        except IndexError:
+            pass
+        else:
+            if isinstance(movie_to_remove, Movie):
+                collection.remove_movie(movie_to_remove)
+                movie_to_remove.remove_cache()
+                del movie_to_remove
+                self.logic_list_display(collection.mov_lst)
 
     def logic_rename_collection(self, collection: Collection) -> None:
         """Allows to rename a collection.
@@ -597,6 +652,8 @@ class MainWindow(QtWidgets.QWidget):
 
         else:  # clicked_item is 'GO BACK'
             self.logic_list_display(MainWindow.all_collections)
+            self.btn_add_movie.setEnabled(False)
+            self.btn_remove_movie.setEnabled(False)
 
     def logic_update_list_widget(self, show_previous_icn: bool = True) -> None:
         """Refreshes the current items in the list widget.

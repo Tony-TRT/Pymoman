@@ -132,7 +132,8 @@ class Movie:
         except FileNotFoundError:
             return False
         except FileExistsError:
-            return True
+            self.remove_cache()
+            shutil.copytree(old_storage, self.storage)
         except shutil.Error:
             return False
         return True
