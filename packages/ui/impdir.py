@@ -1,18 +1,24 @@
+from pathlib import Path
+
+
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 
 
+from ..logic.collection import Collection
 from packages.constants import constants
 
 
 class DirectoryImporter(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, collection: Collection, path: Path):
         super().__init__()
 
         self.setWindowTitle("Python Movie Manager - Import files")
         self.setFixedSize(380, 470)
+        self.collection = collection
+        self.directory = path
 
         ##################################################
         # Layouts.

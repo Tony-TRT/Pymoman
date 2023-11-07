@@ -17,6 +17,7 @@ from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.ui.movdisplay import MovieTagDisplay
 from packages.ui.movtag import MovieTagDialog
+from packages.ui.impdir import DirectoryImporter
 from packages.constants import constants
 
 
@@ -64,6 +65,7 @@ class MainWindow(QtWidgets.QWidget):
         self.lw_main = None
         self.cst_dialog = None
         self.mvt_display = None
+        self.imp_dir = None
 
         self.ui_manage_widgets()
 
@@ -296,6 +298,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
         self.btn_save_col.clicked.connect(self.logic_save_collection)
+        self.btn_scan_dir.clicked.connect(self.logic_scan_dir)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
@@ -632,6 +635,33 @@ class MainWindow(QtWidgets.QWidget):
 
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
+
+    def logic_scan_dir(self) -> None:
+        """Creates all variables needed to scan a folder.
+
+        Returns:
+            None: None.
+        """
+
+        dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
+
+        if not dialog:
+            return
+
+        dir_path = Path(dialog).resolve()
+        dir_name = dir_path.stem
+        suffix = 0
+
+        while dir_name in [collection.name for collection in MainWindow.all_collections]:
+            dir_name = f"{dir_name}_{suffix}"
+            suffix += 1
+
+        # Define the collection in which to add the scanned files
+        collection = MainWindow.last_collection_opened[0] \
+            if MainWindow.last_collection_opened else Collection(dir_name)
+
+        self.imp_dir = DirectoryImporter(collection, dir_path)
+        self.imp_dir.show()
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
