@@ -146,7 +146,7 @@ class DirectoryImporter(QtWidgets.QWidget):
             None: None.
         """
 
-        pass
+        self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_initial_display(self) -> None:
         """Initial display logic for the list widget is managed here.
@@ -162,3 +162,19 @@ class DirectoryImporter(QtWidgets.QWidget):
             lw_item.rating = None
             lw_item.setTextAlignment(Qt.AlignCenter)
             self.lw_main.addItem(lw_item)
+
+    def logic_single_click(self, clicked_item) -> None:
+        """Handle a single click on items in the QListWidget.
+
+        Returns:
+            None: None.
+        """
+
+        if clicked_item.title is not None:
+            self.le_title_tag.setText(clicked_item.title)
+
+        if clicked_item.year is not None:
+            self.le_year_tag.setText(clicked_item.year)
+
+        if clicked_item.rating is not None:
+            self.cbb_rating_tag.setCurrentIndex(clicked_item.rating)
