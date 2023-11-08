@@ -487,6 +487,30 @@ class MainWindow(QtWidgets.QWidget):
         lw_item.attr = item
         return lw_item
 
+    def logic_import_directory(self) -> None:
+        """Retrieves scanned movies from a folder and add them to a collection.
+
+        Returns:
+            None: None.
+        """
+
+        qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
+        conv_items = [dataimport.make_movie(
+            qlw_item.title,
+            int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
+            qlw_item.text(),
+            qlw_item.rating) for qlw_item in qlw_items]
+        movies = [item[0] for item in conv_items if item[0]]
+
+        for movie in movies:
+            self.imp_dir.collection.add_movie(movie)
+
+        if self.imp_dir.collection.name not in [c.name for c in MainWindow.all_collections]:
+            MainWindow.all_collections.append(self.imp_dir.collection)
+        self.imp_dir.close()
+
+        self.logic_list_display(self.imp_dir.collection.mov_lst)
+
     def logic_list_display(self, items: list, show_previous_icn: bool = True) -> None:
         """All display logic for the list widget is managed here.
 
@@ -661,6 +685,7 @@ class MainWindow(QtWidgets.QWidget):
             if MainWindow.last_collection_opened else Collection(dir_name)
 
         self.imp_dir = DirectoryImporter(collection, dir_path)
+        self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
         self.imp_dir.show()
 
     def logic_single_click(self, clicked_item) -> None:

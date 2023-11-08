@@ -187,7 +187,7 @@ class DirectoryImporter(QtWidgets.QWidget):
             if isinstance(widget, QtWidgets.QLineEdit):
                 widget.setText(value if value is not None else '')
             else:
-                widget.setCurrentIndex(value if isinstance(value, int) else 0)
+                widget.setCurrentIndex(int(value) if value is not None and value.isdigit() else 0)
 
     def logic_update_item_attribute(self, attr: str, sender) -> None:
         """Update a selected custom attribute of a QListWidgetItem.
@@ -206,7 +206,7 @@ class DirectoryImporter(QtWidgets.QWidget):
             selected_item = selected_items[0]
 
             if isinstance(sender, QtWidgets.QComboBox):
-                new_value = int(sender.currentText()) if sender.currentText() != '-' else '-'
+                new_value = sender.currentText()
 
             else:
                 new_value = sender.text()
