@@ -215,6 +215,8 @@ class MainWindow(QtWidgets.QWidget):
         self.le_search.setPlaceholderText("Search")
         self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
+        self.lw_main.setAlternatingRowColors(True)
+        self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
         self.mvt_display = MovieTagDisplay()

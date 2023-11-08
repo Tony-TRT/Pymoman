@@ -47,11 +47,16 @@ QMenu::item:selected
 }
 
 
-QListView::item:selected
+QListView::item:selected, QListView::item:selected:alternate
 {
 	color: #ffa500;
 	background-color: #2b5370;
-	border : none;
+}
+
+
+QListView::item:alternate
+{
+    background-color: #353535;
 }
 
 
