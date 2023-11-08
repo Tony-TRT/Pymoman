@@ -86,3 +86,8 @@ that an error occurred while attempting to copy cached information.
 Rest assured, this situation merely necessitates a fresh
 retrieval of the movie data from the internet.
 """
+
+IMPORT_INFO: final(str) = """
+In order to import a file as a movie, you must tag it first.
+You can assign a title, a year and a rating in this window.
+"""
