@@ -7,6 +7,7 @@ from PySide6.QtGui import QIcon
 
 
 from ..logic.collection import Collection
+from ..logic.dataimport import find_movie_files
 from packages.constants import constants
 
 
@@ -19,6 +20,7 @@ class DirectoryImporter(QtWidgets.QWidget):
         self.setFixedSize(380, 470)
         self.collection = collection
         self.directory = path
+        self.files_path = find_movie_files(path)
 
         ##################################################
         # Layouts.
@@ -56,6 +58,18 @@ class DirectoryImporter(QtWidgets.QWidget):
         ##################################################
 
         self.ui_apply_style()
+
+        ##################################################
+        # Connections.
+        ##################################################
+
+        self.logic_connect_widgets()
+
+        ##################################################
+        # Display.
+        ##################################################
+
+        self.logic_initial_display()
 
     def ui_apply_style(self) -> None:
         """Style is managed here.
@@ -114,6 +128,8 @@ class DirectoryImporter(QtWidgets.QWidget):
         self.cbb_rating_tag = QtWidgets.QComboBox()
         self.cbb_rating_tag.addItems(["-", '1', '2', '3', '4', '5'])
         self.lw_main = QtWidgets.QListWidget()
+        self.lw_main.setAlternatingRowColors(True)
+        self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.btn_validate = QtWidgets.QPushButton("Add all tagged movies")
 
         self.top_layout.addWidget(self.le_title_tag)
@@ -122,3 +138,27 @@ class DirectoryImporter(QtWidgets.QWidget):
         self.bottom_layout.addWidget(self.cbb_rating_tag)
         self.bottom_layout.addWidget(self.lw_main)
         self.bottom_layout.addWidget(self.btn_validate)
+
+    def logic_connect_widgets(self) -> None:
+        """Connections are managed here.
+
+        Returns:
+            None: None.
+        """
+
+        pass
+
+    def logic_initial_display(self) -> None:
+        """Initial display logic for the list widget is managed here.
+
+        Returns:
+            None: None.
+        """
+
+        for path in self.files_path:
+            lw_item = QtWidgets.QListWidgetItem(path)
+            lw_item.title = None
+            lw_item.year = None
+            lw_item.rating = None
+            lw_item.setTextAlignment(Qt.AlignCenter)
+            self.lw_main.addItem(lw_item)
