@@ -146,6 +146,12 @@ class DirectoryImporter(QtWidgets.QWidget):
             None: None.
         """
 
+        self.le_title_tag.textChanged.connect(
+            lambda: self.logic_update_item_attribute('title', self.le_title_tag))
+        self.le_year_tag.textChanged.connect(
+            lambda: self.logic_update_item_attribute('year', self.le_year_tag))
+        self.cbb_rating_tag.currentTextChanged.connect(
+            lambda: self.logic_update_item_attribute('rating', self.cbb_rating_tag))
         self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_initial_display(self) -> None:
@@ -170,11 +176,39 @@ class DirectoryImporter(QtWidgets.QWidget):
             None: None.
         """
 
-        if clicked_item.title is not None:
-            self.le_title_tag.setText(clicked_item.title)
+        attribute_mapping = {
+            self.le_title_tag: "title",
+            self.le_year_tag: "year",
+            self.cbb_rating_tag: "rating"
+        }
 
-        if clicked_item.year is not None:
-            self.le_year_tag.setText(clicked_item.year)
+        for widget, attribute in attribute_mapping.items():
+            value = getattr(clicked_item, attribute, None)
+            if isinstance(widget, QtWidgets.QLineEdit):
+                widget.setText(value if value is not None else '')
+            else:
+                widget.setCurrentIndex(value if isinstance(value, int) else 0)
 
-        if clicked_item.rating is not None:
-            self.cbb_rating_tag.setCurrentIndex(clicked_item.rating)
+    def logic_update_item_attribute(self, attr: str, sender) -> None:
+        """Update a selected custom attribute of a QListWidgetItem.
+
+        Args:
+            attr (str): Attribute to modify.
+            sender: Since self.sender() returns None when using lambda, we are directly passing the sender here.
+
+        Returns:
+            None: None.
+        """
+
+        selected_items = self.lw_main.selectedItems()
+
+        if selected_items:
+            selected_item = selected_items[0]
+
+            if isinstance(sender, QtWidgets.QComboBox):
+                new_value = int(sender.currentText()) if sender.currentText() != '-' else '-'
+
+            else:
+                new_value = sender.text()
+
+            setattr(selected_item, attr, new_value)
