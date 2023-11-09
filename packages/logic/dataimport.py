@@ -9,23 +9,23 @@ from glob import glob
 from pathlib import Path
 
 
-from .movie import Movie
-from ..constants import constants
+from packages.constants import constants
+from packages.logic.movie import Movie
 
 
-def find_movie_files(directory: Path) -> list[str]:
+def find_movie_files(directory: Path) -> list[Path]:
     """Finds the paths of video files within a directory and its subdirectories.
 
     Args:
         directory (Path): The path to the main directory from which to search for videos.
 
     Returns:
-        list[str]: A list containing the paths of video files.
+        list[Path]: A list containing the paths of video files.
     """
 
     if directory.exists():
         ok_files = {'.mkv', '.avi', '.mp4', '.flv', '.wmv', '.mov'}
-        return [str(file) for file in directory.rglob('*') if file.suffix in ok_files]
+        return [file for file in directory.rglob('*') if file.suffix in ok_files]
     return []
 
 

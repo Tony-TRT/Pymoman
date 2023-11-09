@@ -3,21 +3,21 @@ from pathlib import Path
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
 
 
-from ..logic.collection import Collection
-from ..logic.dataimport import find_movie_files
 from packages.constants import constants
+from packages.logic.collection import Collection
+from packages.logic.dataimport import find_movie_files
+from packages.ui.aesthetic import AestheticWindow
 
 
-class DirectoryImporter(QtWidgets.QWidget):
+class DirectoryImporter(AestheticWindow):
 
     def __init__(self, collection: Collection, path: Path):
         super().__init__()
 
         self.setWindowTitle("Python Movie Manager - Import files")
-        self.setFixedSize(380, 470)
+        self.setFixedSize(750, 380)
         self.collection = collection
         self.directory = path
         self.files_path = find_movie_files(path)
@@ -49,15 +49,7 @@ class DirectoryImporter(QtWidgets.QWidget):
         # Icons.
         ##################################################
 
-        self.icons = {}
-
         self.ui_manage_icons()
-
-        ##################################################
-        # Style.
-        ##################################################
-
-        self.ui_apply_style()
 
         ##################################################
         # Connections.
@@ -71,16 +63,6 @@ class DirectoryImporter(QtWidgets.QWidget):
 
         self.logic_initial_display()
 
-    def ui_apply_style(self) -> None:
-        """Style is managed here.
-
-        Returns:
-            None: None.
-        """
-
-        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
-            self.setStyleSheet(style_file.read())
-
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
 
@@ -88,11 +70,7 @@ class DirectoryImporter(QtWidgets.QWidget):
             None: None.
         """
 
-        for icn_name, icn_path in constants.STR_ICONS.items():
-            icon = QIcon(icn_path)
-            self.icons[icn_name] = icon
-
-        self.setWindowIcon(self.icons.get('logo'))
+        super().ui_manage_icons()
         self.btn_validate.setIcon(self.icons.get('add'))
 
     def ui_manage_layouts(self) -> None:
@@ -147,11 +125,11 @@ class DirectoryImporter(QtWidgets.QWidget):
         """
 
         self.le_title_tag.textChanged.connect(
-            lambda: self.logic_update_item_attribute('title', self.le_title_tag))
+            lambda: self.logic_update_item_attribute(attr='title', sender=self.le_title_tag))
         self.le_year_tag.textChanged.connect(
-            lambda: self.logic_update_item_attribute('year', self.le_year_tag))
+            lambda: self.logic_update_item_attribute(attr='year', sender=self.le_year_tag))
         self.cbb_rating_tag.currentTextChanged.connect(
-            lambda: self.logic_update_item_attribute('rating', self.cbb_rating_tag))
+            lambda: self.logic_update_item_attribute(attr='rating', sender=self.cbb_rating_tag))
         self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_initial_display(self) -> None:
@@ -162,10 +140,10 @@ class DirectoryImporter(QtWidgets.QWidget):
         """
 
         for path in self.files_path:
-            lw_item = QtWidgets.QListWidgetItem(path)
-            lw_item.title = None
+            lw_item = QtWidgets.QListWidgetItem(str(path))
+            lw_item.title = path.stem.title()
             lw_item.year = None
-            lw_item.rating = None
+            lw_item.rating = '-'
             lw_item.setTextAlignment(Qt.AlignCenter)
             self.lw_main.addItem(lw_item)
 
@@ -183,11 +161,11 @@ class DirectoryImporter(QtWidgets.QWidget):
         }
 
         for widget, attribute in attribute_mapping.items():
-            value = getattr(clicked_item, attribute, None)
+            value = getattr(clicked_item, attribute)
             if isinstance(widget, QtWidgets.QLineEdit):
-                widget.setText(value if value is not None else '')
+                widget.setText(value if value else '')
             else:
-                widget.setCurrentIndex(int(value) if value is not None and value.isdigit() else 0)
+                widget.setCurrentIndex(int(value) if value and value.isdigit() else 0)
 
     def logic_update_item_attribute(self, attr: str, sender) -> None:
         """Update a selected custom attribute of a QListWidgetItem.
