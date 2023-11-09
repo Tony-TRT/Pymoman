@@ -1,3 +1,6 @@
+"""Main application file."""
+
+
 import threading
 from functools import partial
 from pathlib import Path
@@ -6,22 +9,23 @@ from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QIcon, QPixmap, QAction
+from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 
+from packages.constants import constants
 from packages.logic import dataimport
 from packages.logic import dataprocess
 from packages.logic import dataretrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-from packages.ui.movdisplay import MovieTagDisplay
-from packages.ui.movtag import MovieTagDialog
+from packages.ui.aesthetic import AestheticWindow
+from packages.ui.displaypanel import DisplayPanel
 from packages.ui.impdir import DirectoryImporter
-from packages.constants import constants
+from packages.ui.movtag import MovieTagDialog
 
 
-class MainWindow(QtWidgets.QWidget):
+class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
 
@@ -37,14 +41,14 @@ class MainWindow(QtWidgets.QWidget):
         # Frames and layouts.
         ##################################################
 
-        self.mov_frm = None
+        self.pnl_frm = None
         self.main_layout = None
         self.header_layout = None
         self.body_layout = None
         self.menu_layout = None
         self.list_layout = None
         self.global_movie_layout = None
-        self.mov_frm_layout = None
+        self.pnl_frm_layout = None
 
         self.ui_manage_layouts_and_frames()
 
@@ -64,7 +68,7 @@ class MainWindow(QtWidgets.QWidget):
         self.le_search = None
         self.lw_main = None
         self.cst_dialog = None
-        self.mvt_display = None
+        self.panel = None
         self.imp_dir = None
 
         self.ui_manage_widgets()
@@ -73,15 +77,7 @@ class MainWindow(QtWidgets.QWidget):
         # Icons.
         ##################################################
 
-        self.icons = {}
-
         self.ui_manage_icons()
-
-        ##################################################
-        # Style.
-        ##################################################
-
-        self.ui_apply_style()
 
         ##################################################
         # Connections.
@@ -94,16 +90,6 @@ class MainWindow(QtWidgets.QWidget):
         ##################################################
 
         self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
-
-    def ui_apply_style(self) -> None:
-        """Style is managed here.
-
-        Returns:
-            None: None.
-        """
-
-        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
-            self.setStyleSheet(style_file.read())
 
     def ui_information_panel(self, item) -> None:
         """Right information panel that displays information about the selected item.
@@ -135,12 +121,12 @@ class MainWindow(QtWidgets.QWidget):
                 title = content.get('title')
                 summary = content.get('summary')
 
-        self.mvt_display.poster_label.setPixmap(image)
-        self.mvt_display.rating_label.setText(top_right_text)
-        self.mvt_display.title_label.setText(title)
-        self.mvt_display.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.mvt_display.summary_label.setText(summary)
-        self.mvt_display.summary_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.panel.lbl_image.setPixmap(image)
+        self.panel.lbl_top_right.setText(top_right_text)
+        self.panel.lbl_title.setText(title)
+        self.panel.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.panel.lbl_summary.setText(summary)
+        self.panel.lbl_summary.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
@@ -149,11 +135,7 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        for icn_name, icn_path in constants.STR_ICONS.items():
-            icon = QIcon(icn_path)
-            self.icons[icn_name] = icon
-
-        self.setWindowIcon(self.icons.get('logo'))
+        super().ui_manage_icons()
         self.btn_create_col.setIcon(self.icons.get('note'))
         self.btn_save_col.setIcon(self.icons.get('save'))
         self.btn_scan_dir.setIcon(self.icons.get('folder'))
@@ -168,8 +150,8 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        self.mov_frm = QtWidgets.QFrame()
-        self.mov_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.pnl_frm = QtWidgets.QFrame()
+        self.pnl_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.header_layout = QtWidgets.QHBoxLayout()
@@ -178,14 +160,14 @@ class MainWindow(QtWidgets.QWidget):
         self.list_layout = QtWidgets.QVBoxLayout()
         self.list_layout.setContentsMargins(10, 0, 0, 0)
         self.global_movie_layout = QtWidgets.QHBoxLayout()
-        self.mov_frm_layout = QtWidgets.QHBoxLayout(self.mov_frm)
+        self.pnl_frm_layout = QtWidgets.QHBoxLayout(self.pnl_frm)
 
         self.main_layout.addLayout(self.header_layout)
         self.main_layout.addLayout(self.body_layout)
         self.body_layout.addLayout(self.menu_layout)
         self.body_layout.addLayout(self.list_layout)
         self.body_layout.addLayout(self.global_movie_layout)
-        self.global_movie_layout.addWidget(self.mov_frm)
+        self.global_movie_layout.addWidget(self.pnl_frm)
 
     def ui_manage_widgets(self) -> None:
         """Widgets are managed here.
@@ -221,7 +203,7 @@ class MainWindow(QtWidgets.QWidget):
         self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
-        self.mvt_display = MovieTagDisplay()
+        self.panel = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -234,7 +216,7 @@ class MainWindow(QtWidgets.QWidget):
         self.menu_layout.addWidget(self.prg_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
-        self.mov_frm_layout.addWidget(self.mvt_display)
+        self.pnl_frm_layout.addWidget(self.panel)
 
     def ui_progress_bar_animation(self) -> None:
         """Creates a small animation for the progress bar.
