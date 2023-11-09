@@ -10,15 +10,15 @@ from PySide6.QtGui import QIcon, QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 
+from packages.constants import constants
 from packages.logic import dataimport
 from packages.logic import dataprocess
 from packages.logic import dataretrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-from packages.ui.movdisplay import MovieTagDisplay
+from packages.ui.displaypanel import DisplayPanel
 from packages.ui.movtag import MovieTagDialog
 from packages.ui.impdir import DirectoryImporter
-from packages.constants import constants
 
 
 class MainWindow(QtWidgets.QWidget):
@@ -135,12 +135,12 @@ class MainWindow(QtWidgets.QWidget):
                 title = content.get('title')
                 summary = content.get('summary')
 
-        self.mvt_display.poster_label.setPixmap(image)
-        self.mvt_display.rating_label.setText(top_right_text)
-        self.mvt_display.title_label.setText(title)
-        self.mvt_display.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.mvt_display.summary_label.setText(summary)
-        self.mvt_display.summary_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.mvt_display.lbl_image.setPixmap(image)
+        self.mvt_display.lbl_top_right.setText(top_right_text)
+        self.mvt_display.lbl_title.setText(title)
+        self.mvt_display.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.mvt_display.lbl_summary.setText(summary)
+        self.mvt_display.lbl_summary.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
@@ -221,7 +221,7 @@ class MainWindow(QtWidgets.QWidget):
         self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
-        self.mvt_display = MovieTagDisplay()
+        self.mvt_display = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
