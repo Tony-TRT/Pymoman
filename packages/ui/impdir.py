@@ -1,3 +1,6 @@
+"""This module is used when importing videos contained in a folder."""
+
+
 from pathlib import Path
 
 

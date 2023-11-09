@@ -1,4 +1,4 @@
-"""This module provides utility functions for managing the appearance of the user interface"""
+"""This module provides utility functions for managing the appearance of the user interface."""
 
 
 from PySide6.QtWidgets import QWidget
