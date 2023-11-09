@@ -17,6 +17,7 @@ from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.ui.movdisplay import MovieTagDisplay
 from packages.ui.movtag import MovieTagDialog
+from packages.ui.impdir import DirectoryImporter
 from packages.constants import constants
 
 
@@ -64,6 +65,7 @@ class MainWindow(QtWidgets.QWidget):
         self.lw_main = None
         self.cst_dialog = None
         self.mvt_display = None
+        self.imp_dir = None
 
         self.ui_manage_widgets()
 
@@ -215,6 +217,8 @@ class MainWindow(QtWidgets.QWidget):
         self.le_search.setPlaceholderText("Search")
         self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
+        self.lw_main.setAlternatingRowColors(True)
+        self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
         self.mvt_display = MovieTagDisplay()
@@ -296,6 +300,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
         self.btn_save_col.clicked.connect(self.logic_save_collection)
+        self.btn_scan_dir.clicked.connect(self.logic_scan_dir)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
@@ -484,6 +489,30 @@ class MainWindow(QtWidgets.QWidget):
         lw_item.attr = item
         return lw_item
 
+    def logic_import_directory(self) -> None:
+        """Retrieves scanned movies from a folder and add them to a collection.
+
+        Returns:
+            None: None.
+        """
+
+        qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
+        conv_items = [dataimport.make_movie(
+            qlw_item.title,
+            int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
+            qlw_item.text(),
+            qlw_item.rating) for qlw_item in qlw_items]
+        movies = [item[0] for item in conv_items if item[0]]
+
+        for movie in movies:
+            self.imp_dir.collection.add_movie(movie)
+
+        if self.imp_dir.collection.name not in [c.name for c in MainWindow.all_collections]:
+            MainWindow.all_collections.append(self.imp_dir.collection)
+        self.imp_dir.close()
+
+        self.logic_list_display(self.imp_dir.collection.mov_lst)
+
     def logic_list_display(self, items: list, show_previous_icn: bool = True) -> None:
         """All display logic for the list widget is managed here.
 
@@ -632,6 +661,34 @@ class MainWindow(QtWidgets.QWidget):
 
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
+
+    def logic_scan_dir(self) -> None:
+        """Creates all variables needed to scan a folder.
+
+        Returns:
+            None: None.
+        """
+
+        dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
+
+        if not dialog:
+            return
+
+        dir_path = Path(dialog).resolve()
+        dir_name = dir_path.stem
+        suffix = 0
+
+        while dir_name in [collection.name for collection in MainWindow.all_collections]:
+            dir_name = f"{dir_name}_{suffix}"
+            suffix += 1
+
+        # Define the collection in which to add the scanned files
+        collection = MainWindow.last_collection_opened[0] \
+            if MainWindow.last_collection_opened else Collection(dir_name)
+
+        self.imp_dir = DirectoryImporter(collection, dir_path)
+        self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
+        self.imp_dir.show()
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
