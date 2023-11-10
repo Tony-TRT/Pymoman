@@ -3,7 +3,6 @@
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
 
 
 from packages.ui.aesthetic import AestheticWindow
@@ -60,10 +59,11 @@ class DisplayPanel(AestheticWindow):
         self.lbl_top_right.setAlignment(Qt.AlignRight)
         self.lbl_image = QtWidgets.QLabel()
         self.lbl_title = QtWidgets.QLabel()
-        self.lbl_title.setFont(QFont("Arial", 16))
+        self.lbl_title.setFont(self.application_font_big)
         self.lbl_title.setAlignment(Qt.AlignTop)
         self.lbl_title.setWordWrap(True)
         self.lbl_summary = QtWidgets.QLabel()
+        self.lbl_summary.setFont(self.application_font_small)
         self.lbl_summary.setWordWrap(True)
 
         self.image_layout.addWidget(self.lbl_top_right)

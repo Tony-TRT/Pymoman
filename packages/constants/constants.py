@@ -17,6 +17,7 @@ PATHS: final(dict) = {
     'cache': Path(BASE / "cache"),
     'collections': Path(BASE / "collections"),
     'resources': Path(BASE / "resources"),
+    'font': Path(BASE / "resources" / "font" / "MerriweatherSans-Regular.ttf"),
     'default poster': Path(BASE / "resources" / "default.jpg"),
     'style': Path(BASE / "resources" / "style.qss"),
     'icons': Path(BASE / "resources" / "icons")
