@@ -80,7 +80,7 @@ QScrollBar:vertical
 
 QScrollBar::handle:vertical
 {
-	background-color: #ffa500;
+	background-color: #591010;
 }
 
 
@@ -104,7 +104,6 @@ QPushButton
 	background-color: #2b5370;
 	border: 1px solid #ffa500;
 	border-radius: 8px;
-	font-weight: bold;
 	padding: 8px;
 	margin: 10px;
 	qproperty-iconSize: 24px;
@@ -130,7 +129,7 @@ QComboBox
 }
 
 
-QComboBox:!editable, QComboBox::drop-down:editable
+QComboBox:!editable
 {
 	color: #ffa500;
 	background-color: #2b5370;
@@ -142,4 +141,11 @@ QComboBox QAbstractItemView
 	color: #ffa500;
 	background-color: #2b5370;
 	border: 1px solid #ffa500;
+	outline: 0;
+}
+
+
+QComboBox QAbstractItemView::item:hover
+{
+    background-color: #591010;
 }
