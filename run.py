@@ -124,9 +124,7 @@ class MainWindow(AestheticWindow):
         self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_top_right.setText(top_right_text)
         self.panel.lbl_title.setText(title)
-        self.panel.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.panel.lbl_summary.setText(summary)
-        self.panel.lbl_summary.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.panel.te_summary.setText(summary)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.

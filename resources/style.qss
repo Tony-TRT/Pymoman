@@ -39,6 +39,15 @@ QMenu::item:selected
 }
 
 
+.QTextEdit
+{
+    color: #ffa500;
+    background-color: #242424;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+
 .QListWidget
 {
 	color: #ffa500;
