@@ -3,7 +3,6 @@
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
 
 
 from packages.ui.aesthetic import AestheticWindow
@@ -30,7 +29,7 @@ class DisplayPanel(AestheticWindow):
 
         self.lbl_title = None
         self.lbl_top_right = None
-        self.lbl_summary = None
+        self.te_summary = None
         self.lbl_image = None
 
         self.ui_manage_widgets()
@@ -60,13 +59,14 @@ class DisplayPanel(AestheticWindow):
         self.lbl_top_right.setAlignment(Qt.AlignRight)
         self.lbl_image = QtWidgets.QLabel()
         self.lbl_title = QtWidgets.QLabel()
-        self.lbl_title.setFont(QFont("Arial", 16))
-        self.lbl_title.setAlignment(Qt.AlignTop)
+        self.lbl_title.setFont(self.application_font_big)
+        self.lbl_title.setAlignment(Qt.AlignCenter)
         self.lbl_title.setWordWrap(True)
-        self.lbl_summary = QtWidgets.QLabel()
-        self.lbl_summary.setWordWrap(True)
+        self.te_summary = QtWidgets.QTextEdit()
+        self.te_summary.setFont(self.application_font_small)
+        self.te_summary.setReadOnly(True)
 
         self.image_layout.addWidget(self.lbl_top_right)
         self.image_layout.addWidget(self.lbl_image)
         self.info_layout.addWidget(self.lbl_title)
-        self.info_layout.addWidget(self.lbl_summary)
+        self.info_layout.addWidget(self.te_summary)
