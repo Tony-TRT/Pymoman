@@ -206,8 +206,10 @@ class MovieScraper(Movie):
         if self.data_file.exists():
             return True
 
-        official_title = summary = None
-        actors = genre = []
+        official_title = f"{self.title.title()} ({self.year})"
+        summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
+        movie_gse = None
+        actors = []
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -236,7 +238,7 @@ class MovieScraper(Movie):
         # Let's try 2 times again
         for _ in range(2):
             try:
-                summary = wikipedia.summary(query, 2)
+                summary = wikipedia.summary(query, 3)
             except wikipedia.exceptions.DisambiguationError:
                 query = f"{self.title} film"
                 continue
@@ -249,20 +251,10 @@ class MovieScraper(Movie):
                 query = f"{self.title} film"
                 continue
             else:
-                if len(summary) < 230:
-                    summary = wikipedia.summary(query, 3)
+                movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
 
-        if official_title is None:
-            official_title = f"{self.title.title()} ({self.year})"
-
-        if summary is None:
-            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-
-        for movie_genre in constants.MOVIE_GENRES:
-            if movie_genre.casefold() in summary.casefold().replace(self.title.casefold(), ''):
-                genre.append(movie_genre)
-
-        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genre}
+        genres = [mov_genre for mov_genre in constants.MOVIE_GENRES if movie_gse and mov_genre.casefold() in movie_gse]
+        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genres}
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)
