@@ -1,3 +1,6 @@
+"""Main application file."""
+
+
 import threading
 from functools import partial
 from pathlib import Path
@@ -6,21 +9,23 @@ from time import sleep
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtGui import QIcon, QPixmap, QAction
+from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 
+from packages.constants import constants
 from packages.logic import dataimport
 from packages.logic import dataprocess
 from packages.logic import dataretrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
-from packages.ui.movdisplay import MovieTagDisplay
+from packages.ui.aesthetic import AestheticWindow
+from packages.ui.displaypanel import DisplayPanel
+from packages.ui.impdir import DirectoryImporter
 from packages.ui.movtag import MovieTagDialog
-from packages.constants import constants
 
 
-class MainWindow(QtWidgets.QWidget):
+class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
 
@@ -36,14 +41,14 @@ class MainWindow(QtWidgets.QWidget):
         # Frames and layouts.
         ##################################################
 
-        self.mov_frm = None
+        self.pnl_frm = None
         self.main_layout = None
         self.header_layout = None
         self.body_layout = None
         self.menu_layout = None
         self.list_layout = None
         self.global_movie_layout = None
-        self.mov_frm_layout = None
+        self.pnl_frm_layout = None
 
         self.ui_manage_layouts_and_frames()
 
@@ -63,7 +68,8 @@ class MainWindow(QtWidgets.QWidget):
         self.le_search = None
         self.lw_main = None
         self.cst_dialog = None
-        self.mvt_display = None
+        self.panel = None
+        self.imp_dir = None
 
         self.ui_manage_widgets()
 
@@ -71,15 +77,7 @@ class MainWindow(QtWidgets.QWidget):
         # Icons.
         ##################################################
 
-        self.icons = {}
-
         self.ui_manage_icons()
-
-        ##################################################
-        # Style.
-        ##################################################
-
-        self.ui_apply_style()
 
         ##################################################
         # Connections.
@@ -92,16 +90,6 @@ class MainWindow(QtWidgets.QWidget):
         ##################################################
 
         self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
-
-    def ui_apply_style(self) -> None:
-        """Style is managed here.
-
-        Returns:
-            None: None.
-        """
-
-        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
-            self.setStyleSheet(style_file.read())
 
     def ui_information_panel(self, item) -> None:
         """Right information panel that displays information about the selected item.
@@ -133,12 +121,10 @@ class MainWindow(QtWidgets.QWidget):
                 title = content.get('title')
                 summary = content.get('summary')
 
-        self.mvt_display.poster_label.setPixmap(image)
-        self.mvt_display.rating_label.setText(top_right_text)
-        self.mvt_display.title_label.setText(title)
-        self.mvt_display.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.mvt_display.summary_label.setText(summary)
-        self.mvt_display.summary_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.panel.lbl_image.setPixmap(image)
+        self.panel.lbl_top_right.setText(top_right_text)
+        self.panel.lbl_title.setText(title)
+        self.panel.te_summary.setText(summary)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
@@ -147,11 +133,7 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        for icn_name, icn_path in constants.STR_ICONS.items():
-            icon = QIcon(icn_path)
-            self.icons[icn_name] = icon
-
-        self.setWindowIcon(self.icons.get('logo'))
+        super().ui_manage_icons()
         self.btn_create_col.setIcon(self.icons.get('note'))
         self.btn_save_col.setIcon(self.icons.get('save'))
         self.btn_scan_dir.setIcon(self.icons.get('folder'))
@@ -166,8 +148,8 @@ class MainWindow(QtWidgets.QWidget):
             None: None.
         """
 
-        self.mov_frm = QtWidgets.QFrame()
-        self.mov_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.pnl_frm = QtWidgets.QFrame()
+        self.pnl_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.header_layout = QtWidgets.QHBoxLayout()
@@ -176,14 +158,14 @@ class MainWindow(QtWidgets.QWidget):
         self.list_layout = QtWidgets.QVBoxLayout()
         self.list_layout.setContentsMargins(10, 0, 0, 0)
         self.global_movie_layout = QtWidgets.QHBoxLayout()
-        self.mov_frm_layout = QtWidgets.QHBoxLayout(self.mov_frm)
+        self.pnl_frm_layout = QtWidgets.QHBoxLayout(self.pnl_frm)
 
         self.main_layout.addLayout(self.header_layout)
         self.main_layout.addLayout(self.body_layout)
         self.body_layout.addLayout(self.menu_layout)
         self.body_layout.addLayout(self.list_layout)
         self.body_layout.addLayout(self.global_movie_layout)
-        self.global_movie_layout.addWidget(self.mov_frm)
+        self.global_movie_layout.addWidget(self.pnl_frm)
 
     def ui_manage_widgets(self) -> None:
         """Widgets are managed here.
@@ -202,8 +184,10 @@ class MainWindow(QtWidgets.QWidget):
         self.lbl_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
         self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
+        self.cbb_genre.setMaxVisibleItems(5)
         self.cbb_genre.addItems(["Genre"] + constants.MOVIE_GENRES)
         self.cbb_actors = QtWidgets.QComboBox()
+        self.cbb_actors.setMaxVisibleItems(5)
         self.clr_reload_cbb_actors()
         self.prg_bar = QtWidgets.QProgressBar()
         self.prg_bar.setTextVisible(False)
@@ -215,9 +199,12 @@ class MainWindow(QtWidgets.QWidget):
         self.le_search.setPlaceholderText("Search")
         self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
+        self.lw_main.setAlternatingRowColors(True)
+        self.lw_main.setFocusPolicy(Qt.NoFocus)
+        self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
-        self.mvt_display = MovieTagDisplay()
+        self.panel = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -230,7 +217,7 @@ class MainWindow(QtWidgets.QWidget):
         self.menu_layout.addWidget(self.prg_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
-        self.mov_frm_layout.addWidget(self.mvt_display)
+        self.pnl_frm_layout.addWidget(self.panel)
 
     def ui_progress_bar_animation(self) -> None:
         """Creates a small animation for the progress bar.
@@ -296,6 +283,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
         self.btn_save_col.clicked.connect(self.logic_save_collection)
+        self.btn_scan_dir.clicked.connect(self.logic_scan_dir)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
         self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
@@ -484,6 +472,30 @@ class MainWindow(QtWidgets.QWidget):
         lw_item.attr = item
         return lw_item
 
+    def logic_import_directory(self) -> None:
+        """Retrieves scanned movies from a folder and add them to a collection.
+
+        Returns:
+            None: None.
+        """
+
+        qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
+        conv_items = [dataimport.make_movie(
+            qlw_item.title,
+            int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
+            qlw_item.text(),
+            qlw_item.rating) for qlw_item in qlw_items]
+        movies = [item[0] for item in conv_items if item[0]]
+
+        for movie in movies:
+            self.imp_dir.collection.add_movie(movie)
+
+        if self.imp_dir.collection.name not in [c.name for c in MainWindow.all_collections]:
+            MainWindow.all_collections.append(self.imp_dir.collection)
+        self.imp_dir.close()
+
+        self.logic_list_display(self.imp_dir.collection.mov_lst)
+
     def logic_list_display(self, items: list, show_previous_icn: bool = True) -> None:
         """All display logic for the list widget is managed here.
 
@@ -632,6 +644,34 @@ class MainWindow(QtWidgets.QWidget):
 
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
+
+    def logic_scan_dir(self) -> None:
+        """Creates all variables needed to scan a folder.
+
+        Returns:
+            None: None.
+        """
+
+        dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
+
+        if not dialog:
+            return
+
+        dir_path = Path(dialog).resolve()
+        dir_name = dir_path.stem
+        suffix = 0
+
+        while dir_name in [collection.name for collection in MainWindow.all_collections]:
+            dir_name = f"{dir_name}_{suffix}"
+            suffix += 1
+
+        # Define the collection in which to add the scanned files
+        collection = MainWindow.last_collection_opened[0] \
+            if MainWindow.last_collection_opened else Collection(dir_name)
+
+        self.imp_dir = DirectoryImporter(collection, dir_path)
+        self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
+        self.imp_dir.show()
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.

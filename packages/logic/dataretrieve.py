@@ -3,16 +3,19 @@ This module is dedicated to retrieving information from the internet.
 It provides functions and tools to access and gather data from various online sources.
 """
 
+
 import json
 from time import sleep
+
 
 import requests
 import wikipedia
 from bs4 import BeautifulSoup
 
-from .dataprocess import modify_raw_poster
-from .movie import Movie
-from ..constants import constants
+
+from packages.constants import constants
+from packages.logic.dataprocess import modify_raw_poster
+from packages.logic.movie import Movie
 
 
 class MovieScraper(Movie):
@@ -79,8 +82,7 @@ class MovieScraper(Movie):
         page = requests.get(url, timeout=10)
         soup = BeautifulSoup(page.text, 'html.parser')
         img_cont = soup.find(class_='vertical-image img-responsive poster_img lazyload')
-        links = [img_cont['data-src']]
-        return links
+        return [img_cont['data-src']] if img_cont else []
 
     def generate_cnm_link(self) -> str:
         """Generates download link
@@ -91,7 +93,6 @@ class MovieScraper(Movie):
 
         sanitized_query = self.title.replace(' ', '+')
         results_link = f"{self.sources_websites.get('SC')}/search?q={sanitized_query}"
-        poster_link = ""
 
         results_page = requests.get(results_link, timeout=5)
         if results_page.ok:
@@ -101,15 +102,13 @@ class MovieScraper(Movie):
             page_link = td_element.find('a')['href']
             full_link = f"{self.sources_websites.get('SC')}{page_link}"
         else:
-            return poster_link
+            return ""
 
         posters_page = requests.get(full_link, timeout=5)
         if posters_page.ok:
             soup = BeautifulSoup(posters_page.text, 'html.parser')
             cont_poster_link = soup.find('img', class_="lazy")
-            poster_link = cont_poster_link['data-src'] if cont_poster_link else ""
-
-        return poster_link
+            return cont_poster_link['data-src'] if cont_poster_link else ""
 
     def _write_img_on_disk(self, url: requests.Response) -> bool:
         """Writes image to disk
@@ -207,8 +206,10 @@ class MovieScraper(Movie):
         if self.data_file.exists():
             return True
 
-        official_title = summary = None
-        actors = genre = []
+        official_title = f"{self.title.title()} ({self.year})"
+        summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
+        movie_gse = None
+        actors = []
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -237,7 +238,7 @@ class MovieScraper(Movie):
         # Let's try 2 times again
         for _ in range(2):
             try:
-                summary = wikipedia.summary(query, 2)
+                summary = wikipedia.summary(query, 3)
             except wikipedia.exceptions.DisambiguationError:
                 query = f"{self.title} film"
                 continue
@@ -250,20 +251,10 @@ class MovieScraper(Movie):
                 query = f"{self.title} film"
                 continue
             else:
-                if len(summary) < 230:
-                    summary = wikipedia.summary(query, 3)
+                movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
 
-        if official_title is None:
-            official_title = f"{self.title.title()} ({self.year})"
-
-        if summary is None:
-            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-
-        for movie_genre in constants.MOVIE_GENRES:
-            if movie_genre.casefold() in summary.casefold().replace(self.title.casefold(), ''):
-                genre.append(movie_genre)
-
-        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genre}
+        genres = [mov_genre for mov_genre in constants.MOVIE_GENRES if movie_gse and mov_genre.casefold() in movie_gse]
+        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genres}
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)

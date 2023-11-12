@@ -17,6 +17,7 @@ PATHS: final(dict) = {
     'cache': Path(BASE / "cache"),
     'collections': Path(BASE / "collections"),
     'resources': Path(BASE / "resources"),
+    'font': Path(BASE / "resources" / "font" / "MerriweatherSans-Regular.ttf"),
     'default poster': Path(BASE / "resources" / "default.jpg"),
     'style': Path(BASE / "resources" / "style.qss"),
     'icons': Path(BASE / "resources" / "icons")
@@ -85,4 +86,9 @@ Regrettably, no data was found for this movie, or it seems
 that an error occurred while attempting to copy cached information.
 Rest assured, this situation merely necessitates a fresh
 retrieval of the movie data from the internet.
+"""
+
+IMPORT_INFO: final(str) = """
+In order to import a file as a movie, you must tag it first.
+You can assign a title, a year and a rating in this window.
 """
