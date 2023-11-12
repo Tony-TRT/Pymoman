@@ -117,7 +117,7 @@ class MainWindow(AestheticWindow):
             top_right_text = item.aesthetic_rating
 
             if item.data_file.exists():
-                content = dataimport.load_file_content(item.data_file)
+                content = item.load_data_file()
                 title = content.get('title')
                 summary = content.get('summary')
 
@@ -481,10 +481,10 @@ class MainWindow(AestheticWindow):
 
         qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
         conv_items = [dataimport.make_movie(
-            qlw_item.title,
-            int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
-            qlw_item.text(),
-            qlw_item.rating) for qlw_item in qlw_items]
+            title=qlw_item.title,
+            year=int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
+            path=qlw_item.text(),
+            rating=qlw_item.rating) for qlw_item in qlw_items]
         movies = [item[0] for item in conv_items if item[0]]
 
         for movie in movies:

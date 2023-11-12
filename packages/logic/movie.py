@@ -1,7 +1,6 @@
-import json
 import shutil
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 from . import dataimport
@@ -74,14 +73,7 @@ class Movie:
             dict: Data file's content.
         """
 
-        try:
-            content: dict = dataimport.load_file_content(self.data_file)
-        except FileNotFoundError:
-            return {}
-        except json.JSONDecodeError:
-            return {}
-        else:
-            return content
+        return dataimport.load_file_content(self.data_file)
 
     @property
     def official_title(self) -> str:

@@ -5,7 +5,6 @@ It provides functions and utilities to parse, structure, and categorize informat
 
 
 import json
-from glob import glob
 from pathlib import Path
 
 
@@ -24,78 +23,102 @@ def find_movie_files(directory: Path) -> list[Path]:
     """
 
     if directory.exists():
-        ok_files = {'.mkv', '.avi', '.mp4', '.flv', '.wmv', '.mov'}
-        return [file for file in directory.rglob('*') if file.suffix in ok_files]
+        ok_files = {'.avi', '.flv', '.m4v', '.mkv', '.mov', '.mp4', '.ogg', '.vob', '.wmv'}
+        return [file for file in directory.rglob('*') if file.suffix.casefold() in ok_files]
     return []
 
 
 def load_all_actors() -> list[str]:
-    """Retrieves all actors from data.json files
+    """Retrieves all actors from data.json files.
 
     Returns:
-        list[str]: actors names
+        list[str]: Actors names.
     """
 
     full_list = set()
 
     for file_path in constants.PATHS.get('cache').glob('**/data.json'):
-        try:
-            content = load_file_content(file_path)
-            actors = content.get('actors', ['Unknown'])
-            full_list.update(actors)
-        except json.JSONDecodeError:
-            continue
+        content: dict = load_file_content(file_path)
+        actors: list[str] = content.get('actors', ['Unknown'])
+        full_list.update(actors)
 
-    full_list = list(full_list)
-    full_list = sorted(full_list, key=str.casefold)
-    return full_list
+    return sorted(list(full_list), key=str.casefold)
 
 
 def load_all_movies() -> list[Movie]:
-    """Returns a list of Movie objects from all saved collections
+    """Returns a list of Movie objects from all saved collections.
 
     Returns:
-        list[Movie]: movies
+        list[Movie]: Movies.
     """
 
     full_list = []
 
-    for file_path in glob(str(Path.joinpath(constants.PATHS.get('collections'), "*.json"))):
+    for file_path in constants.PATHS.get('collections').glob('*.json'):
         full_list.extend(load_collection_movies(file_path))
     return full_list
 
 
-def load_collection_movies(c_path: str) -> list[Movie]:
-    """Returns a list of Movie objects from a collection's path
+def load_collection_movies(collection_path) -> list[Movie]:
+    """Returns a list of Movie objects from a collection's path.
+
+    Args:
+        collection_path: Collection's file's path.
 
     Returns
-        list[Movie]: movies
+        list[Movie]: Collection's movies.
     """
 
-    content = load_file_content(c_path)
-    mvs = [make_movie(el.get('title'), el.get('year'), el.get('path'), el.get('rating'))[0] for el in content]
-    return [mov for mov in mvs if mov]
+    content: dict = load_file_content(collection_path)
+
+    if not content:
+        return []
+
+    movies = [make_movie(
+        title=element.get('title'),
+        year=element.get('year'),
+        path=element.get('path'),
+        rating=element.get('rating'))[0] for element in content]
+    return [movie for movie in movies if movie]
 
 
-def load_file_content(input_file):
-    """Loads a json file and returns its content
+def load_file_content(input_file) -> dict:
+    """Loads a json file and returns its content.
+
+    Args:
+        input_file: File's path.
+
+    Returns:
+        dict: File's content.
     """
 
-    with open(input_file, 'r', encoding="UTF-8") as file:
-        return json.load(file)
+    try:
+        with open(input_file, 'r', encoding="UTF-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError:
+        return {}
 
 
 def make_movie(title: str, year: int, path, rating) -> tuple:
-    """Creates Movie object in a tuple
+    """Creates Movie object in a tuple.
+
+    Args:
+        title (str): Movie title.
+        year (int): Release year.
+        path: File's path if any.
+        rating: Personal rating.
 
     Returns:
-        tuple: tuple containing Movie object or False
+        tuple: Tuple containing Movie object or False.
     """
 
     movie = (False,)
+
     try:
-        movie = (Movie(title, year, path, rating),)
+        movie = (Movie(title=title, year=year, path=path, rating=rating),)
     except ValueError:
-        movie = (False,)
-    finally:
-        return movie
+        pass
+
+    return movie
