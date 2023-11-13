@@ -3,8 +3,8 @@ from datetime import datetime
 from pathlib import Path
 
 
-from . import dataimport
-from ..constants import constants
+from packages.constants import constants
+from packages.logic import dataimport
 
 
 class Movie:
@@ -110,6 +110,9 @@ class Movie:
 
     def rename(self, new_title: str) -> bool:
         """Changes the movie title.
+
+        Args:
+            new_title (str): New movie title.
 
         Returns:
             bool: True or False depending on whether the cache folder was moved successfully or not.

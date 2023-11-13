@@ -2,23 +2,26 @@
 This module is designed for the processing of data obtained from the internet.
 """
 
+
 from pathlib import Path
 from shutil import rmtree
 
+
 from PIL import Image
 
-from . import dataimport as dti
-from ..constants import constants
+
+from packages.constants import constants
+from packages.logic import dataimport
 
 
 def modify_raw_poster(poster: Path) -> bool:
-    """Prepares movie poster to be displayed
+    """Prepares movie poster to be displayed.
 
     Args:
-        poster (Path): raw file path
+        poster (Path): Raw file's path.
 
     Returns:
-        bool: success or failure
+        bool: Success or failure.
     """
 
     if not poster.exists():
@@ -30,14 +33,17 @@ def modify_raw_poster(poster: Path) -> bool:
     return True
 
 
-def clear_cache():
-    """Clear unused cache data
+def clear_cache() -> None:
+    """Clear unused cache data.
+
+    Returns:
+        None: None.
     """
 
     if not constants.PATHS.get('cache').exists():
         return
 
-    saved_movies = dti.load_all_movies()
+    saved_movies = dataimport.load_all_movies()
     saved_movies_c_path = [movie.storage for movie in saved_movies]
 
     for path in constants.PATHS.get('cache').iterdir():
