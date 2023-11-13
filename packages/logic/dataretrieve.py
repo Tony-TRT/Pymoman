@@ -45,10 +45,10 @@ class MovieScraper(Movie):
 
     @property
     def imp_sanitized_title(self) -> str:
-        """Returns sanitized title
+        """Returns sanitized title for IMP Awards.
 
         Returns:
-            str: sanitized title
+            str: Sanitized title.
         """
 
         sanitized_title = self.title.strip().lower()
@@ -58,10 +58,10 @@ class MovieScraper(Movie):
         return sanitized_title.replace(' ', '_')
 
     def generate_imp_links(self) -> list[str]:
-        """Generates download links
+        """Generates IMP Awards download links.
 
         Returns:
-            list[str]: links in a list
+            list[str]: Links in a list.
         """
 
         def_imp_link = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{self.imp_sanitized_title}.jpg"
@@ -70,10 +70,10 @@ class MovieScraper(Movie):
         return links
 
     def generate_movie_pdb_link(self) -> list[str]:
-        """Generates download link
+        """Generates MoviePosterDB download link.
 
         Returns:
-            list[str]: download link
+            list[str]: Link in a list.
         """
 
         movie_pdb_title = self.title.replace(' ', '%20')
@@ -85,10 +85,10 @@ class MovieScraper(Movie):
         return [img_cont['data-src']] if img_cont else []
 
     def generate_cnm_link(self) -> str:
-        """Generates download link
+        """Generates CineMaterial download link.
 
         Returns:
-            str: download link
+            str: Download link.
         """
 
         sanitized_query = self.title.replace(' ', '+')
@@ -111,10 +111,13 @@ class MovieScraper(Movie):
             return cont_poster_link['data-src'] if cont_poster_link else ""
 
     def _write_img_on_disk(self, url: requests.Response) -> bool:
-        """Writes image to disk
+        """Writes image to disk.
+
+        Args:
+            url (requests.Response): Image link.
 
         Returns:
-            bool: success or failure
+            bool: Success or failure.
         """
 
         with open(self.thumb, "wb") as poster:
@@ -127,10 +130,13 @@ class MovieScraper(Movie):
 
     @staticmethod
     def get_actors(page: wikipedia.WikipediaPage) -> list[str]:
-        """Retrieves movie's actors from the wikipedia page
+        """Retrieves movie's actors from the wikipedia page.
+
+        Args:
+            page (wikipedia.WikipediaPage): Wikipedia page.
 
         Returns:
-            list[str]: actors names
+            list[str]: Actors in a list.
         """
 
         soup = BeautifulSoup(page.html(), 'html.parser')
@@ -154,10 +160,10 @@ class MovieScraper(Movie):
         return sorted([actor for actor in final_try], key=str.casefold)
 
     def download_poster(self) -> bool:
-        """Downloads movie poster
+        """Downloads movie poster.
 
         Returns:
-            bool: success or failure
+            bool: Success or failure.
         """
 
         if self.thumb.exists():
@@ -181,10 +187,10 @@ class MovieScraper(Movie):
         return value
 
     def download_cnm_poster(self) -> bool:
-        """Downloads movie poster
+        """Downloads movie poster.
 
         Returns:
-            bool: success or failure
+            bool: Success or failure.
         """
 
         cnm_link = self.generate_cnm_link()
@@ -197,10 +203,10 @@ class MovieScraper(Movie):
             return value
 
     def download_info(self) -> bool:
-        """Downloads movie info using wikipedia module
+        """Downloads movie info using wikipedia module.
 
         Returns:
-            bool: success or failure
+            bool: Success or failure.
         """
 
         if self.data_file.exists():
