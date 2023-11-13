@@ -1,3 +1,8 @@
+"""
+This module is dedicated to the creation and management of movies.
+"""
+
+
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -139,6 +144,19 @@ class Movie:
         except shutil.Error:
             return False
         return True
+
+    def set_default_poster(self) -> None:
+        """Set default poster.
+
+        Returns:
+            None: None.
+        """
+
+        if self.thumb.exists():
+            self.thumb.unlink()
+
+        self.storage.mkdir(exist_ok=True, parents=True)
+        shutil.copytree(constants.PATHS.get('default poster'), self.thumb)
 
     @property
     def storage(self) -> Path:
