@@ -156,7 +156,7 @@ class Movie:
             self.thumb.unlink()
 
         self.storage.mkdir(exist_ok=True, parents=True)
-        shutil.copytree(constants.PATHS.get('default poster'), self.thumb)
+        shutil.copy(constants.PATHS.get('default poster'), self.thumb)
 
     @property
     def storage(self) -> Path:

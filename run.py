@@ -368,7 +368,7 @@ class MainWindow(AestheticWindow):
         load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
         load_new_poster.triggered.connect(partial(self.logic_modify_poster, item))
         load_default_poster = QAction(self.icons.get('default_poster'), "Set default poster")
-        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item))
+        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item, True))
         wishlist = QAction(self.icons.get('wishlist'), "Add to Wishlist")
         wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
         watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
@@ -526,20 +526,26 @@ class MainWindow(AestheticWindow):
         for item in display_list:
             self.lw_main.addItem(item)
 
-    def logic_modify_poster(self, movie: Movie) -> None:
-        """Allows the user to download a new image for the movie -
+    def logic_modify_poster(self, movie: Movie, use_default=False) -> None:
+        """Allows the user to display a new image for the movie,
         (for example if they don't like the current image.)
 
         Args:
             movie (Movie): Movie to work on.
+            use_default (bool): True to use default image, False to scrape a new image.
 
         Returns:
             None: None.
         """
 
-        cnm_scraper = dataretrieve.MovieScraper(movie)
-        threading.Thread(target=cnm_scraper.download_cnm_poster, daemon=True).start()
-        self.ui_progress_bar_animation()
+        if use_default:
+            movie.set_default_poster()
+        else:
+            cnm_scraper = dataretrieve.MovieScraper(movie)
+            threading.Thread(target=cnm_scraper.download_cnm_poster, daemon=True).start()
+            self.ui_progress_bar_animation()
+
+        self.ui_information_panel(movie)
 
     def logic_open_collection(self, collection: Collection) -> None:
         """Allows to open a collection.
