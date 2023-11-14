@@ -541,8 +541,8 @@ class MainWindow(AestheticWindow):
         if use_default:
             movie.set_default_poster()
         else:
-            cnm_scraper = dataretrieve.MovieScraper(movie)
-            threading.Thread(target=cnm_scraper.download_cnm_poster, daemon=True).start()
+            scraper = dataretrieve.MovieScraper(movie)
+            threading.Thread(target=scraper.download_poster, args=(True,), daemon=True).start()
             self.ui_progress_bar_animation()
 
         self.ui_information_panel(movie)
