@@ -14,23 +14,22 @@ from packages.constants import constants
 from packages.logic import dataimport
 
 
-def modify_raw_poster(poster: Path) -> bool:
+def modify_raw_poster(poster: Path) -> None:
     """Prepares movie poster to be displayed.
 
     Args:
         poster (Path): Raw file's path.
 
     Returns:
-        bool: Success or failure.
+        None: None.
     """
 
     if not poster.exists():
-        return False
+        return
 
     movie_poster = Image.open(poster)
     movie_poster_resized = movie_poster.resize((185, 275))
     movie_poster_resized.save(poster)
-    return True
 
 
 def clear_cache() -> None:
