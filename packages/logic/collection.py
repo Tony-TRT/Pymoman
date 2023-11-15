@@ -1,3 +1,8 @@
+"""
+This module contains the Collection class which allows the creation and management of movie collections.
+"""
+
+
 import json
 from glob import glob
 from pathlib import Path
