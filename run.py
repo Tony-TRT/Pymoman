@@ -89,7 +89,7 @@ class MainWindow(AestheticWindow):
         # Display.
         ##################################################
 
-        self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
+        self.logic_list_display(MainWindow.all_collections)
 
     def ui_information_panel(self, item) -> None:
         """Right information panel that displays information about the selected item.
@@ -304,7 +304,7 @@ class MainWindow(AestheticWindow):
             new_collection = Collection(name)
             MainWindow.all_collections.append(new_collection)
 
-            self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
+            self.logic_list_display(MainWindow.all_collections)
 
     def logic_create_collection_menu(self, pos, item: Collection) -> None:
         """Create a context menu for collections.
@@ -403,7 +403,7 @@ class MainWindow(AestheticWindow):
 
         if value:
             MainWindow.all_collections.remove(collection)
-            self.logic_list_display(MainWindow.all_collections, show_previous_icn=False)
+            self.logic_list_display(MainWindow.all_collections)
 
     @staticmethod
     def logic_delete_movie_cache(movie: Movie) -> None:
@@ -497,12 +497,11 @@ class MainWindow(AestheticWindow):
 
         self.logic_list_display(self.imp_dir.collection.mov_lst)
 
-    def logic_list_display(self, items: list, show_previous_icn: bool = True) -> None:
+    def logic_list_display(self, items: list) -> None:
         """All display logic for the list widget is managed here.
 
         Args:
             items (list): List of Collection objects or Movie objects.
-            show_previous_icn (bool, optional): Whether to display the previous item. Defaults to True.
 
         Returns:
             None: None.
@@ -514,13 +513,13 @@ class MainWindow(AestheticWindow):
         previous_item.setIcon(self.icons.get('previous'))
         self.lw_main.clear()
 
-        if not items and show_previous_icn:
+        if not items and not MainWindow.all_collections:
+            display_list = []
+        elif not items and MainWindow.all_collections:
             display_list = [previous_item]
-
         elif all(isinstance(item, Collection) for item in items):
             self.last_collection_opened.clear()
             display_list = [self.logic_generate_list_item(collection) for collection in items]
-
         else:
             display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
 
@@ -602,7 +601,7 @@ class MainWindow(AestheticWindow):
         new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
         if new_name and new_name not in [c.name for c in MainWindow.all_collections] and value:
             collection.rename(new_name)
-            self.logic_update_list_widget(show_previous_icn=False)
+            self.logic_update_list_widget()
 
     def logic_rename_movie(self, movie: Movie, user_choice: bool) -> None:
         """Allows to rename a movie.
@@ -619,8 +618,8 @@ class MainWindow(AestheticWindow):
         if user_choice:
             new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
 
-            if new_name and value:              # User can use a title that already exists when renaming.
-                res = movie.rename(new_name)    # However he cannot when adding a new movie.
+            if new_name and value:              # Users can use a title that already exists when renaming.
+                res = movie.rename(new_name)    # However they cannot when adding a new movie.
 
         else:
             res = movie.rename(movie.official_title)
@@ -692,10 +691,10 @@ class MainWindow(AestheticWindow):
         if MainWindow.last_collection_opened:
             collection = MainWindow.last_collection_opened[0]
             requested_items = [movie for movie in collection.mov_lst if movie.title.casefold().startswith(query)]
-            self.logic_list_display(requested_items)
         else:
             requested_items = [col for col in MainWindow.all_collections if col.name.casefold().startswith(query)]
-            self.logic_list_display(requested_items, show_previous_icn=False)
+
+        self.logic_list_display(requested_items)
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
@@ -719,11 +718,8 @@ class MainWindow(AestheticWindow):
             self.btn_add_movie.setEnabled(False)
             self.btn_remove_movie.setEnabled(False)
 
-    def logic_update_list_widget(self, show_previous_icn: bool = True) -> None:
+    def logic_update_list_widget(self) -> None:
         """Refreshes the current items in the list widget.
-
-        Args:
-            show_previous_icn (bool, optional): Whether to display the previous item. Defaults to True.
 
         Returns:
             None: None.
@@ -731,7 +727,7 @@ class MainWindow(AestheticWindow):
 
         items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
         items = [it.attr for it in items if it.attr is not None]
-        self.logic_list_display(items, show_previous_icn)
+        self.logic_list_display(items)
 
     def logic_watch_trailer(self, movie: Movie) -> None:
 
