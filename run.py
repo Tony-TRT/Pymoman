@@ -117,16 +117,14 @@ class MainWindow(AestheticWindow):
             top_right_text = item.aesthetic_rating
 
             if item.data_file.exists():
-                content = dataimport.load_file_content(item.data_file)
+                content = item.load_data_file()
                 title = content.get('title')
                 summary = content.get('summary')
 
         self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_top_right.setText(top_right_text)
         self.panel.lbl_title.setText(title)
-        self.panel.lbl_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.panel.lbl_summary.setText(summary)
-        self.panel.lbl_summary.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.panel.te_summary.setText(summary)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.
@@ -186,8 +184,10 @@ class MainWindow(AestheticWindow):
         self.lbl_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
         self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
+        self.cbb_genre.setMaxVisibleItems(5)
         self.cbb_genre.addItems(["Genre"] + constants.MOVIE_GENRES)
         self.cbb_actors = QtWidgets.QComboBox()
+        self.cbb_actors.setMaxVisibleItems(5)
         self.clr_reload_cbb_actors()
         self.prg_bar = QtWidgets.QProgressBar()
         self.prg_bar.setTextVisible(False)
@@ -201,6 +201,7 @@ class MainWindow(AestheticWindow):
         self.lw_main.installEventFilter(self)
         self.lw_main.setAlternatingRowColors(True)
         self.lw_main.setFocusPolicy(Qt.NoFocus)
+        self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
         self.panel = DisplayPanel()
@@ -367,7 +368,7 @@ class MainWindow(AestheticWindow):
         load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
         load_new_poster.triggered.connect(partial(self.logic_modify_poster, item))
         load_default_poster = QAction(self.icons.get('default_poster'), "Set default poster")
-        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item))
+        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item, True))
         wishlist = QAction(self.icons.get('wishlist'), "Add to Wishlist")
         wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
         watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
@@ -480,10 +481,10 @@ class MainWindow(AestheticWindow):
 
         qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
         conv_items = [dataimport.make_movie(
-            qlw_item.title,
-            int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
-            qlw_item.text(),
-            qlw_item.rating) for qlw_item in qlw_items]
+            title=qlw_item.title,
+            year=int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
+            path=qlw_item.text(),
+            rating=qlw_item.rating) for qlw_item in qlw_items]
         movies = [item[0] for item in conv_items if item[0]]
 
         for movie in movies:
@@ -525,20 +526,26 @@ class MainWindow(AestheticWindow):
         for item in display_list:
             self.lw_main.addItem(item)
 
-    def logic_modify_poster(self, movie: Movie) -> None:
-        """Allows the user to download a new image for the movie -
+    def logic_modify_poster(self, movie: Movie, use_default=False) -> None:
+        """Allows the user to display a new image for the movie,
         (for example if they don't like the current image.)
 
         Args:
             movie (Movie): Movie to work on.
+            use_default (bool): True to use default image, False to scrape a new image.
 
         Returns:
             None: None.
         """
 
-        cnm_scraper = dataretrieve.MovieScraper(movie)
-        threading.Thread(target=cnm_scraper.download_cnm_poster, daemon=True).start()
-        self.ui_progress_bar_animation()
+        if use_default:
+            movie.set_default_poster()
+        else:
+            scraper = dataretrieve.MovieScraper(movie)
+            threading.Thread(target=scraper.download_poster, args=(True,), daemon=True).start()
+            self.ui_progress_bar_animation()
+
+        self.ui_information_panel(movie)
 
     def logic_open_collection(self, collection: Collection) -> None:
         """Allows to open a collection.

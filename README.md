@@ -9,13 +9,13 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/fd2442fc-8dbf-4eb9-bfcf-2cd56787c52f)
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/7b397bb0-eea8-44a9-811f-c747fe02aa33)
 
 
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/94211abe-37f9-4db2-bfec-0a21b8f525c8)
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/fdec8a5f-589f-41fd-9576-5704eda36df2)
 
 ## How to install
-It works on Windows and Linux (tested on Debian Sid), although there are some minor display issues on Linux.
+It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under linux.
 I recommend using Python 3.11 because that's the version I work with.
 
 It does not work with Python 3.12 (strange display glitches) and has not been tested with other versions.
