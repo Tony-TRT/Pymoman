@@ -289,6 +289,7 @@ class MainWindow(AestheticWindow):
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
         self.cbb_genre.currentTextChanged.connect(self.logic_filter)
         self.cbb_actors.currentTextChanged.connect(self.logic_filter)
+        self.le_search.textChanged.connect(self.logic_search_bar)
         self.lw_main.itemClicked.connect(self.logic_single_click)
 
     def logic_create_collection(self) -> None:
@@ -678,6 +679,23 @@ class MainWindow(AestheticWindow):
         self.imp_dir = DirectoryImporter(collection, dir_path)
         self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
         self.imp_dir.show()
+
+    def logic_search_bar(self) -> None:
+        """Search bar logic is here.
+
+        Returns:
+            None: None.
+        """
+
+        query: str = self.le_search.text().strip().lower()
+
+        if MainWindow.last_collection_opened:
+            collection = MainWindow.last_collection_opened[0]
+            requested_items = [movie for movie in collection.mov_lst if movie.title.casefold().startswith(query)]
+            self.logic_list_display(requested_items)
+        else:
+            requested_items = [col for col in MainWindow.all_collections if col.name.casefold().startswith(query)]
+            self.logic_list_display(requested_items, show_previous_icn=False)
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
