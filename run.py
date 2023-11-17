@@ -725,9 +725,14 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
+        selected_item_row = self.lw_main.row(self.lw_main.currentItem())
+
         items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
-        items = [it.attr for it in items if it.attr is not None]
+        items = [item.attr for item in items if item.attr is not None]
         self.logic_list_display(items)
+
+        if selected_item_row:
+            self.lw_main.scrollToItem(self.lw_main.item(selected_item_row))
 
     def logic_watch_trailer(self, movie: Movie) -> None:
 
