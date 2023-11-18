@@ -7,6 +7,7 @@ to respect the source websites by deliberately slowing down the program.
 
 
 import json
+import re
 from random import shuffle
 from time import sleep
 
@@ -27,7 +28,8 @@ class MovieScraper(Movie):
     sources_websites: dict = {
         "SA": "http://www.impawards.com/",
         "SB": "https://www.movieposterdb.com/",
-        "SC": "https://www.cinematerial.com/"
+        "SC": "https://www.cinematerial.com/",
+        "SD": "https://www.youtube.com/"
     }
 
     def __init__(self, movie: Movie):
@@ -41,7 +43,7 @@ class MovieScraper(Movie):
         self.storage.mkdir(exist_ok=True, parents=True)
 
     def download_info(self) -> None:
-        """Downloads movie info using wikipedia module.
+        """Gathers information about the movie, such as title, summary, actors, genre and trailer link.
 
         Returns:
             None: None.
@@ -98,7 +100,13 @@ class MovieScraper(Movie):
                 movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
 
         genres = [mov_genre for mov_genre in constants.MOVIE_GENRES if movie_gse and mov_genre.casefold() in movie_gse]
-        data = {"title": official_title, "summary": summary, "actors": actors, "genre": genres}
+        data = {
+            "title": official_title,
+            "summary": summary,
+            "actors": actors,
+            "genre": genres,
+            "trailer": self.get_youtube_link()
+        }
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)
@@ -222,6 +230,30 @@ class MovieScraper(Movie):
         final_try: set[str] = set().union(try_a, try_b)
 
         return sorted([actor for actor in final_try], key=str.casefold)
+
+    def get_youtube_link(self) -> str:
+        """Generates an embedded YouTube link corresponding to the movie trailer.
+        Regex used here comes from a YouTube video by CodeFather.
+
+        Returns:
+            str: Embedded YouTube link.
+        """
+
+        sanitized_query = f"{self.title.strip().replace(' ', '+')}+{self.year}"
+        base_link = f"{self.sources_websites.get('SD')}embed/"
+        page = f"{self.sources_websites.get('SD')}results?search_query={sanitized_query}+trailer"
+
+        response = requests.get(page, timeout=10)
+
+        if response.status_code == 200:
+            identifiers: list[str] = re.findall(r"watch\?v=(\S{11})", response.text)
+        else:
+            identifiers: list[str] = []
+
+        if not (identifiers and len(identifiers[0]) == 11):
+            return ""
+
+        return base_link + identifiers[0]
 
     def _write_img_to_disk(self, url: requests.Response) -> None:
         """Writes image to disk.

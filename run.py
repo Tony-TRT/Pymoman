@@ -23,6 +23,7 @@ from packages.ui.aesthetic import AestheticWindow
 from packages.ui.displaypanel import DisplayPanel
 from packages.ui.impdir import DirectoryImporter
 from packages.ui.movtag import MovieTagDialog
+from packages.ui.minib import MiniBrowser
 
 
 class MainWindow(AestheticWindow):
@@ -70,6 +71,7 @@ class MainWindow(AestheticWindow):
         self.cst_dialog = None
         self.panel = None
         self.imp_dir = None
+        self.mini_browser = None
 
         self.ui_manage_widgets()
 
@@ -735,8 +737,14 @@ class MainWindow(AestheticWindow):
             self.lw_main.scrollToItem(self.lw_main.item(selected_item_row))
 
     def logic_watch_trailer(self, movie: Movie) -> None:
+        """Allows trailer viewing.
 
-        pass
+        Returns:
+            None: None.
+        """
+
+        self.mini_browser = MiniBrowser(movie)
+        self.mini_browser.show()
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
