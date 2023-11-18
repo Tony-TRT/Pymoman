@@ -1,5 +1,5 @@
 """
-This module allows loading an integrated YouTube video.
+This module allows loading an embedded YouTube video in a QWebEngineView.
 """
 
 
@@ -45,8 +45,3 @@ class MiniBrowser(AestheticWindow):
 
         self.main_layout.addWidget(self.browser, 0, 0, 1, 1)
         self.ui_manage_icons()
-
-    def closeEvent(self, event):
-
-        self.browser.close()
-        self.deleteLater()

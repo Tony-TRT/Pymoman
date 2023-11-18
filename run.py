@@ -744,6 +744,7 @@ class MainWindow(AestheticWindow):
         """
 
         self.mini_browser = MiniBrowser(movie)
+        self.mini_browser.setAttribute(Qt.WA_DeleteOnClose)
         self.mini_browser.show()
 
     def clr_reload_cbb_actors(self) -> None:
