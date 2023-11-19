@@ -104,8 +104,13 @@ class MainWindow(AestheticWindow):
         """
 
         image = QPixmap(constants.STR_PATHS.get('default poster'))
+        collection = item if isinstance(item, Collection) else False
+        movie = item if isinstance(item, Movie) else False
 
-        if isinstance(item, Collection):
+        if collection and collection.name == 'My Wishlist':
+            image = QPixmap(constants.STR_PATHS.get('wishlist'))
+
+        if collection and not movie:
             title = f"→ {item.name.upper()}"
             summary = "\n".join([f"- {movie.title}" for movie in item.mov_lst[:7]] + ['...'])
             top_right_text = f"{len(item.mov_lst)} movie{'s' if len(item.mov_lst) > 1 else ''}."
@@ -273,9 +278,23 @@ class MainWindow(AestheticWindow):
         self.clr_reset_cst_dialog()
 
     def logic_add_to_wishlist(self, movie: Movie) -> None:
+        """Allows the addition of a movie to a special collection called 'My Wishlist'.
 
-        pass
+        Returns:
+            None: None.
+        """
 
+        if 'My Wishlist' not in [collection.name for collection in MainWindow.all_collections]:
+            MainWindow.all_collections.append(Collection(name='My Wishlist'))
+
+        wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
+
+        if movie.title not in [mov.title for mov in wishlist.mov_lst]:
+            wishlist.add_movie(movie)
+            wishlist.save()
+
+        self.ui_progress_bar_animation()
+        
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
 
@@ -303,7 +322,7 @@ class MainWindow(AestheticWindow):
 
         name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
         if name and name not in [c.name for c in MainWindow.all_collections] and value:
-            new_collection = Collection(name)
+            new_collection = Collection(name=name)
             MainWindow.all_collections.append(new_collection)
 
             self.logic_list_display(MainWindow.all_collections)
@@ -675,7 +694,7 @@ class MainWindow(AestheticWindow):
 
         # Define the collection in which to add the scanned files
         collection = MainWindow.last_collection_opened[0] \
-            if MainWindow.last_collection_opened else Collection(dir_name)
+            if MainWindow.last_collection_opened else Collection(name=dir_name)
 
         self.imp_dir = DirectoryImporter(collection, dir_path)
         self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
