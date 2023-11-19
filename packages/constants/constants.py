@@ -18,7 +18,8 @@ PATHS: final(dict) = {
     'collections': Path(BASE / "collections"),
     'resources': Path(BASE / "resources"),
     'font': Path(BASE / "resources" / "font" / "MerriweatherSans-Regular.ttf"),
-    'default poster': Path(BASE / "resources" / "default.jpg"),
+    'default poster': Path(BASE / "resources" / "posters" / "default.jpg"),
+    'wishlist': Path(BASE / "resources" / "posters" / "wishlist.jpg"),
     'style': Path(BASE / "resources" / "style.qss"),
     'icons': Path(BASE / "resources" / "icons")
 }
@@ -28,7 +29,7 @@ for key, value in PATHS.items():
 
 STR_ICONS = {}
 ICONS: final(dict) = {
-    'logo': Path(PATHS.get('resources') / "logo.png"),
+    'logo': Path(PATHS.get('icons') / "logo.png"),
     'save': Path(PATHS.get('icons') / "save.png"),
     'note': Path(PATHS.get('icons') / "create_collection.png"),
     'folder': Path(PATHS.get('icons') / "folder.png"),
@@ -64,7 +65,7 @@ MOVIE_GENRES: final(list[str]) = [
     "Historical",
     "Horror",
     "Martial Arts",
-    "Mistery",
+    "Mystery",
     "Romance",
     "Science Fiction",
     "Thriller",
