@@ -770,6 +770,11 @@ class MainWindow(AestheticWindow):
         self.cst_dialog.le_movie_year.clear()
         self.cst_dialog.cbb_movie_rating.setCurrentIndex(0)
 
+    def closeEvent(self, event):
+
+        dataprocess.clear_cache()
+        super().closeEvent(event)
+
     def eventFilter(self, watched, event: QEvent) -> bool:
 
         if event.type() == QEvent.ContextMenu and watched is self.lw_main:
