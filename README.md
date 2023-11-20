@@ -9,16 +9,16 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/7b397bb0-eea8-44a9-811f-c747fe02aa33)
+
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/39aa6a1b-fca8-47dd-ac45-85ce2eb4b457)
 
 
 ![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/fdec8a5f-589f-41fd-9576-5704eda36df2)
 
+
 ## How to install
 It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under linux.
 I recommend using Python 3.11 because that's the version I work with.
-
-It does not work with Python 3.12 (strange display glitches) and has not been tested with other versions.
 
 Please keep in mind that this is an ongoing project, and many features are yet to be implemented.
 
@@ -37,6 +37,8 @@ Please keep in mind that this is an ongoing project, and many features are yet t
    `pip install -r requirements.txt`
 
 3) Make sure to use the virtual environment and run 'run.py'.
+
+You can also try the [Windows executable.](https://github.com/Tony-TRT/Pymoman/releases/download/v0.1/Pymoman.exe)
 
 ## How to use
 You must first create a collection, open it, and then add movies.
