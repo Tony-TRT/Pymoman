@@ -27,10 +27,6 @@ class Movie:
         self.path = path
         self.rating = rating
 
-        for key, value in constants.MOVIE_RATINGS.items():
-            if rating == key:
-                self.aesthetic_rating = value
-
     def __str__(self):
 
         return self.title
@@ -49,6 +45,18 @@ class Movie:
 
         content: dict = self.load_data_file()
         return content.get('actors', [])
+
+    @property
+    def aesthetic_rating(self) -> str:
+        """Displays the movie rating in a nice way.
+
+        Returns:
+            str: Aesthetic movie rating.
+        """
+
+        for key, value in constants.MOVIE_RATINGS.items():
+            if self.rating == key:
+                return value
 
     @property
     def data_file(self) -> Path:

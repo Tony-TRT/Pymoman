@@ -23,6 +23,7 @@ from packages.ui.aesthetic import AestheticWindow
 from packages.ui.displaypanel import DisplayPanel
 from packages.ui.impdir import DirectoryImporter
 from packages.ui.movtag import MovieTagDialog
+from packages.ui.cbbdialog import RatingModifier
 from packages.ui.minib import MiniBrowser
 
 
@@ -71,6 +72,7 @@ class MainWindow(AestheticWindow):
         self.cst_dialog = None
         self.panel = None
         self.imp_dir = None
+        self.rating_mod = None
         self.mini_browser = None
 
         self.ui_manage_widgets()
@@ -211,6 +213,7 @@ class MainWindow(AestheticWindow):
         self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.cst_dialog = MovieTagDialog()
+        self.rating_mod = RatingModifier()
         self.panel = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
@@ -312,6 +315,7 @@ class MainWindow(AestheticWindow):
         self.cbb_actors.currentTextChanged.connect(self.logic_filter)
         self.le_search.textChanged.connect(self.logic_search_bar)
         self.lw_main.itemClicked.connect(self.logic_single_click)
+        self.rating_mod.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -386,7 +390,7 @@ class MainWindow(AestheticWindow):
         official_title = QAction(self.icons.get('official'), "Assign official title")
         official_title.triggered.connect(partial(self.logic_rename_movie, item, False))
         edit_rating = QAction(self.icons.get('star'), "Edit rating")
-        edit_rating.triggered.connect(partial(self.logic_edit_movie_rating, item))
+        edit_rating.triggered.connect(partial(self.logic_show_rating_modifier))
         load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
         load_new_poster.triggered.connect(partial(self.logic_modify_poster, item))
         load_default_poster = QAction(self.icons.get('default_poster'), "Set default poster")
@@ -431,9 +435,20 @@ class MainWindow(AestheticWindow):
 
         movie.remove_cache()
 
-    def logic_edit_movie_rating(self, movie: Movie) -> None:
+    def logic_edit_movie_rating(self) -> None:
+        """Lets the user change their rating of the selected movie.
 
-        pass
+        Returns:
+            None: None.
+        """
+
+        selected_items = self.lw_main.selectedItems()
+        if not selected_items or not isinstance(selected_items[0].attr, Movie):
+            return
+
+        selected_movie: Movie = selected_items[0].attr
+        selected_movie.rating = self.rating_mod.cbb_movie_rating.currentText()
+        self.ui_information_panel(selected_movie)
 
     def logic_export_collection(self, collection: Collection) -> None:
         """Allows to export a collection.
@@ -716,6 +731,16 @@ class MainWindow(AestheticWindow):
             requested_items = [col for col in MainWindow.all_collections if col.name.casefold().startswith(query)]
 
         self.logic_list_display(requested_items)
+
+    def logic_show_rating_modifier(self) -> None:
+        """Shows rating modification dialog.
+
+        Returns:
+            None: None.
+        """
+
+        self.rating_mod.cbb_movie_rating.setCurrentIndex(0)
+        self.rating_mod.show()
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
