@@ -10,12 +10,13 @@ from pathlib import Path
 
 
 BASE: final(Path) = Path(__file__).resolve().parent.parent.parent
+HOME_FOLDER: final(Path) = Path.joinpath(Path.home(), '.pymoman')
 
 STR_PATHS = {}
 PATHS: final(dict) = {
     'base': BASE,
-    'cache': Path(BASE / "cache"),
-    'collections': Path(BASE / "collections"),
+    'cache': Path(HOME_FOLDER / "cache"),
+    'collections': Path(HOME_FOLDER / "collections"),
     'resources': Path(BASE / "resources"),
     'font': Path(BASE / "resources" / "font" / "MerriweatherSans-Regular.ttf"),
     'default poster': Path(BASE / "resources" / "posters" / "default.jpg"),

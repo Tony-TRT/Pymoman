@@ -1,6 +1,7 @@
 """Main application file."""
 
 
+import sys
 import threading
 from functools import partial
 from pathlib import Path
@@ -27,14 +28,20 @@ from packages.ui.cbbdialog import RatingModifier
 from packages.ui.minib import MiniBrowser
 
 
+if getattr(sys, 'frozen', False):  # auto-py-to-exe splash option
+    import pyi_splash
+
+
+constants.HOME_FOLDER.mkdir(exist_ok=True)
+dataprocess.clear_cache()  # Remove unused cache folders before loading anything.
+
+
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
 
     def __init__(self):
         super().__init__()
-
-        dataprocess.clear_cache()  # Remove unused cache folders before loading anything.
 
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
@@ -839,5 +846,7 @@ class MainWindow(AestheticWindow):
 if __name__ == '__main__':
     root = QtWidgets.QApplication()
     application = MainWindow()
+    if getattr(sys, 'frozen', False):
+        pyi_splash.close()
     application.show()
     root.exec()
