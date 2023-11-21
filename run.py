@@ -33,7 +33,7 @@ if getattr(sys, 'frozen', False):
         pyi_splash = None
 
 
-constants.HOME_FOLDER.mkdir(exist_ok=True)
+constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True)
 dataprocess.clear_cache()  # Remove unused cache folders before loading anything.
 
 
@@ -848,9 +848,8 @@ if __name__ == '__main__':
     root = QtWidgets.QApplication()
     application = MainWindow()
 
-    if pyi_splash is not None and getattr(sys, 'frozen', False):
-        if hasattr(pyi_splash, 'close') and callable(pyi_splash.close):
-            pyi_splash.close()
+    if pyi_splash and hasattr(pyi_splash, 'close') and callable(pyi_splash.close) and getattr(sys, 'frozen', False):
+        pyi_splash.close()
 
     application.show()
     root.exec()
