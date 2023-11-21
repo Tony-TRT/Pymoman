@@ -51,14 +51,14 @@ class MainWindow(AestheticWindow):
         # Frames and layouts.
         ##################################################
 
-        self.pnl_frm = None
+        self.panel_frame = None
         self.main_layout = None
         self.header_layout = None
         self.body_layout = None
         self.menu_layout = None
         self.list_layout = None
-        self.global_movie_layout = None
-        self.pnl_frm_layout = None
+        self.information_layout = None
+        self.panel_frame_layout = None
 
         self.ui_manage_layouts_and_frames()
 
@@ -77,11 +77,11 @@ class MainWindow(AestheticWindow):
         self.prg_bar = None
         self.le_search = None
         self.lw_main = None
-        self.cst_dialog = None
+        self.movie_appender = None
         self.panel = None
-        self.imp_dir = None
-        self.rating_mod = None
-        self.mini_browser = None
+        self.directory_importer = None
+        self.rating_adjuster = None
+        self.trailer_viewer = None
 
         self.ui_manage_widgets()
 
@@ -103,7 +103,7 @@ class MainWindow(AestheticWindow):
 
         self.logic_list_display(MainWindow.all_collections)
 
-    def ui_information_panel(self, item) -> None:
+    def ui_information_panel(self, item: Collection | Movie) -> None:
         """Right information panel that displays information about the selected item.
 
         Args:
@@ -114,29 +114,28 @@ class MainWindow(AestheticWindow):
         """
 
         image = QPixmap(constants.STR_PATHS.get('default poster'))
-        collection = item if isinstance(item, Collection) else False
-        movie = item if isinstance(item, Movie) else False
+        collection: Collection | bool = item if isinstance(item, Collection) else False
+        movie: Movie | bool = item if isinstance(item, Movie) else False
 
         if collection and collection.name == 'My Wishlist':
             image = QPixmap(constants.STR_PATHS.get('wishlist'))
 
         if collection and not movie:
-            title = f"→ {item.name.upper()}"
-            summary = "\n".join([f"- {movie.title}" for movie in item.mov_lst[:7]] + ['...'])
-            top_right_text = f"{len(item.mov_lst)} movie{'s' if len(item.mov_lst) > 1 else ''}."
+            title: str = f"→ {collection.name.upper()}"
+            summary: str = "\n".join([f"- {movie.title}" for movie in collection.mov_lst[:7]] + ['...'])
+            top_right_text: str = f"{len(collection.mov_lst)} movie{'s' if len(collection.mov_lst) > 1 else ''}."
 
         else:
-            if item.thumb.exists():
-                image = QPixmap(str(item.thumb))
+            if movie.thumb.exists():
+                image = QPixmap(str(movie.thumb))
 
-            title = f"{item.title.title()} ({item.year})"
-            summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-            top_right_text = item.aesthetic_rating
+            title: str = f"{movie.title.title()} ({movie.year})"
+            summary: str = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
+            top_right_text: str = movie.aesthetic_rating
 
-            if item.data_file.exists():
-                content = item.load_data_file()
-                title = content.get('title')
-                summary = content.get('summary')
+            content: dict = movie.load_data_file()
+            title: str = content.get('title', title)
+            summary: str = content.get('summary', summary)
 
         self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_top_right.setText(top_right_text)
@@ -165,8 +164,8 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.pnl_frm = QtWidgets.QFrame()
-        self.pnl_frm.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.panel_frame = QtWidgets.QFrame()
+        self.panel_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.header_layout = QtWidgets.QHBoxLayout()
@@ -174,15 +173,15 @@ class MainWindow(AestheticWindow):
         self.menu_layout = QtWidgets.QVBoxLayout()
         self.list_layout = QtWidgets.QVBoxLayout()
         self.list_layout.setContentsMargins(10, 0, 0, 0)
-        self.global_movie_layout = QtWidgets.QHBoxLayout()
-        self.pnl_frm_layout = QtWidgets.QHBoxLayout(self.pnl_frm)
+        self.information_layout = QtWidgets.QHBoxLayout()
+        self.panel_frame_layout = QtWidgets.QHBoxLayout(self.panel_frame)
 
         self.main_layout.addLayout(self.header_layout)
         self.main_layout.addLayout(self.body_layout)
         self.body_layout.addLayout(self.menu_layout)
         self.body_layout.addLayout(self.list_layout)
-        self.body_layout.addLayout(self.global_movie_layout)
-        self.global_movie_layout.addWidget(self.pnl_frm)
+        self.body_layout.addLayout(self.information_layout)
+        self.information_layout.addWidget(self.panel_frame)
 
     def ui_manage_widgets(self) -> None:
         """Widgets are managed here.
@@ -220,8 +219,8 @@ class MainWindow(AestheticWindow):
         self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.cst_dialog = MovieAppender()
-        self.rating_mod = RatingAdjuster()
+        self.movie_appender = MovieAppender()
+        self.rating_adjuster = RatingAdjuster()
         self.panel = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
@@ -235,7 +234,7 @@ class MainWindow(AestheticWindow):
         self.menu_layout.addWidget(self.prg_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
-        self.pnl_frm_layout.addWidget(self.panel)
+        self.panel_frame_layout.addWidget(self.panel)
 
     def ui_progress_bar_animation(self) -> None:
         """Creates a small animation for the progress bar.
@@ -261,7 +260,7 @@ class MainWindow(AestheticWindow):
         if not MainWindow.last_collection_opened:
             return
 
-        self.cst_dialog.show()
+        self.movie_appender.show()
 
     def logic_add_movie_validation(self) -> None:
         """Validate whether to add the movie or not based on whether the user input is correct or incorrect.
@@ -273,20 +272,20 @@ class MainWindow(AestheticWindow):
         collection = MainWindow.last_collection_opened[0]
         try:
             movie = Movie(
-                title=self.cst_dialog.le_movie_title.text(),
-                year=int(self.cst_dialog.le_movie_year.text()),
-                rating=self.cst_dialog.cbb_movie_rating.currentText())
+                title=self.movie_appender.le_movie_title.text(),
+                year=int(self.movie_appender.le_movie_year.text()),
+                rating=self.movie_appender.cbb_movie_rating.currentText())
         except ValueError:
-            self.cst_dialog.close()
+            self.movie_appender.close()
         else:
             if movie.title not in [mov.title for mov in collection.mov_lst]:
                 collection.add_movie(movie)
-                self.cst_dialog.close()
+                self.movie_appender.close()
                 self.logic_list_display(collection.mov_lst)
             else:
-                self.cst_dialog.close()
+                self.movie_appender.close()
 
-        self.clr_reset_cst_dialog()
+        self.clr_reset_movie_appender()
 
     def logic_add_to_wishlist(self, movie: Movie) -> None:
         """Allows the addition of a movie to a special collection called 'My Wishlist'.
@@ -317,13 +316,13 @@ class MainWindow(AestheticWindow):
         self.btn_save_col.clicked.connect(self.logic_save_collection)
         self.btn_scan_dir.clicked.connect(self.logic_scan_dir)
         self.btn_add_movie.clicked.connect(self.logic_add_movie)
-        self.cst_dialog.btn_validate.clicked.connect(self.logic_add_movie_validation)
+        self.movie_appender.btn_validate.clicked.connect(self.logic_add_movie_validation)
         self.btn_remove_movie.clicked.connect(self.logic_remove_movie)
         self.cbb_genre.currentTextChanged.connect(self.logic_filter)
         self.cbb_actors.currentTextChanged.connect(self.logic_filter)
         self.le_search.textChanged.connect(self.logic_search_bar)
         self.lw_main.itemClicked.connect(self.logic_single_click)
-        self.rating_mod.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
+        self.rating_adjuster.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -455,7 +454,7 @@ class MainWindow(AestheticWindow):
             return
 
         selected_movie: Movie = selected_items[0].attr
-        selected_movie.rating = self.rating_mod.cbb_movie_rating.currentText()
+        selected_movie.rating = self.rating_adjuster.cbb_movie_rating.currentText()
         self.ui_information_panel(selected_movie)
 
     def logic_export_collection(self, collection: Collection) -> None:
@@ -524,7 +523,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        qlw_items = [self.imp_dir.lw_main.item(i) for i in range(self.imp_dir.lw_main.count())]
+        qlw_items = [self.directory_importer.lw_main.item(i) for i in range(self.directory_importer.lw_main.count())]
         conv_items = [dataimport.make_movie(
             title=qlw_item.title,
             year=int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
@@ -533,13 +532,13 @@ class MainWindow(AestheticWindow):
         movies = [item[0] for item in conv_items if item[0]]
 
         for movie in movies:
-            self.imp_dir.collection.add_movie(movie)
+            self.directory_importer.collection.add_movie(movie)
 
-        if self.imp_dir.collection.name not in [c.name for c in MainWindow.all_collections]:
-            MainWindow.all_collections.append(self.imp_dir.collection)
-        self.imp_dir.close()
+        if self.directory_importer.collection.name not in [c.name for c in MainWindow.all_collections]:
+            MainWindow.all_collections.append(self.directory_importer.collection)
+        self.directory_importer.close()
 
-        self.logic_list_display(self.imp_dir.collection.mov_lst)
+        self.logic_list_display(self.directory_importer.collection.mov_lst)
 
     def logic_list_display(self, items: list) -> None:
         """All display logic for the list widget is managed here.
@@ -719,9 +718,9 @@ class MainWindow(AestheticWindow):
         collection = MainWindow.last_collection_opened[0] \
             if MainWindow.last_collection_opened else Collection(name=dir_name)
 
-        self.imp_dir = DirectoryImporter(collection, dir_path)
-        self.imp_dir.btn_validate.clicked.connect(self.logic_import_directory)
-        self.imp_dir.show()
+        self.directory_importer = DirectoryImporter(collection, dir_path)
+        self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
+        self.directory_importer.show()
 
     def logic_search_bar(self) -> None:
         """Search bar logic is here.
@@ -747,8 +746,8 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.rating_mod.cbb_movie_rating.setCurrentIndex(0)
-        self.rating_mod.show()
+        self.rating_adjuster.cbb_movie_rating.setCurrentIndex(0)
+        self.rating_adjuster.show()
 
     def logic_single_click(self, clicked_item) -> None:
         """Handle a single click on items in the QListWidget.
@@ -795,9 +794,9 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.mini_browser = TrailerPlayer(movie)
-        self.mini_browser.setAttribute(Qt.WA_DeleteOnClose)
-        self.mini_browser.show()
+        self.trailer_viewer = TrailerPlayer(movie)
+        self.trailer_viewer.setAttribute(Qt.WA_DeleteOnClose)
+        self.trailer_viewer.show()
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.
@@ -811,16 +810,16 @@ class MainWindow(AestheticWindow):
         self.cbb_actors.addItems(["Actors"] + dataimport.load_all_actors())
         self.cbb_actors.blockSignals(False)
 
-    def clr_reset_cst_dialog(self) -> None:
-        """Reset the fields of cst_dialog.
+    def clr_reset_movie_appender(self) -> None:
+        """Reset the fields of self.movie_appender.
 
         Returns:
             None: None.
         """
 
-        self.cst_dialog.le_movie_title.clear()
-        self.cst_dialog.le_movie_year.clear()
-        self.cst_dialog.cbb_movie_rating.setCurrentIndex(0)
+        self.movie_appender.le_movie_title.clear()
+        self.movie_appender.le_movie_year.clear()
+        self.movie_appender.cbb_movie_rating.setCurrentIndex(0)
 
     def closeEvent(self, event):
 
