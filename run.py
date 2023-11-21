@@ -1,18 +1,15 @@
 """Main application file."""
 
-
 import sys
 import threading
 from functools import partial
 from pathlib import Path
 from time import sleep
 
-
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
-
 
 from packages.constants import constants
 from packages.logic import dataimport
@@ -27,9 +24,13 @@ from packages.ui.movtag import MovieTagDialog
 from packages.ui.cbbdialog import RatingModifier
 from packages.ui.minib import MiniBrowser
 
-
-if getattr(sys, 'frozen', False):  # auto-py-to-exe splash option
-    import pyi_splash
+# This code is for the splash image when the application is launched from an executable.
+pyi_splash = None
+if getattr(sys, 'frozen', False):
+    try:
+        import pyi_splash
+    except ImportError:
+        pyi_splash = None
 
 
 constants.HOME_FOLDER.mkdir(exist_ok=True)
@@ -846,7 +847,10 @@ class MainWindow(AestheticWindow):
 if __name__ == '__main__':
     root = QtWidgets.QApplication()
     application = MainWindow()
-    if getattr(sys, 'frozen', False):
-        pyi_splash.close()
+
+    if pyi_splash is not None and getattr(sys, 'frozen', False):
+        if hasattr(pyi_splash, 'close') and callable(pyi_splash.close):
+            pyi_splash.close()
+
     application.show()
     root.exec()
