@@ -19,10 +19,10 @@ from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.ui.aesthetic import AestheticWindow
 from packages.ui.displaypanel import DisplayPanel
-from packages.ui.impdir import DirectoryImporter
-from packages.ui.movtag import MovieTagDialog
-from packages.ui.cbbdialog import RatingModifier
-from packages.ui.minib import MiniBrowser
+from packages.ui.dirimporter import DirectoryImporter
+from packages.ui.movieappender import MovieAppender
+from packages.ui.ratingadjuster import RatingAdjuster
+from packages.ui.trailplayer import TrailerPlayer
 
 # This code is for the splash image when the application is launched from an executable.
 pyi_splash = None
@@ -220,8 +220,8 @@ class MainWindow(AestheticWindow):
         self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.cst_dialog = MovieTagDialog()
-        self.rating_mod = RatingModifier()
+        self.cst_dialog = MovieAppender()
+        self.rating_mod = RatingAdjuster()
         self.panel = DisplayPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
@@ -795,7 +795,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.mini_browser = MiniBrowser(movie)
+        self.mini_browser = TrailerPlayer(movie)
         self.mini_browser.setAttribute(Qt.WA_DeleteOnClose)
         self.mini_browser.show()
 

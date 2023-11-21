@@ -12,7 +12,7 @@ from packages.logic.movie import Movie
 from packages.ui.aesthetic import AestheticWindow
 
 
-class MiniBrowser(AestheticWindow):
+class TrailerPlayer(AestheticWindow):
 
     def __init__(self, movie: Movie):
         super().__init__()
