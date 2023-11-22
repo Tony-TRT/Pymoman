@@ -269,21 +269,21 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
+        title: str = self.movie_appender.le_movie_title.text()
+        year: str = self.movie_appender.le_movie_year.text()
+        year: int | None = int(year) if year and year.isdigit() else None
+        rating: str = self.movie_appender.cbb_movie_rating.currentText()
         collection: Collection = MainWindow.last_collection_opened[0]
-        movie: Movie | bool = dataimport.make_movie(
-            title=self.movie_appender.le_movie_title.text(),
-            year=int(self.movie_appender.le_movie_year.text()),
-            rating=self.movie_appender.cbb_movie_rating.currentText(),
-            path=None)[0]
+        movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
         if movie and movie.title not in [m.title for m in collection.mov_lst]:
             collection.add_movie(movie)
+            self.logic_list_display(collection.mov_lst)
 
         self.movie_appender.close()
-        self.logic_list_display(collection.mov_lst)
 
     def logic_add_to_wishlist(self, movie: Movie) -> None:
-        """Allows the addition of a movie to a special collection called 'My Wishlist'.
+        """Adds a movie to a special collection called 'My Wishlist'.
 
         Returns:
             None: None.
@@ -294,12 +294,11 @@ class MainWindow(AestheticWindow):
 
         wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
 
-        if movie.title not in [mov.title for mov in wishlist.mov_lst]:
+        if movie.title not in [m.title for m in wishlist.mov_lst]:
             wishlist.add_movie(movie)
-            wishlist.save()
 
         self.ui_progress_bar_animation()
-        
+
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
 
