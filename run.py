@@ -327,9 +327,7 @@ class MainWindow(AestheticWindow):
 
         name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
         if name and name not in [c.name for c in MainWindow.all_collections] and value:
-            new_collection = Collection(name=name)
-            MainWindow.all_collections.append(new_collection)
-
+            MainWindow.all_collections.append(Collection(name=name))
             self.logic_list_display(MainWindow.all_collections)
 
     def logic_create_collection_menu(self, pos, item: Collection) -> None:
@@ -401,7 +399,7 @@ class MainWindow(AestheticWindow):
         watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
         watch_trailer.triggered.connect(partial(self.logic_watch_trailer, item))
         delete_cache = QAction(self.icons.get('delete'), "Delete cached data")
-        delete_cache.triggered.connect(partial(self.logic_delete_movie_cache, item))
+        delete_cache.triggered.connect(item.remove_cache)
 
         movie_menu.addAction(official_title)
         movie_menu.addAction(rename_movie)
@@ -416,7 +414,7 @@ class MainWindow(AestheticWindow):
         movie_menu.deleteLater()
 
     def logic_delete_collection(self, collection: Collection) -> None:
-        """Allows to delete a collection.
+        """Deletes a collection.
 
         Args:
             collection (Collection): Collection to delete.
@@ -425,16 +423,9 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        value = collection.remove()
-
-        if value:
+        if collection.remove():
             MainWindow.all_collections.remove(collection)
             self.logic_list_display(MainWindow.all_collections)
-
-    @staticmethod
-    def logic_delete_movie_cache(movie: Movie) -> None:
-
-        movie.remove_cache()
 
     def logic_edit_movie_rating(self) -> None:
         """Lets the user change their rating of the selected movie.
