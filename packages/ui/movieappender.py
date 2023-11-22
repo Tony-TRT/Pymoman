@@ -5,9 +5,7 @@ Features:
     - Provides options for tagging movies to facilitate organization.
 """
 
-
 from PySide6 import QtWidgets
-
 
 from packages.ui.aesthetic import AestheticWindow
 
@@ -78,3 +76,10 @@ class MovieAppender(AestheticWindow):
         self.main_layout.addWidget(self.lbl_movie_rating)
         self.main_layout.addWidget(self.cbb_movie_rating)
         self.main_layout.addWidget(self.btn_validate)
+
+    def closeEvent(self, event):
+
+        self.le_movie_title.clear()
+        self.le_movie_year.clear()
+        self.cbb_movie_rating.setCurrentIndex(0)
+        super().closeEvent(event)

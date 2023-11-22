@@ -269,23 +269,18 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        collection = MainWindow.last_collection_opened[0]
-        try:
-            movie = Movie(
-                title=self.movie_appender.le_movie_title.text(),
-                year=int(self.movie_appender.le_movie_year.text()),
-                rating=self.movie_appender.cbb_movie_rating.currentText())
-        except ValueError:
-            self.movie_appender.close()
-        else:
-            if movie.title not in [mov.title for mov in collection.mov_lst]:
-                collection.add_movie(movie)
-                self.movie_appender.close()
-                self.logic_list_display(collection.mov_lst)
-            else:
-                self.movie_appender.close()
+        collection: Collection = MainWindow.last_collection_opened[0]
+        movie: Movie | bool = dataimport.make_movie(
+            title=self.movie_appender.le_movie_title.text(),
+            year=int(self.movie_appender.le_movie_year.text()),
+            rating=self.movie_appender.cbb_movie_rating.currentText(),
+            path=None)[0]
 
-        self.clr_reset_movie_appender()
+        if movie and movie.title not in [m.title for m in collection.mov_lst]:
+            collection.add_movie(movie)
+
+        self.movie_appender.close()
+        self.logic_list_display(collection.mov_lst)
 
     def logic_add_to_wishlist(self, movie: Movie) -> None:
         """Allows the addition of a movie to a special collection called 'My Wishlist'.
@@ -809,17 +804,6 @@ class MainWindow(AestheticWindow):
         self.cbb_actors.clear()
         self.cbb_actors.addItems(["Actors"] + dataimport.load_all_actors())
         self.cbb_actors.blockSignals(False)
-
-    def clr_reset_movie_appender(self) -> None:
-        """Reset the fields of self.movie_appender.
-
-        Returns:
-            None: None.
-        """
-
-        self.movie_appender.le_movie_title.clear()
-        self.movie_appender.le_movie_year.clear()
-        self.movie_appender.cbb_movie_rating.setCurrentIndex(0)
 
     def closeEvent(self, event):
 
