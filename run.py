@@ -285,6 +285,9 @@ class MainWindow(AestheticWindow):
     def logic_add_to_wishlist(self, movie: Movie) -> None:
         """Adds a movie to a special collection called 'My Wishlist'.
 
+        Args:
+            movie (Movie): Movie to add.
+
         Returns:
             None: None.
         """
@@ -478,7 +481,7 @@ class MainWindow(AestheticWindow):
 
         self.logic_list_display(matching_movies)
 
-    def logic_generate_list_item(self, item) -> QtWidgets.QListWidgetItem:
+    def logic_generate_list_item(self, item: Collection | Movie) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
 
         Args:
@@ -508,28 +511,33 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        qlw_items = [self.directory_importer.lw_main.item(i) for i in range(self.directory_importer.lw_main.count())]
-        conv_items = [dataimport.make_movie(
-            title=qlw_item.title,
-            year=int(qlw_item.year) if qlw_item.year and isinstance(qlw_item.year, str) else qlw_item.year,
-            path=qlw_item.text(),
-            rating=qlw_item.rating) for qlw_item in qlw_items]
-        movies = [item[0] for item in conv_items if item[0]]
+        collection: Collection = self.directory_importer.collection
+        to_import = [self.directory_importer.lw_main.item(i) for i in range(self.directory_importer.lw_main.count())]
+        imported_items: list[tuple] = []
+
+        for item in to_import:
+            title: str = item.title
+            year: int | None = int(item.year) if item.year and item.year.isdigit() else None
+            path: str = item.text()
+            rating: str = item.rating
+            imported_items.append(dataimport.make_movie(title=title, year=year, path=path, rating=rating))
+
+        movies: list[Movie] = [item[0] for item in imported_items if item[0]]
 
         for movie in movies:
-            self.directory_importer.collection.add_movie(movie)
+            collection.add_movie(movie)
 
-        if self.directory_importer.collection.name not in [c.name for c in MainWindow.all_collections]:
-            MainWindow.all_collections.append(self.directory_importer.collection)
+        if collection not in MainWindow.all_collections:
+            MainWindow.all_collections.append(collection)
+
+        self.logic_list_display(collection.mov_lst)
         self.directory_importer.close()
 
-        self.logic_list_display(self.directory_importer.collection.mov_lst)
-
-    def logic_list_display(self, items: list) -> None:
+    def logic_list_display(self, items: list[Collection] | list[Movie]) -> None:
         """All display logic for the list widget is managed here.
 
         Args:
-            items (list): List of Collection objects or Movie objects.
+            items: List of Collection objects or Movie objects.
 
         Returns:
             None: None.
