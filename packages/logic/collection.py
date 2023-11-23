@@ -2,12 +2,9 @@
 This module contains the Collection class which allows the creation and management of movie collections.
 """
 
-
 import json
-from glob import glob
 from pathlib import Path
 from typing import Self
-
 
 from packages.constants import constants
 from packages.logic.dataimport import load_collection_movies
@@ -16,13 +13,13 @@ from packages.logic.movie import Movie
 
 class Collection:
 
-    def __init__(self, name: str, mov_lst=None):
+    def __init__(self, name: str, movies=None):
 
-        if mov_lst is None:
-            mov_lst = []
+        if movies is None:
+            movies = []
 
-        self.name = self._name_filter(name)
-        self.mov_lst = mov_lst
+        self.name: str = self._filter_name(name)
+        self.movies: list[Movie] = movies
 
     def __str__(self):
 
@@ -30,45 +27,7 @@ class Collection:
 
     def __repr__(self):
 
-        return f"{self.name} {self.mov_lst}"
-
-    @staticmethod
-    def _name_filter(name: str) -> str:
-        """Filter unwanted characters.
-
-        Args:
-            name (str): Collection's name.
-
-        Returns:
-            str: Filtered name.
-        """
-
-        return "".join(char for char in name if char not in "/\\:'\"")
-
-    @property
-    def path(self) -> Path:
-        """Returns the path of the instance's file on disk.
-
-        Returns:
-            Path: File's path.
-        """
-
-        return Path.joinpath(constants.PATHS.get('collections'), self.name.replace(' ', '_') + ".json")
-
-    @classmethod
-    def retrieve_collections(cls) -> list[Self]:
-        """Recovers all collections saved on the disk.
-
-        Returns:
-            list[self]: List of all saved collections.
-        """
-
-        collections = []
-        for file in glob(str(Path.joinpath(constants.PATHS.get('collections'), "*.json"))):
-            mov_lst = load_collection_movies(file)
-            name = Path(file).stem.replace('_', ' ')
-            collections.append(Collection(name=name, mov_lst=mov_lst))
-        return collections
+        return f"Collection -> '{self.name}' with {len(self.movies)} movie{'s' if len(self.movies) > 1 else ''}"
 
     def add_movie(self, movie: Movie) -> None:
         """Add a movie to the collection.
@@ -80,9 +39,9 @@ class Collection:
             None: None.
         """
 
-        self.mov_lst.append(movie)
+        self.movies.append(movie)
 
-    def export_as_txt(self, output_file) -> None:
+    def export_as_txt(self, output_file: str | Path) -> None:
         """Export the collection to a text file.
 
         Args:
@@ -92,9 +51,45 @@ class Collection:
             None: None.
         """
 
-        with open(output_file, 'a', encoding="UTF-8") as text_file:
-            for movie in self.mov_lst:
-                text_file.write(f"- {movie.title} ({movie.year})\n")
+        with open(output_file, 'w', encoding="UTF-8") as file:
+            for movie in self.movies:
+                file.write(f"- {movie.title}{f' ({movie.year})' if str(movie.year) not in movie.title else ''}\n")
+
+    @staticmethod
+    def _filter_name(name: str) -> str:
+        """Filter unwanted characters.
+
+        Args:
+            name (str): Name to filter.
+
+        Returns:
+            str: Filtered name.
+        """
+
+        char_map: dict = {
+            '/': '',
+            '\\': '',
+            ':': ' -',
+            '"': ''
+        }
+
+        for key, value in char_map.items():
+            name = name.replace(key, value)
+        name = name.strip()
+
+        if name:
+            return name
+        return "An ugly name"
+
+    @property
+    def path(self) -> Path:
+        """Returns the path of the instance's file on disk.
+
+        Returns:
+            Path: File's path.
+        """
+
+        return Path.joinpath(constants.PATHS.get('collections'), self.name.replace(' ', '_') + ".json")
 
     def remove(self) -> bool:
         """Remove saved collection from disk.
@@ -120,7 +115,7 @@ class Collection:
             None: None.
         """
 
-        self.mov_lst.remove(movie)
+        self.movies.remove(movie)
 
     def rename(self, new_name: str) -> None:
         """Renames a collection both on disk and in memory.
@@ -133,11 +128,26 @@ class Collection:
         """
 
         old_path = self.path
-        self.name = self._name_filter(new_name)
+        self.name = self._filter_name(new_name)
 
         if old_path.exists():
             self.save()
             old_path.unlink()
+
+    @classmethod
+    def retrieve_collections(cls) -> list[Self]:
+        """Recovers all collections saved on the disk.
+
+        Returns:
+            list[self]: List of all saved collections.
+        """
+
+        collections = []
+        for file in constants.PATHS.get('collections').glob('*.json'):
+            movies = load_collection_movies(file)
+            name = Path(file).stem.replace('_', ' ')
+            collections.append(Collection(name=name, movies=movies))
+        return collections
 
     def save(self) -> None:
         """Saves a collection to disk.
@@ -147,9 +157,9 @@ class Collection:
         """
 
         constants.PATHS.get('collections').mkdir(exist_ok=True)
-        data_to_dump = []
+        data_to_dump: list[dict] = []
 
-        for movie in self.mov_lst:
+        for movie in self.movies:
             dictionary = {
                 'title': movie.title,
                 'year': movie.year,

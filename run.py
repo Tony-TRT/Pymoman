@@ -122,8 +122,8 @@ class MainWindow(AestheticWindow):
 
         if collection and not movie:
             title: str = f"→ {collection.name.upper()}"
-            summary: str = "\n".join([f"- {movie.title}" for movie in collection.mov_lst[:7]] + ['...'])
-            top_right_text: str = f"{len(collection.mov_lst)} movie{'s' if len(collection.mov_lst) > 1 else ''}."
+            summary: str = "\n".join([f"- {movie.title}" for movie in collection.movies[:7]] + ['...'])
+            top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
 
         else:
             if movie.thumb.exists():
@@ -276,9 +276,9 @@ class MainWindow(AestheticWindow):
         collection: Collection = MainWindow.last_collection_opened[0]
         movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
-        if movie and movie.title not in [m.title for m in collection.mov_lst]:
+        if movie and movie.title not in [m.title for m in collection.movies]:
             collection.add_movie(movie)
-            self.logic_list_display(collection.mov_lst)
+            self.logic_list_display(collection.movies)
 
         self.movie_appender.close()
 
@@ -297,7 +297,7 @@ class MainWindow(AestheticWindow):
 
         wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
 
-        if movie.title not in [m.title for m in wishlist.mov_lst]:
+        if movie.title not in [m.title for m in wishlist.movies]:
             wishlist.add_movie(movie)
 
         self.ui_progress_bar_animation()
@@ -466,7 +466,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        all_movies = [mov for col in MainWindow.all_collections for mov in col.mov_lst]
+        all_movies = [m for c in MainWindow.all_collections for m in c.movies]
         query_g = self.cbb_genre.currentText()
         query_a = self.cbb_actors.currentText()
 
@@ -530,7 +530,7 @@ class MainWindow(AestheticWindow):
         if collection not in MainWindow.all_collections:
             MainWindow.all_collections.append(collection)
 
-        self.logic_list_display(collection.mov_lst)
+        self.logic_list_display(collection.movies)
         self.directory_importer.close()
 
     def logic_list_display(self, items: list[Collection] | list[Movie]) -> None:
@@ -595,7 +595,7 @@ class MainWindow(AestheticWindow):
 
         self.last_collection_opened.clear()
         self.last_collection_opened.append(collection)
-        self.logic_list_display(collection.mov_lst)
+        self.logic_list_display(collection.movies)
         self.btn_add_movie.setEnabled(True)
         self.btn_remove_movie.setEnabled(True)
 
@@ -622,7 +622,7 @@ class MainWindow(AestheticWindow):
                 collection.remove_movie(movie_to_remove)
                 movie_to_remove.remove_cache()
                 del movie_to_remove
-                self.logic_list_display(collection.mov_lst)
+                self.logic_list_display(collection.movies)
 
     def logic_rename_collection(self, collection: Collection) -> None:
         """Allows to rename a collection.
@@ -726,9 +726,9 @@ class MainWindow(AestheticWindow):
 
         if MainWindow.last_collection_opened:
             collection = MainWindow.last_collection_opened[0]
-            requested_items = [movie for movie in collection.mov_lst if movie.title.casefold().startswith(query)]
+            requested_items = [m for m in collection.movies if m.title.casefold().startswith(query)]
         else:
-            requested_items = [col for col in MainWindow.all_collections if col.name.casefold().startswith(query)]
+            requested_items = [c for c in MainWindow.all_collections if c.name.casefold().startswith(query)]
 
         self.logic_list_display(requested_items)
 
