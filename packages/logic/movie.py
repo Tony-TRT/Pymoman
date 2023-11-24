@@ -2,11 +2,9 @@
 This module is dedicated to the creation and management of movies.
 """
 
-
 import shutil
 from datetime import datetime
 from pathlib import Path
-
 
 from packages.constants import constants
 from packages.logic import dataimport
@@ -16,10 +14,7 @@ class Movie:
 
     def __init__(self, title: str, year: int, path=None, rating=None):
 
-        if len(title) < 2:
-            raise ValueError
-
-        if not isinstance(year, int) or not 1900 <= year <= (datetime.now().year + 5):
+        if len(title) < 2 or not isinstance(year, int) or not 1900 <= year <= (datetime.now().year + 5):
             raise ValueError
 
         self.title = title.strip()

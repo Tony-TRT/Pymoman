@@ -9,7 +9,7 @@ from PySide6 import QtWidgets
 from packages.ui.aesthetic import AestheticWindow
 
 
-class RatingModifier(AestheticWindow):
+class RatingAdjuster(AestheticWindow):
     def __init__(self):
         super().__init__()
 
