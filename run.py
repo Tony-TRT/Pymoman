@@ -617,7 +617,7 @@ class MainWindow(AestheticWindow):
             self.logic_list_display(collection.movies)
 
     def logic_rename_collection(self, collection: Collection) -> None:
-        """Allows to rename a collection.
+        """Renames a collection.
 
         Args:
             collection (Collection): Collection to rename.
@@ -632,7 +632,7 @@ class MainWindow(AestheticWindow):
             self.logic_update_list_widget()
 
     def logic_rename_movie(self, movie: Movie, user_choice: bool) -> None:
-        """Allows to rename a movie.
+        """Renames a movie.
 
         Args:
             movie (Movie): Movie to rename.
