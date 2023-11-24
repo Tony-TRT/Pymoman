@@ -600,29 +600,21 @@ class MainWindow(AestheticWindow):
         self.btn_remove_movie.setEnabled(True)
 
     def logic_remove_movie(self) -> None:
-        """Allows to remove a movie.
+        """Removes a selected movie.
 
         Returns:
             None: None.
         """
 
-        if not MainWindow.last_collection_opened:
-            return
+        collection = MainWindow.last_collection_opened[0] if MainWindow.last_collection_opened else None
+        selected_items = self.lw_main.selectedItems()
 
-        collection = MainWindow.last_collection_opened[0]
-
-        try:
-            movie_to_remove = self.lw_main.selectedItems()[0].attr
-        except AttributeError:
-            pass
-        except IndexError:
-            pass
-        else:
-            if isinstance(movie_to_remove, Movie):
-                collection.remove_movie(movie_to_remove)
-                movie_to_remove.remove_cache()
-                del movie_to_remove
-                self.logic_list_display(collection.movies)
+        if collection and selected_items and isinstance(selected_items[0].attr, Movie):
+            movie_to_remove: Movie = selected_items[0].attr
+            collection.remove_movie(movie_to_remove)
+            movie_to_remove.remove_cache()
+            del movie_to_remove
+            self.logic_list_display(collection.movies)
 
     def logic_rename_collection(self, collection: Collection) -> None:
         """Allows to rename a collection.
