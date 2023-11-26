@@ -5,17 +5,14 @@ The information retrieved and the manner in which it is retrieved is legal and t
 to respect the source websites by deliberately slowing down the program.
 """
 
-
 import json
 import re
 from random import shuffle
 from time import sleep
 
-
 import requests
 import wikipedia
 from bs4 import BeautifulSoup
-
 
 from packages.constants import constants
 from packages.logic.dataprocess import modify_raw_poster
@@ -99,7 +96,7 @@ class MovieScraper(Movie):
             else:
                 movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
 
-        genres = [mov_genre for mov_genre in constants.MOVIE_GENRES if movie_gse and mov_genre.casefold() in movie_gse]
+        genres = [m_genre for m_genre in constants.MOVIE_GENRES if movie_gse and m_genre.casefold() in movie_gse]
         data = {
             "title": official_title,
             "summary": summary,
