@@ -1,151 +1,178 @@
+/*----------------------------------------------------------------------------*/
+/* Containers                                                                 */
+/*----------------------------------------------------------------------------*/
+
 QWidget
 {
-	color: #ffa500;
-	background-color: #242424;
+    color: #FFA500;
+    background-color: #242424;
 }
-
-
-.QLabel
-{
-	color: #ffa500;
-	background-color: #242424;
-	border-radius: 8px;
-	padding: 8px;
-}
-
-
-QMenu::item:selected
-{
-    background-color: #2b5370;
-}
-
-
-.QLineEdit
-{
-	color: #ffa500;
-	background-color: #3f3f3f;
-	selection-background-color: #2b5370;
-	border: 1px solid #ffa500;
-	border-top-left-radius: 5px;
-	border-bottom-right-radius: 5px;
-}
-
 
 .QFrame
 {
-	background-color: #3f3f3f;
-	border-top-right-radius: 20px;
-	border-bottom-left-radius: 20px;
+    background-color: #3F3F3F;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
 }
 
+/*----------------------------------------------------------------------------*/
+/* QPushButton                                                                */
+/*----------------------------------------------------------------------------*/
 
-.QTextEdit
+.QPushButton
 {
-    color: #ffa500;
+    color: #FFA500;
+    background-color: #2B5370;
+    border: 1px solid #FFA500;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 10px;
+}
+
+.QPushButton::pressed
+{
+    background-color: #353535;
+}
+
+.QPushButton::hover
+{
+    background-color: #496F8E;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QLabel                                                                     */
+/*----------------------------------------------------------------------------*/
+
+.QLabel
+{
+    color: #FFA500;
     background-color: #242424;
     border-radius: 8px;
     padding: 8px;
 }
 
+/*----------------------------------------------------------------------------*/
+/* QLineEdit                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QLineEdit
+{
+    color: #FFA500;
+    background-color: #3F3F3F;
+    selection-background-color: #2B5370;
+    border: 1px solid #FFA500;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QListWidget                                                                */
+/*----------------------------------------------------------------------------*/
 
 .QListWidget
 {
-	color: #ffa500;
-	background-color: #3f3f3f;
-	border: none;
+    color: #FFA500;
+    background-color: #3F3F3F;
+    border: none;
 }
 
-
-QListView::item:selected, QListView::item:selected:alternate
+.QListWidget::item
 {
-	color: #ffa500;
-	background-color: #2b5370;
+    border: none;
+    padding: 8px;
 }
-
 
 QListView::item:alternate
 {
     background-color: #353535;
 }
 
+QListView::item:hover, QListView::item:alternate:hover
+{
+    background: #242424;
+}
+
+QListView::item:selected, QListView::item:alternate:selected
+{
+    color: #FFA500;
+    background-color: #591010;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QProgressBar                                                               */
+/*----------------------------------------------------------------------------*/
+
+.QProgressBar
+{
+    background-color: #3F3F3F;
+    border: none;
+    border-radius: 2px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QComboBox                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QComboBox
+{
+    border: 1px solid #FFA500;
+    padding: 1px 18px 1px 3px;
+}
+
+.QComboBox:!editable
+{
+    color: #FFA500;
+    background-color: #2B5370;
+}
+
+.QComboBox QAbstractItemView
+{
+    color: #FFA500;
+    background-color: #2B5370;
+    border: 1px solid #FFA500;
+    outline: 0;
+}
+
+.QComboBox QAbstractItemView::item:hover
+{
+    color: #FFA500;
+    background-color: #591010;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QTextEdit                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QTextEdit
+{
+    color: #FFA500;
+    background-color: #242424;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QScrollBar                                                                 */
+/*----------------------------------------------------------------------------*/
 
 QScrollBar:vertical
 {
-	background-color: white;
-	border: none;
-	width: 1px;
-	margin: 0px 0px 0px 0px;
+    background-color: #FFFFFF;
+    border: none;
+    width: 1px;
+    margin: 0px 0px 0px 0px;
 }
-
 
 QScrollBar::handle:vertical
 {
-	background-color: #591010;
-}
-
-
-QProgressBar
-{
-	background-color: #3f3f3f;
-	border: none;
-	border-radius: 2px;
-}
-
-
-QProgressBar::chunk
-{
-	width:2px
-}
-
-
-QPushButton
-{
-	color: #ffa500;
-	background-color: #2b5370;
-	border: 1px solid #ffa500;
-	border-radius: 8px;
-	padding: 8px;
-	margin: 10px;
-	qproperty-iconSize: 24px;
-}
-
-
-QPushButton::hover
-{
-	background-color: #496f8e;
-}
-
-
-QPushButton::pressed
-{
-	background-color: #353535;
-}
-
-
-QComboBox
-{
-	border: 1px solid #ffa500;
-	padding: 1px 18px 1px 3px;
-}
-
-
-QComboBox:!editable
-{
-	color: #ffa500;
-	background-color: #2b5370;
-}
-
-
-QComboBox QAbstractItemView
-{
-	color: #ffa500;
-	background-color: #2b5370;
-	border: 1px solid #ffa500;
-	outline: 0;
-}
-
-
-QComboBox QAbstractItemView::item:hover
-{
     background-color: #591010;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QMenu                                                                      */
+/*----------------------------------------------------------------------------*/
+
+.QMenu::item:selected
+{
+    background-color: #2B5370;
 }
