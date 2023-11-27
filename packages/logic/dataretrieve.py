@@ -208,29 +208,22 @@ class MovieScraper(Movie):
             list[str]: Actors in a list.
         """
 
+        actors: list[str] = []
         soup = BeautifulSoup(page.html(), 'html.parser')
         starring_element = soup.find('th', string='Starring')
 
         if starring_element:
-            starring_element_parent = starring_element.parent
-            ul_element = starring_element.find_next('ul')
-        else:
-            return []
+            starring_element_parent: str = str(starring_element.parent)
+            regex_pattern_a = r"title=\"[A-zÀ-ú -\.]+\">(.+?)<\/a>"
+            regex_pattern_b = r"<li>([A-zÀ-ú -\.]+)<\/li>"
+            regex = regex_pattern_a + '|' + regex_pattern_b
+            actors: list[tuple] = re.findall(regex, starring_element_parent)
+            actors: list[str] = ["".join(element) for element in actors]
 
-        try_a = [a.text for a in starring_element_parent.find_all('a')]
-        try_a = [el for el in try_a if not any(char.isdigit() for char in el)]
-        if not ul_element:
-            return sorted(try_a, key=str.casefold)
-
-        try_b = [li.text for li in ul_element.find_all('li')]
-        try_b = [el for el in try_b if not any(char.isdigit() for char in el)]
-        final_try: set[str] = set().union(try_a, try_b)
-
-        return sorted([actor for actor in final_try], key=str.casefold)
+        return actors
 
     def get_youtube_link(self) -> str:
         """Generates an embedded YouTube link corresponding to the movie trailer.
-        Regex used here comes from a YouTube video by CodeFather.
 
         Returns:
             str: Embedded YouTube link.
