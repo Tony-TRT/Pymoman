@@ -79,7 +79,7 @@ QWidget
 .QListWidget::item
 {
     border: none;
-    padding: 8px;
+    padding: 5px;
 }
 
 QListView::item:alternate
@@ -90,6 +90,7 @@ QListView::item:alternate
 QListView::item:hover, QListView::item:alternate:hover
 {
     background: #242424;
+    padding: 10px;
 }
 
 QListView::item:selected, QListView::item:alternate:selected
@@ -137,6 +138,7 @@ QListView::item:selected, QListView::item:alternate:selected
 {
     color: #FFA500;
     background-color: #591010;
+    padding: 2px;
 }
 
 /*----------------------------------------------------------------------------*/
