@@ -4,7 +4,6 @@ These constants can be imported and used throughout the project to maintain
 consistency and ease of updates.
 """
 
-
 from typing import final
 from pathlib import Path
 
@@ -53,26 +52,26 @@ ICONS: final(dict) = {
 for key, value in ICONS.items():
     STR_ICONS[key] = str(value)
 
-MOVIE_GENRES: final(list[str]) = [
-    "Action",
-    "Adventure",
-    "Animation",
-    "Comedy",
-    "Crime",
-    "Documentary",
-    "Drama",
-    "Experimental",
-    "Fantasy",
-    "Historical",
-    "Horror",
-    "Martial Arts",
-    "Mystery",
-    "Romance",
-    "Science Fiction",
-    "Thriller",
-    "War",
-    "Western",
-]
+MOVIE_GENRES: final(dict) = {
+    "action": "action",
+    "adventure": "adventure",
+    "animation": "animated",
+    "comedy": "comedy",
+    "crime": "crime",
+    "documentary": "biography",
+    "drama": "drama",
+    "experimental": "experimental",
+    "fantasy": "fantasy",
+    "historical": "historical",
+    "horror": "horror",
+    "martial arts": "martial arts",
+    "mystery": "mystery",
+    "romance": "romance",
+    "science fiction": "sci-fi",
+    "thriller": "thriller",
+    "war": "war",
+    "western": "western"
+}
 
 MOVIE_RATINGS: final(dict) = {
     "-": "☆☆☆☆☆",

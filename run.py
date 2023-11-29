@@ -201,7 +201,7 @@ class MainWindow(AestheticWindow):
         self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
         self.cbb_genre.setMaxVisibleItems(5)
-        self.cbb_genre.addItems(["Genre"] + constants.MOVIE_GENRES)
+        self.cbb_genre.addItems(["Genre"] + [genre.title() for genre in constants.MOVIE_GENRES])
         self.cbb_actors = QtWidgets.QComboBox()
         self.cbb_actors.setMaxVisibleItems(5)
         self.clr_reload_cbb_actors()

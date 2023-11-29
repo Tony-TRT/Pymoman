@@ -52,7 +52,8 @@ class MovieScraper(Movie):
         official_title = f"{self.title.title()} ({self.year})"
         summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
         movie_gse = None
-        actors = []
+        actors: list[str] = []
+        genres: list[str] = []
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -96,7 +97,10 @@ class MovieScraper(Movie):
             else:
                 movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
 
-        genres = [m_genre for m_genre in constants.MOVIE_GENRES if movie_gse and m_genre.casefold() in movie_gse]
+        for key, value in constants.MOVIE_GENRES.items():
+            if key in movie_gse or value in movie_gse:
+                genres.append(key.title())
+
         data = {
             "title": official_title,
             "summary": summary,
