@@ -13,14 +13,15 @@ APP_HIDDEN_FOLDER: final(Path) = Path.joinpath(Path.home(), '.pymoman')
 
 STR_PATHS = {}
 PATHS: final(dict) = {
-    'base': BASE,
+    'settings': Path(APP_HIDDEN_FOLDER / "settings.json"),
     'cache': Path(APP_HIDDEN_FOLDER / "cache"),
     'collections': Path(APP_HIDDEN_FOLDER / "collections"),
     'resources': Path(BASE / "resources"),
     'font': Path(BASE / "resources" / "font" / "MerriweatherSans-Regular.ttf"),
     'default poster': Path(BASE / "resources" / "posters" / "default.jpg"),
     'wishlist': Path(BASE / "resources" / "posters" / "wishlist.jpg"),
-    'style': Path(BASE / "resources" / "style.qss"),
+    'default style': Path(BASE / "resources" / "styles" / "default.qss"),
+    'jungle style': Path(BASE / "resources" / "styles" / "jungle.qss"),
     'icons': Path(BASE / "resources" / "icons")
 }
 

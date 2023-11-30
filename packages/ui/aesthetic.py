@@ -40,7 +40,7 @@ class AestheticWindow(QWidget):
             None: None.
         """
 
-        with open(constants.PATHS.get('style'), 'r', encoding="UTF-8") as style_file:
+        with open(constants.PATHS.get('default style'), 'r', encoding="UTF-8") as style_file:
             self.setStyleSheet(style_file.read())
 
     def ui_load_font(self) -> None:
