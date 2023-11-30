@@ -309,6 +309,22 @@ class MainWindow(AestheticWindow):
 
         self.ui_progress_bar_animation()
 
+    def logic_commands(self) -> None:
+        """Search bar commands logic is managed here.
+
+        Returns:
+            None:None.
+        """
+
+        if self.le_search.text() not in self.commands:
+            return
+
+        for command, action in self.commands.items():
+            if self.le_search.text() == command:
+                self.le_search.clear()
+                action()
+                break
+
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
 
@@ -325,6 +341,7 @@ class MainWindow(AestheticWindow):
         self.cbb_genre.currentTextChanged.connect(self.logic_filter)
         self.cbb_actors.currentTextChanged.connect(self.logic_filter)
         self.le_search.textChanged.connect(self.logic_search_bar)
+        self.le_search.returnPressed.connect(self.logic_commands)
         self.lw_main.itemClicked.connect(self.logic_single_click)
         self.rating_adjuster.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
 
@@ -715,17 +732,20 @@ class MainWindow(AestheticWindow):
         self.directory_importer.show()
 
     def logic_search_bar(self) -> None:
-        """Search bar logic is here.
+        """Search bar logic is managed here.
 
         Returns:
             None: None.
         """
 
         completer = QtWidgets.QCompleter(self.commands, self)
+        # Not using the .qss file here to avoid a lot of complicated code.
         completer.popup().setStyleSheet("color: #FFA500; background-color: #3F3F3F;")
         self.le_search.setCompleter(completer)
 
         query: str = self.le_search.text().strip().lower()
+        if query.startswith('/'):
+            return
 
         if MainWindow.last_collection_opened:
             collection = MainWindow.last_collection_opened[0]
