@@ -47,8 +47,8 @@ class MainWindow(AestheticWindow):
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
         self.commands: dict = {
-            "/set_default_theme": None,
-            "/set_jungle_theme": None,
+            "/set_default_theme": partial(self.ui_apply_style, "default"),
+            "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
             "/set_default_font": None,
             "/set_cyber_font": None,
             "/sort_collection": None

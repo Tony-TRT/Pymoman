@@ -21,7 +21,7 @@ PATHS: final(dict) = {
     'default poster': Path(BASE / "resources" / "posters" / "default.jpg"),
     'wishlist': Path(BASE / "resources" / "posters" / "wishlist.jpg"),
     'default style': Path(BASE / "resources" / "styles" / "default.qss"),
-    'jungle style': Path(BASE / "resources" / "styles" / "jungle.qss"),
+    'cyber style': Path(BASE / "resources" / "styles" / "cyber.qss"),
     'icons': Path(BASE / "resources" / "icons")
 }
 
