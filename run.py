@@ -46,6 +46,13 @@ class MainWindow(AestheticWindow):
 
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
+        self.commands: dict = {
+            "/set_default_theme": None,
+            "/set_jungle_theme": None,
+            "/set_default_font": None,
+            "/set_cyber_font": None,
+            "/sort_collection": None
+        }
 
         ##################################################
         # Frames and layouts.
@@ -212,7 +219,7 @@ class MainWindow(AestheticWindow):
         self.le_search = QtWidgets.QLineEdit()
         self.le_search.setClearButtonEnabled(True)
         self.le_search.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.le_search.setPlaceholderText("Search")
+        self.le_search.setPlaceholderText("Search  or  run  '/'  commands.")
         self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
         self.lw_main.setAlternatingRowColors(True)
@@ -713,6 +720,10 @@ class MainWindow(AestheticWindow):
         Returns:
             None: None.
         """
+
+        completer = QtWidgets.QCompleter(self.commands, self)
+        completer.popup().setStyleSheet("color: #FFA500; background-color: #3F3F3F;")
+        self.le_search.setCompleter(completer)
 
         query: str = self.le_search.text().strip().lower()
 
