@@ -1,0 +1,175 @@
+/*----------------------------------------------------------------------------*/
+/* Containers                                                                 */
+/*----------------------------------------------------------------------------*/
+
+QWidget
+{
+    color: #EF745C;
+    background-color: #34073D;
+}
+
+.QFrame
+{
+    background-color: #531942;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QPushButton                                                                */
+/*----------------------------------------------------------------------------*/
+
+.QPushButton
+{
+    color: #EF745C;
+    background-color: #722B47;
+    border: 1px solid #EF745C;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 10px;
+}
+
+.QPushButton::hover
+{
+    background-color: #923E4D;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QLabel                                                                     */
+/*----------------------------------------------------------------------------*/
+
+.QLabel
+{
+    color: #EF745C;
+    background-color: #34073D;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QLineEdit                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QLineEdit
+{
+    color: #EF745C;
+    background-color: #531942;
+    selection-background-color: #923E4D;
+    border: 1px solid #EF745C;
+    border-top-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QListWidget                                                                */
+/*----------------------------------------------------------------------------*/
+
+.QListWidget
+{
+    color: #EF745C;
+    background-color: #531942;
+    border: none;
+}
+
+.QListWidget::item
+{
+    border: none;
+    padding: 5px;
+}
+
+QListView::item:alternate
+{
+    background-color: #722B47;
+}
+
+QListView::item:hover, QListView::item:alternate:hover
+{
+    background: #34073D;
+    padding: 10px;
+}
+
+QListView::item:selected, QListView::item:alternate:selected
+{
+    color: #EF745C;
+    background-color: #34073D;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QProgressBar                                                               */
+/*----------------------------------------------------------------------------*/
+
+.QProgressBar
+{
+    background-color: #531942;
+    border: none;
+    border-radius: 2px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QComboBox                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QComboBox
+{
+    border: 1px solid #EF745C;
+    padding: 1px 18px 1px 3px;
+}
+
+.QComboBox:!editable
+{
+    color: #EF745C;
+    background-color: #722B47;
+}
+
+.QComboBox QAbstractItemView
+{
+    color: #EF745C;
+    background-color: #722B47;
+    border: 1px solid #EF745C;
+    outline: 0;
+}
+
+.QComboBox QAbstractItemView::item:hover
+{
+    color: #EF745C;
+    background-color: #923E4D;
+    padding: 2px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QTextEdit                                                                  */
+/*----------------------------------------------------------------------------*/
+
+.QTextEdit
+{
+    color: #EF745C;
+    background-color: #34073D;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QScrollBar                                                                 */
+/*----------------------------------------------------------------------------*/
+
+QScrollBar:vertical
+{
+    background-color: #FFFFFF;
+    border: none;
+    width: 1px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical
+{
+    background-color: #923E4D;
+}
+
+/*----------------------------------------------------------------------------*/
+/* QMenu                                                                      */
+/*----------------------------------------------------------------------------*/
+
+.QMenu::item:selected
+{
+    background-color: #923E4D;
+}

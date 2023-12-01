@@ -29,11 +29,6 @@ QWidget
     margin: 10px;
 }
 
-.QPushButton::pressed
-{
-    background-color: #353535;
-}
-
 .QPushButton::hover
 {
     background-color: #496F8E;
