@@ -2,6 +2,7 @@
 This module contains the Collection class which allows the creation and management of movie collections.
 """
 
+import re
 import json
 from pathlib import Path
 from typing import Self
@@ -57,7 +58,7 @@ class Collection:
 
     @staticmethod
     def _filter_name(name: str) -> str:
-        """Filter unwanted characters.
+        """Filters the collection name and raises a ValueError if it is not suitable.
 
         Args:
             name (str): Name to filter.
@@ -66,21 +67,26 @@ class Collection:
             str: Filtered name.
         """
 
-        char_map: dict = {
-            '/': '',
-            '\\': '',
-            ':': ' -',
-            ';': '',
-            '"': ''
+        forbidden_names: dict = {
+            r"^$": "Name cannot be empty.",
+            r"^ +$": "Name cannot contain only spaces.",
+            r"^\W+$": "Name cannot contain only special characters.",
+            r".{25,}": "Name cannot exceed 25 characters."
         }
 
-        for key, value in char_map.items():
-            name = name.replace(key, value)
+        for regex, error_message in forbidden_names.items():
+            if re.match(regex, name):
+                raise ValueError(error_message)
+
+        unwanted_characters: str = '/\\:;"'
+
+        for unwanted_character in unwanted_characters:
+            name = name.replace(unwanted_character, "")
         name = name.strip()
 
         if name:
             return name
-        return "An ugly name"
+        raise ValueError("An unknown error has occurred.")
 
     @property
     def path(self) -> Path:
