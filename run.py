@@ -283,7 +283,7 @@ class MainWindow(AestheticWindow):
         collection: Collection = MainWindow.last_collection_opened[0]
         movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
-        if movie and movie.title not in [m.title for m in collection.movies]:
+        if movie:
             collection.add_movie(movie)
             self.logic_list_display(collection.movies)
 
@@ -303,9 +303,7 @@ class MainWindow(AestheticWindow):
             MainWindow.all_collections.append(Collection(name='My Wishlist'))
 
         wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
-
-        if movie.title not in [m.title for m in wishlist.movies]:
-            wishlist.add_movie(movie)
+        wishlist.add_movie(movie)
 
         self.ui_progress_bar_animation()
 
@@ -670,8 +668,8 @@ class MainWindow(AestheticWindow):
         if user_choice:
             new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
 
-            if new_name and value:              # Users can use a title that already exists when renaming.
-                res = movie.rename(new_name)    # However they cannot when adding a new movie.
+            if new_name and value:
+                res = movie.rename(new_name)
 
         else:
             res = movie.rename(movie.official_title)

@@ -30,6 +30,12 @@ class Movie:
 
         return f"{self.title}, {self.year}, {self.path}, {self.rating}/5"
 
+    def __eq__(self, other):
+
+        if isinstance(other, Movie):
+            return self.storage == other.storage and self.year == other.year
+        return False
+
     @property
     def actors(self) -> list[str]:
         """Retrieves movie's actors from the data file.

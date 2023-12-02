@@ -40,7 +40,8 @@ class Collection:
             None: None.
         """
 
-        self.movies.append(movie)
+        if isinstance(movie, Movie) and not any(movie == movie_to_check for movie_to_check in self.movies):
+            self.movies.append(movie)
 
     def export_as_txt(self, output_file: str | Path) -> None:
         """Export the collection to a text file.
