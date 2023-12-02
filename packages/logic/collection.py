@@ -16,7 +16,7 @@ class Collection:
 
     def __init__(self, name: str, movies=None):
 
-        if movies is None:
+        if not (type(movies) is list and all(isinstance(item, Movie) for item in movies)):
             movies = []
 
         self.name: str = self._filter_name(name)
