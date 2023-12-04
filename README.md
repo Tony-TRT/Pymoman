@@ -9,10 +9,11 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/0a0347ab-0de2-450c-83b2-8c0f0d20bd4e)
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/905b78af-53e5-48d5-b2f7-c3773fe7caf2)
 
 
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/1d931d23-f31e-416e-a222-bf4dee9b60b5)
+With an alternative theme:
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/0ffc3dc4-b0f3-452d-a93b-60ca79066c10)
 
 ## How to install
 It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under linux.
@@ -42,7 +43,6 @@ You can also try the [Windows executable.](https://github.com/Tony-TRT/Pymoman/r
 You must first create a collection, open it, and then add movies.
 In order to retrieve information from the internet, the application requires the release date of the movie, as we can all agree that 'Planet of the Apes' from 1968 is not the same film as 'Planet of the Apes' from 2001 :).
 Please note that regardless of the actions you take, everything will be lost upon closure if you do not save!
-
 
 ## How to help
 Any help is welcome; there are no strict constraints as long as the coding style remains somewhat consistent.
