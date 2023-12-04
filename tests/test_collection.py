@@ -76,5 +76,21 @@ class MovieListChecker(unittest.TestCase):
         self.assertListEqual(self.collection.movies, [])
 
 
+class MethodsChecker(unittest.TestCase):
+
+    def setUp(self):
+        self.collection = Collection(name="My collection")
+        self.movie = Movie(title="Movie", year=2000)
+        self.collection.add_movie(self.movie)
+
+    def tearDown(self):
+        self.collection.movies.clear()
+        self.collection.add_movie(self.movie)
+
+    def test_remove_movie(self):
+        self.collection.remove_movie(self.movie)
+        self.assertListEqual(self.collection.movies, [])
+
+
 if __name__ == '__main__':
     unittest.main()
