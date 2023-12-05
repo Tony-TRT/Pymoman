@@ -51,7 +51,7 @@ class MainWindow(AestheticWindow):
             "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
             "/set_default_font": None,
             "/set_cyber_font": None,
-            "/sort_collection": None
+            "/sort_collection": self.logic_sort_collection
         }
 
         ##################################################
@@ -784,6 +784,21 @@ class MainWindow(AestheticWindow):
             self.logic_list_display(MainWindow.all_collections)
             self.btn_add_movie.setEnabled(False)
             self.btn_remove_movie.setEnabled(False)
+
+    def logic_sort_collection(self) -> None:
+        """Sorts a collection alphabetically.
+
+        Returns:
+            None: None.
+        """
+
+        if not MainWindow.last_collection_opened:
+            return
+
+        collection: Collection = MainWindow.last_collection_opened[0]
+        collection.movies.sort()
+
+        self.logic_list_display(collection.movies)
 
     def logic_update_list_widget(self) -> None:
         """Refreshes the current items in the list widget.

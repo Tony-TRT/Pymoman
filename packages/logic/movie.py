@@ -36,6 +36,12 @@ class Movie:
             return self.storage == other.storage and self.year == other.year
         return False
 
+    def __lt__(self, other):
+
+        if isinstance(other, Movie):
+            return self.title.casefold() < other.title.casefold()
+        return False
+
     @property
     def actors(self) -> list[str]:
         """Retrieves movie's actors from the data file.
