@@ -37,8 +37,6 @@ Please keep in mind that this is an ongoing project, and many features are yet t
 
 3) Make sure to use the virtual environment and run 'run.py'.
 
-You can also try the [Windows executable.](https://github.com/Tony-TRT/Pymoman/releases/download/v0.1/Pymoman.exe)
-
 ## How to use
 You must first create a collection, open it, and then add movies.
 In order to retrieve information from the internet, the application requires the release date of the movie, as we can all agree that 'Planet of the Apes' from 1968 is not the same film as 'Planet of the Apes' from 2001 :).
