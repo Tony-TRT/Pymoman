@@ -16,10 +16,10 @@ With an alternative theme:
 ![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/0ffc3dc4-b0f3-452d-a93b-60ca79066c10)
 
 ## How to install
-It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under linux.
+It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under Linux.
 I recommend using Python 3.11 because that's the version I work with.
 
-Please keep in mind that this is an ongoing project, and many features are yet to be implemented.
+Please keep in mind that this is an ongoing project, and many features still need to be perfected.
 
 1) Clone the repository:
    
