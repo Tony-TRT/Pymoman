@@ -49,8 +49,8 @@ class MainWindow(AestheticWindow):
         self.commands: dict = {
             "/set_default_theme": partial(self.ui_apply_style, "default"),
             "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
-            "/set_default_font": None,
-            "/set_cyber_font": None,
+            "/set_default_font": partial(self.ui_apply_font, "default"),
+            "/set_cyber_font": partial(self.ui_apply_font, "cyber"),
             "/sort_collection": self.logic_sort_collection
         }
 

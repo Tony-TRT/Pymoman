@@ -32,34 +32,48 @@ class AestheticWindow(QWidget):
 
         self.icons = {}
         self.settings: dict = load_file_content(constants.PATHS.get('settings'))
-        self.application_font = None
-        self.application_font_big = None
-        self.application_font_small = None
+        self.default_font = None
+        self.cyber_font = None
+        self.default_font_big = None
+        self.default_font_small = None
 
         if self.settings.get("theme") == "cyber":
             self.ui_apply_style("cyber")
         else:
             self.ui_apply_style("default")
 
-        self.ui_load_font()
-        self.ui_apply_font()
+        self.ui_load_fonts()
 
-    def ui_apply_font(self) -> None:
-        """Applies the application font.
+        if self.settings.get("font") == "cyber":
+            self.ui_apply_font("cyber")
+        else:
+            self.ui_apply_font("default")
+
+    def ui_apply_font(self, style: str) -> None:
+        """Loads application font.
+
+        Args:
+            style (str): Font style (default or cyber).
 
         Returns:
             None: None.
         """
 
-        if self.application_font:
-            self.setFont(self.application_font)
-            QApplication.instance().setFont(self.application_font)
+        if style == "default" and self.default_font:
+            self.setFont(self.default_font)
+            QApplication.instance().setFont(self.default_font)
+        elif style == "cyber" and self.cyber_font:
+            self.setFont(self.cyber_font)
+            QApplication.instance().setFont(self.cyber_font)
+
+        self.settings['font'] = style
+        save_settings(self.settings)
 
     def ui_apply_style(self, style: str) -> None:
         """Loads application style.
 
         Args:
-            style (str): Style to load.
+            style (str): Application style (default or cyber).
 
         Returns:
             None: None.
@@ -75,24 +89,28 @@ class AestheticWindow(QWidget):
         self.settings['theme'] = style
         save_settings(self.settings)
 
-    def ui_load_font(self) -> None:
-        """Loads the application font.
+    def ui_load_fonts(self) -> None:
+        """Loads the application fonts.
 
         Returns:
             None: None.
         """
 
-        font = QFontDatabase.addApplicationFont(constants.STR_PATHS.get('font'))
-        font_family = QFontDatabase.applicationFontFamilies(font)[0]
+        default_font = QFontDatabase.addApplicationFont(constants.STR_PATHS.get('default font'))
+        default_font_family = QFontDatabase.applicationFontFamilies(default_font)[0]
+        cyber_font = QFontDatabase.addApplicationFont(constants.STR_PATHS.get('cyber font'))
+        cyber_font_family = QFontDatabase.applicationFontFamilies(cyber_font)[0]
 
-        self.application_font = QFont(font_family)
-        self.application_font.setPointSize(10)
+        self.default_font = QFont(default_font_family)
+        self.default_font.setPointSize(10)
+        self.cyber_font = QFont(cyber_font_family)
+        self.cyber_font.setPointSize(11)
 
-        self.application_font_big = QFont(font_family)
-        self.application_font_big.setPointSize(12)
+        self.default_font_big = QFont(default_font_family)
+        self.default_font_big.setPointSize(12)
 
-        self.application_font_small = QFont(font_family)
-        self.application_font_small.setPointSize(8)
+        self.default_font_small = QFont(default_font_family)
+        self.default_font_small.setPointSize(8)
 
     def ui_manage_icons(self) -> None:
         """Icons are managed here.

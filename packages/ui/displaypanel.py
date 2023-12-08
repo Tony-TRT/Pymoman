@@ -1,9 +1,9 @@
-"""This module contains the right display panel."""
-
+"""
+This module contains the right display panel.
+"""
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
-
 
 from packages.ui.aesthetic import AestheticWindow
 
@@ -59,11 +59,11 @@ class DisplayPanel(AestheticWindow):
         self.lbl_top_right.setAlignment(Qt.AlignRight)
         self.lbl_image = QtWidgets.QLabel()
         self.lbl_title = QtWidgets.QLabel()
-        self.lbl_title.setFont(self.application_font_big)
+        self.lbl_title.setFont(self.default_font_big)
         self.lbl_title.setAlignment(Qt.AlignCenter)
         self.lbl_title.setWordWrap(True)
         self.te_summary = QtWidgets.QTextEdit()
-        self.te_summary.setFont(self.application_font_small)
+        self.te_summary.setFont(self.default_font_small)
         self.te_summary.setReadOnly(True)
 
         self.image_layout.addWidget(self.lbl_top_right)
