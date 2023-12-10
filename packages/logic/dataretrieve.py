@@ -54,6 +54,7 @@ class MovieScraper(Movie):
         movie_gse = None
         actors: list[str] = []
         genres: list[str] = []
+        imdb_link: str = ""
 
         query = f"{self.title} {self.year}"
         wikipedia.set_lang("en")
@@ -101,12 +102,20 @@ class MovieScraper(Movie):
             if key in movie_gse or value in movie_gse:
                 genres.append(key.title())
 
+        for link in self.generate_imp_links(end='html'):
+            imdb_link: str = self.get_imdb_page_link(link)
+
+            if imdb_link:
+                break
+            sleep(1)
+
         data = {
             "title": official_title,
             "summary": summary,
             "actors": actors,
             "genre": genres,
-            "trailer": self.get_youtube_link()
+            "trailer": self.get_youtube_link(),
+            "imdb": imdb_link
         }
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
@@ -230,6 +239,39 @@ class MovieScraper(Movie):
             actors: list[str] = ["".join(element) for element in actors]
 
         return actors
+
+    def get_imdb_page_link(self, imp_url: str) -> str:
+        """Get the movie IMDB page using http://www.impawards.com/ URL.
+        (Since IMDB does not allow scripts to browse its pages.)
+
+        Args:
+            imp_url (str): http://www.impawards.com/ URL.
+
+        Returns:
+            str: IMDB link.
+        """
+
+        imdb_base_url: str = "https://www.imdb.com/title/{}/"
+
+        response = requests.get(imp_url, headers=self.headers, timeout=10)
+        if response.status_code != 200:
+            return ""
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        div_elements = soup.find_all(name='div', class_="rightsidesmallbordered")
+        regex = r"title/(\w{9})\""
+
+        imdb_identifier = None
+        for element in div_elements:
+            element = str(element)
+            if "www.imdb.com" not in element:
+                continue
+
+            imdb_identifier = re.search(regex, element)
+
+        if imdb_identifier is not None:
+            return imdb_base_url.format(imdb_identifier[1])
+        return ""
 
     def get_youtube_link(self) -> str:
         """Generates an embedded YouTube link corresponding to the movie trailer.
