@@ -12,7 +12,6 @@ While there's still work to be done to refine the code and add more features, Py
 ![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/0830454c-3313-46eb-9295-a89b3422633d)
 
 
-With an alternative theme:
 ![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/bb31e0c1-217d-4eb2-ae45-d3eadb484780)
 
 ## How to install
