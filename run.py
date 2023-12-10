@@ -22,7 +22,7 @@ from packages.ui.displaypanel import DisplayPanel
 from packages.ui.dirimporter import DirectoryImporter
 from packages.ui.movieappender import MovieAppender
 from packages.ui.ratingadjuster import RatingAdjuster
-from packages.ui.trailplayer import TrailerPlayer
+from packages.ui.minibrowser import MiniBrowser
 
 # This code is for the splash image when the application is launched from an executable.
 pyi_splash = None
@@ -88,7 +88,7 @@ class MainWindow(AestheticWindow):
         self.panel = None
         self.directory_importer = None
         self.rating_adjuster = None
-        self.trailer_viewer = None
+        self.mini_browser = None
 
         self.ui_manage_widgets()
 
@@ -422,9 +422,9 @@ class MainWindow(AestheticWindow):
         wishlist = QAction(self.icons.get('wishlist'), "Add to Wishlist")
         wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
         watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
-        watch_trailer.triggered.connect(partial(self.logic_watch_trailer, item))
+        watch_trailer.triggered.connect(partial(self.logic_mini_browser, item, 'trailer'))
         see_on_imdb = QAction(self.icons.get('imdb'), "See on IMDb")
-        # see_on_imdb.triggered.connect()
+        see_on_imdb.triggered.connect(partial(self.logic_mini_browser, item, 'imdb'))
         delete_cache = QAction(self.icons.get('delete'), "Delete cached data")
         delete_cache.triggered.connect(item.remove_cache)
 
@@ -586,6 +586,21 @@ class MainWindow(AestheticWindow):
 
         for item in display_list:
             self.lw_main.addItem(item)
+
+    def logic_mini_browser(self, movie: Movie, content: str) -> None:
+        """Instantiates a small browser that loads a link.
+
+        Args:
+            movie (Movie): The movie whose user wants to open a corresponding link.
+            content (str): The link that should be loaded; 'trailer' or 'imdb'.
+
+        Returns:
+            None: None.
+        """
+
+        self.mini_browser = MiniBrowser(movie=movie, content=content)
+        self.mini_browser.setAttribute(Qt.WA_DeleteOnClose)
+        self.mini_browser.show()
 
     def logic_modify_poster(self, movie: Movie, use_default=False) -> None:
         """Allows the user to display a new image for the movie,
@@ -818,17 +833,6 @@ class MainWindow(AestheticWindow):
 
         if selected_item_row:
             self.lw_main.scrollToItem(self.lw_main.item(selected_item_row))
-
-    def logic_watch_trailer(self, movie: Movie) -> None:
-        """Allows trailer viewing.
-
-        Returns:
-            None: None.
-        """
-
-        self.trailer_viewer = TrailerPlayer(movie)
-        self.trailer_viewer.setAttribute(Qt.WA_DeleteOnClose)
-        self.trailer_viewer.show()
 
     def clr_reload_cbb_actors(self) -> None:
         """Reloads a list of all actors in the combobox.

@@ -1,28 +1,26 @@
 """
-This module allows loading an embedded YouTube video in a QWebEngineView.
+This module loads a link in a small browser.
 """
-
 
 from PySide6.QtWidgets import QGridLayout
 from PySide6.QtCore import QUrl
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-
 from packages.logic.movie import Movie
 from packages.ui.aesthetic import AestheticWindow
 
 
-class TrailerPlayer(AestheticWindow):
+class MiniBrowser(AestheticWindow):
 
-    def __init__(self, movie: Movie):
+    def __init__(self, movie: Movie, content: str):
         super().__init__()
 
-        self.setWindowTitle("Python Movie Manager - Trailer Viewer")
+        self.setWindowTitle("Python Movie Manager - Mini Browser")
         self.setFixedSize(900, 400)
 
         url = ''
         if movie.data_file.exists():
-            url = movie.load_data_file().get('trailer')
+            url = movie.load_data_file().get(content)
 
         self.url = QUrl(url) if url else None
 
