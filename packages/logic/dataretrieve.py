@@ -125,7 +125,7 @@ class MovieScraper(Movie):
         if self.thumb.exists() and not override:
             return
 
-        links = self.generate_cnm_link() + self.generate_imp_links() + self.generate_movie_pdb_link()
+        links = self.generate_cnm_link() + self.generate_imp_links(end='jpg') + self.generate_movie_pdb_link()
         shuffle(links)
 
         for link in links:
@@ -162,25 +162,30 @@ class MovieScraper(Movie):
                 return [cont_poster_link.get('data-src')] if cont_poster_link else []
         return []
 
-    def generate_imp_links(self) -> list[str]:
-        """Generates IMP Awards download links.
+    def generate_imp_links(self, end: str) -> list[str]:
+        """Generates IMP Awards links.
+
+        Args:
+            end (str): End link extension, 'html' for web pages and 'jpg' for image links.
 
         Returns:
             list[str]: Links in a list.
         """
 
         imp_suffixes: set = {
-            "_ver2", "_ver3", "_ver4",
-            "_ver5", "_ver6", "_ver7",
-            "_ver8", "_ver9", "_ver10",
-            "_xlg", "_xxlg"
+            "_ver2", "_ver3", "_ver4", "_ver5", "_ver6", "_ver7",
+            "_ver8", "_ver9", "_ver10", "_xlg", "_xxlg"
         }
-        sanitized_title: str = self.title.strip().lower().replace(' ', '_')
-        sanitized_title: str = sanitized_title[4:] if sanitized_title.startswith('the_') else sanitized_title
-        def_imp_link: str = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{sanitized_title}.jpg"
-        links: list[str] = [f"{def_imp_link[:-4]}{suffix}.jpg" for suffix in imp_suffixes]
+
+        # Cached folder treats the movie title the same as http://www.impawards.com/ does.
+        sanitized_title: str = self.storage.stem
+
+        def_imp_link: str = f"{MovieScraper.sources_websites.get('SA')}{self.year}/posters/{sanitized_title}.{end}"
+        links: list[str] = [f"{def_imp_link[:def_imp_link.index(end) - 1]}{suffix}.{end}" for suffix in imp_suffixes]
         links.insert(0, def_imp_link)
 
+        if end == 'html':
+            return [link.replace('posters/', '') for link in links]
         return links
 
     def generate_movie_pdb_link(self) -> list[str]:
