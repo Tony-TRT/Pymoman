@@ -409,10 +409,10 @@ class MainWindow(AestheticWindow):
 
         movie_menu = QtWidgets.QMenu(self)
 
-        rename_movie = QAction(self.icons.get('note'), "Rename")
-        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, True))
         official_title = QAction(self.icons.get('official'), "Assign official title")
         official_title.triggered.connect(partial(self.logic_rename_movie, item, False))
+        rename_movie = QAction(self.icons.get('note'), "Rename")
+        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, True))
         edit_rating = QAction(self.icons.get('star'), "Edit rating")
         edit_rating.triggered.connect(partial(self.logic_show_rating_modifier))
         load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
@@ -423,6 +423,8 @@ class MainWindow(AestheticWindow):
         wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
         watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
         watch_trailer.triggered.connect(partial(self.logic_watch_trailer, item))
+        see_on_imdb = QAction(self.icons.get('imdb'), "See on IMDb")
+        # see_on_imdb.triggered.connect()
         delete_cache = QAction(self.icons.get('delete'), "Delete cached data")
         delete_cache.triggered.connect(item.remove_cache)
 
@@ -433,6 +435,7 @@ class MainWindow(AestheticWindow):
         movie_menu.addAction(load_default_poster)
         movie_menu.addAction(wishlist)
         movie_menu.addAction(watch_trailer)
+        movie_menu.addAction(see_on_imdb)
         movie_menu.addAction(delete_cache)
 
         movie_menu.exec(pos)

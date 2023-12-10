@@ -46,6 +46,7 @@ ICONS: final(dict) = {
     'official': Path(PATHS.get('icons') / "official.png"),
     'star': Path(PATHS.get('icons') / "star.png"),
     'trailer': Path(PATHS.get('icons') / "trailer.png"),
+    'imdb': Path(PATHS.get('icons') / "imdb.png"),
     'wishlist': Path(PATHS.get('icons') / "wishlist.png"),
     'new_poster': Path(PATHS.get('icons') / "new_poster.png"),
     'default_poster': Path(PATHS.get('icons') / "default_poster.png")

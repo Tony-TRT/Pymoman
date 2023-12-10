@@ -241,14 +241,14 @@ class MovieScraper(Movie):
         return actors
 
     def get_imdb_page_link(self, imp_url: str) -> str:
-        """Get the movie IMDB page using http://www.impawards.com/ URL.
-        (Since IMDB does not allow scripts to browse its pages.)
+        """Get the movie IMDb page using http://www.impawards.com/ URL.
+        (Since IMDb does not allow scripts to browse its pages.)
 
         Args:
             imp_url (str): http://www.impawards.com/ URL.
 
         Returns:
-            str: IMDB link.
+            str: IMDb link.
         """
 
         imdb_base_url: str = "https://www.imdb.com/title/{}/"
