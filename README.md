@@ -9,11 +9,11 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## Screenshots
 
-![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/905b78af-53e5-48d5-b2f7-c3773fe7caf2)
+![01](https://github.com/Tony-TRT/Pymoman/assets/146631446/0830454c-3313-46eb-9295-a89b3422633d)
 
 
 With an alternative theme:
-![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/0ffc3dc4-b0f3-452d-a93b-60ca79066c10)
+![02](https://github.com/Tony-TRT/Pymoman/assets/146631446/bb31e0c1-217d-4eb2-ae45-d3eadb484780)
 
 ## How to install
 It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under Linux.
