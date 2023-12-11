@@ -16,7 +16,8 @@ While there's still work to be done to refine the code and add more features, Py
 
 ## How to install
 It works on Windows and Linux (tested on Debian Sid), although there are some display faults in QComboBoxes under Linux.
-I recommend using Python 3.11 because that's the version I work with.
+In order for everything to work as well as possible I recommend using Python 3.11.
+On Linux, an error involving Qt may be displayed at startup in the terminal. These packages may fix the problem: libxcb-xinerama0-dev, libxcb-cursor0.
 
 Please keep in mind that this is an ongoing project, and many features still need to be perfected.
 
