@@ -3,10 +3,8 @@ This module is dedicated to the organization and classification of data.
 It provides functions and utilities to parse, structure, and categorize information.
 """
 
-
 import json
 from pathlib import Path
-
 
 from packages.constants import constants
 from packages.logic.movie import Movie
@@ -35,14 +33,14 @@ def load_all_actors() -> list[str]:
         list[str]: Actors names.
     """
 
-    full_list = set()
+    full_list: set[str] = set()
 
     for file_path in constants.PATHS.get('cache').glob('**/data.json'):
         content: dict = load_file_content(file_path)
-        actors: list[str] = content.get('actors', ['Unknown'])
+        actors: list[str] = content.get('actors', [])
         full_list.update(actors)
 
-    return sorted(list(full_list), key=str.casefold)
+    return sorted(list(full_list), key=lambda x: str.casefold(x))
 
 
 def load_all_movies() -> list[Movie]:
