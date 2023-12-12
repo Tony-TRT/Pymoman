@@ -67,7 +67,7 @@ def load_collection_movies(collection_path) -> list[Movie]:
         list[Movie]: Collection's movies.
     """
 
-    content: dict = load_file_content(collection_path)
+    content: list[dict] = load_file_content(collection_path)
 
     if not content:
         return []
@@ -80,14 +80,14 @@ def load_collection_movies(collection_path) -> list[Movie]:
     return [movie for movie in movies if movie]
 
 
-def load_file_content(input_file) -> dict:
+def load_file_content(input_file) -> dict | list[dict]:
     """Loads a json file and returns its content.
 
     Args:
         input_file: File's path.
 
     Returns:
-        dict: File's content.
+        dict | list[dict]: File's content.
     """
 
     try:
