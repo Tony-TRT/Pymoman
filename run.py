@@ -111,7 +111,7 @@ class MainWindow(AestheticWindow):
         self.logic_list_display(MainWindow.all_collections)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
-        """Right information panel that displays information about the selected item.
+        """Displays the correct information in the right information panel.
 
         Args:
             item: Collection or Movie object.
