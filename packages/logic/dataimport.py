@@ -3,8 +3,6 @@ This module is dedicated to the organization and classification of data.
 It provides functions and utilities to parse, structure, and categorize information.
 """
 
-from __future__ import annotations
-
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -47,7 +45,7 @@ def load_all_actors() -> list[str]:
     return sorted(list(full_list), key=lambda x: str.casefold(x))
 
 
-def load_all_movies() -> list[Movie]:
+def load_all_movies() -> list["Movie"]:
     """Returns a list of Movie objects from all saved collections.
 
     Returns:
@@ -61,7 +59,7 @@ def load_all_movies() -> list[Movie]:
     return full_list
 
 
-def load_collection_movies(collection_path) -> list[Movie]:
+def load_collection_movies(collection_path) -> list["Movie"]:
     """Returns a list of Movie objects from a collection's path.
 
     Args:
