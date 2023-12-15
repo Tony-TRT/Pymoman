@@ -7,7 +7,8 @@ from datetime import datetime
 from pathlib import Path
 
 from packages.constants import constants
-from packages.logic import dataimport
+from packages.logic.dataimport import load_file_content
+from packages.logic.dataprocess import filter_name
 
 
 class Movie:
@@ -17,7 +18,7 @@ class Movie:
         if len(title) < 2 or not isinstance(year, int) or not 1900 <= year <= (datetime.now().year + 5):
             raise ValueError
 
-        self.title = title.strip()
+        self.title = filter_name(title, limit=60)
         self.year = year
         self.path = path
         self.rating = rating
@@ -93,7 +94,7 @@ class Movie:
             dict: Data file's content.
         """
 
-        return dataimport.load_file_content(self.data_file)
+        return load_file_content(self.data_file)
 
     @property
     def official_title(self) -> str:
@@ -141,11 +142,7 @@ class Movie:
 
         old_storage: Path = self.storage
 
-        b_char = '&"(-_='
-        if any(new_title.startswith(char) or new_title.endswith(char) for char in b_char):
-            return False
-
-        self.title = new_title.strip()
+        self.title = filter_name(new_title, limit=60)
 
         if self.storage == old_storage:
             return True

@@ -16,25 +16,26 @@ class NameChecker(unittest.TestCase):
 
     def test_empty_name_raises_value_error(self):
         with self.assertRaises(ValueError):
-            Collection("")
+            Collection(name="")
 
     def test_name_with_only_spaces_raises_value_error(self):
         with self.assertRaises(ValueError):
-            Collection("   ")
+            Collection(name="   ")
 
     def test_name_with_only_special_characters_raises_value_error(self):
         with self.assertRaises(ValueError):
-            Collection("%$€")
+            Collection(name="%$€")
 
     def test_too_long_name_raises_value_error(self):
+        name = 'a' * 30
         with self.assertRaises(ValueError):
-            Collection("An excessively long and relatively boring collection name")
+            Collection(name=name)
 
 
 class MovieListChecker(unittest.TestCase):
 
     def setUp(self):
-        self.collection = Collection("My collection")
+        self.collection = Collection(name="My collection")
 
     def tearDown(self):
         self.collection.movies.clear()

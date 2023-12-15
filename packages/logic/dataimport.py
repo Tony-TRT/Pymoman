@@ -3,11 +3,15 @@ This module is dedicated to the organization and classification of data.
 It provides functions and utilities to parse, structure, and categorize information.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from packages.constants import constants
-from packages.logic.movie import Movie
+if TYPE_CHECKING:
+    from packages.logic.movie import Movie
 
 
 def find_movie_files(directory: Path) -> list[Path]:
@@ -112,6 +116,7 @@ def make_movie(title: str, year: int, path, rating) -> tuple:
         tuple: Tuple containing Movie object or False.
     """
 
+    from packages.logic.movie import Movie
     movie = (False,)
 
     try:

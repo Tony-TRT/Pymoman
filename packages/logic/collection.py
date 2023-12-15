@@ -2,13 +2,13 @@
 This module contains the Collection class which allows the creation and management of movie collections.
 """
 
-import re
 import json
 from pathlib import Path
 from typing import Self
 
 from packages.constants import constants
 from packages.logic.dataimport import load_collection_movies
+from packages.logic.dataprocess import filter_name
 from packages.logic.movie import Movie
 
 
@@ -19,7 +19,7 @@ class Collection:
         if not (type(movies) is list and all(isinstance(item, Movie) for item in movies)):
             movies = []
 
-        self.name: str = self._filter_name(name)
+        self.name: str = filter_name(name)
         self.movies: list[Movie] = movies
 
     def __str__(self):
@@ -56,38 +56,6 @@ class Collection:
         with open(output_file, 'w', encoding="UTF-8") as file:
             for movie in self.movies:
                 file.write(f"- {movie.title}{f' ({movie.year})' if str(movie.year) not in movie.title else ''}\n")
-
-    @staticmethod
-    def _filter_name(name: str) -> str:
-        """Filters the collection name and raises a ValueError if it is not suitable.
-
-        Args:
-            name (str): Name to filter.
-
-        Returns:
-            str: Filtered name.
-        """
-
-        forbidden_names: dict = {
-            r"^$": "Name cannot be empty.",
-            r"^ +$": "Name cannot contain only spaces.",
-            r"^\W+$": "Name cannot contain only special characters.",
-            r".{25,}": "Name cannot exceed 25 characters."
-        }
-
-        for regex, error_message in forbidden_names.items():
-            if re.match(regex, name):
-                raise ValueError(error_message)
-
-        unwanted_characters: str = '/\\:;"'
-
-        for unwanted_character in unwanted_characters:
-            name = name.replace(unwanted_character, "")
-        name = name.strip()
-
-        if name:
-            return name
-        raise ValueError("An unknown error has occurred.")
 
     @property
     def path(self) -> Path:
@@ -136,7 +104,7 @@ class Collection:
         """
 
         old_path = self.path
-        self.name = self._filter_name(new_name)
+        self.name = filter_name(new_name)
 
         if old_path.exists():
             self.save()
