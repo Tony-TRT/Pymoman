@@ -31,5 +31,22 @@ class NameChecker(unittest.TestCase):
             Movie(title=title, year=2000)
 
 
+class YearChecker(unittest.TestCase):
+
+    def test_too_old_year_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            Movie(title="Movie", year=1850)
+
+    def test_too_far_year_raises_value_error(self):
+        from datetime import datetime
+        year = datetime.now().year + 10
+        with self.assertRaises(ValueError):
+            Movie(title="Movie", year=year)
+
+    def test_year_is_not_int_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            Movie(title="Movie", year="2000")  # type: ignore
+
+
 if __name__ == '__main__':
     unittest.main()
