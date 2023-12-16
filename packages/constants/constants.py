@@ -16,6 +16,7 @@ PATHS: final(dict) = {
     'settings': Path(APP_HIDDEN_FOLDER / "settings.json"),
     'cache': Path(APP_HIDDEN_FOLDER / "cache"),
     'collections': Path(APP_HIDDEN_FOLDER / "collections"),
+    'recommendations': Path(APP_HIDDEN_FOLDER / "recommendations"),
     'resources': Path(BASE / "resources"),
     'default font': Path(BASE / "resources" / "fonts" / "default.ttf"),
     'cyber font': Path(BASE / "resources" / "fonts" / "cyber.ttf"),
