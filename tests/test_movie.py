@@ -48,5 +48,20 @@ class YearChecker(unittest.TestCase):
             Movie(title="Movie", year="2000")  # type: ignore
 
 
+class MethodsChecker(unittest.TestCase):
+
+    def test_storage_path(self):
+        from pathlib import Path
+        expected_a: Path = Path.joinpath(Path.home(), '.pymoman', 'cache', 'my_movie')
+        expected_b: Path = Path.joinpath(Path.home(), '.pymoman', 'cache', 'best_movie')
+        expected_c: Path = Path.joinpath(Path.home(), '.pymoman', 'cache', 'movie_of_the_year')
+        movie_a = Movie(title="My Movie", year=2000)
+        movie_b = Movie(title="The Best Movie", year=2000)
+        movie_c = Movie(title="The Movie of The Year", year=2000)
+        self.assertEqual(movie_a.storage, expected_a)
+        self.assertEqual(movie_b.storage, expected_b)
+        self.assertEqual(movie_c.storage, expected_c)
+
+
 if __name__ == '__main__':
     unittest.main()
