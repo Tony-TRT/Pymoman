@@ -26,7 +26,8 @@ class MovieScraper(Movie):
         "SA": "http://www.impawards.com/",
         "SB": "https://www.movieposterdb.com/",
         "SC": "https://www.cinematerial.com/",
-        "SD": "https://www.youtube.com/"
+        "SD": "https://www.youtube.com/",
+        "SE": "https://tastedive.com/"
     }
 
     def __init__(self, movie: Movie):
@@ -272,6 +273,40 @@ class MovieScraper(Movie):
         if imdb_identifier is not None:
             return imdb_base_url.format(imdb_identifier[1])
         return ""
+
+    def get_recommendations(self) -> list[str]:
+        """Retrieves movie titles that the user might like.
+
+        Returns:
+            list[str]: Recommendations in a list.
+        """
+
+        sanitized_title: list[str] = self.title.replace(f"({self.year})", '').strip().split()
+        sanitized_title: str = '-'.join([item.title() for item in sanitized_title])
+        queries: list[str] = [f"{sanitized_title}-Movie", f"{sanitized_title}-{self.year}", sanitized_title]
+
+        response = ""
+        for attempt in queries:
+            url = f"{self.sources_websites.get('SE')}movies/like/{attempt}"
+            response = requests.get(url, headers=self.headers, timeout=10)
+            if response.status_code != 200:
+                continue
+            else:
+                break
+
+        regex = r'"recommendations":"(.*?), (.*?)?, (.*?)?"'
+        recommendations = re.search(regex, response.text)
+
+        if recommendations is None:
+            return []
+
+        valid_recommendations: list[str] = []
+        for i in range(1, 4):
+            suggestion: str = recommendations.group(i)
+            if suggestion:
+                valid_recommendations.append(suggestion.strip())
+
+        return valid_recommendations
 
     def get_youtube_link(self) -> str:
         """Generates an embedded YouTube link corresponding to the movie trailer.

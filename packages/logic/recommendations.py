@@ -8,6 +8,7 @@ from pathlib import Path
 
 from packages.constants import constants
 from packages.logic.dataimport import load_all_movies
+from packages.logic.dataretrieve import MovieScraper
 from packages.logic.movie import Movie
 
 
@@ -58,9 +59,12 @@ def main() -> None:
         return
 
     for file in constants.PATHS.get('recommendations').iterdir():
-        file.unlink()
+        file.unlink()  # Removes old recommendations which may have become obsolete.
 
+    many_recommendations: set[str] = set()
+    for movie in selected_movies.values():
+        scraper = MovieScraper(movie)
+        many_recommendations.update(scraper.get_recommendations())
 
-# Get 3 recommendations for these 3 films, they cannot be identical or already present in a collection.
-# Download the posters of these 3 recommendations in the recommendations directory.
-# Obtain and organize the trailer links in a json file.
+    if not many_recommendations:
+        return
