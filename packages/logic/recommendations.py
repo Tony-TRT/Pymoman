@@ -1,15 +1,34 @@
 """
-This module contains the logic for new movie recommendations.
-It is supposed to run in the background.
+This module encapsulates the logic for generating new movie recommendations.
+It is designed to operate in the background.
 """
 
 from random import choice
 from pathlib import Path
+import base64
 
 from packages.constants import constants
 from packages.logic.dataimport import load_all_movies
 from packages.logic.dataretrieve import MovieScraper
 from packages.logic.movie import Movie
+
+
+SUGGESTED_MOVIES: dict = {
+    "Movie 1": [],
+    "Movie 2": [],
+    "Movie 3": []
+}
+
+
+def update_dict(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if not (isinstance(result, tuple) and len(result) == 3):
+            raise ValueError
+        for index, key in enumerate(SUGGESTED_MOVIES):
+            SUGGESTED_MOVIES[key].append(result[index])
+        return result
+    return wrapper
 
 
 def check_folder() -> bool:
@@ -27,66 +46,100 @@ def check_folder() -> bool:
     return False
 
 
-def collect_trailer_links(recommendations_dictionary: dict) -> dict:
-    """Adds trailer links to movies in the dictionary.
+@update_dict
+def collect_trailer_links(movies: tuple[Movie]) -> tuple:
+    """Gathers the trailer links for the given input movies.
 
     Args:
-        recommendations_dictionary (dict): str keys paired with Movie objects.
+        movies (tuple[Movie]): A tuple containing three Movie objects.
 
     Returns:
-        dict: str keys paired with a tuple containing Movie and str objects.
+        tuple: A tuple containing three YouTube links for movie trailers.
     """
 
-    for key, value in recommendations_dictionary.items():
-        scraper = MovieScraper(value)
-        recommendations_dictionary[key] = (value, scraper.get_youtube_link(year=False))
+    links: list = []
+    for movie in movies:
+        scraper = MovieScraper(movie)
+        links.append(scraper.get_youtube_link(year=False))
 
-    return recommendations_dictionary
+    return tuple(links)
 
 
-def film_picker() -> dict:
-    """Chooses three random movies from the user's personal collections.
-    These movies will be the ones used to get recommendations.
+def film_picker() -> list[Movie]:
+    """Selects three random movies from the user's personal collection.
+    These randomly chosen movies serve as the basis for obtaining recommendations.
 
     Returns:
-        dict: The three chosen films each paired with a key.
+        list[Movie]: A list containing the three selected movies.
     """
 
     all_movies: list[Movie] = load_all_movies()
-    lucky_movies: dict = {
-        "Movie A": None,
-        "Movie B": None,
-        "Movie C": None
-    }
+    selected_movies: list[Movie] = []
 
-    for movie in lucky_movies:
+    for _ in range(3):
         try:
-            lucky_movies[movie] = choice(all_movies)
+            selected_movies.append(choice(all_movies))
         except IndexError:
-            return {}
+            return []
 
-    return lucky_movies
+    return selected_movies
 
 
-def str_to_movie(recommendations_dictionary: dict) -> dict:
-    """Converts strings into Movie objects.
-    This operation is necessary in order to be able to use web scraping module which needs a Movie object.
+@update_dict
+def generate_image_filename(dictionary: dict) -> tuple:
+    """Generates the filenames for movie posters.
+    Trailer links and movie title are encoded in the filename using the base64 module for simplification.
 
     Args:
-        recommendations_dictionary (dict): str keys paired with str objects.
+        dictionary (dict): A dictionary where values are links, and keys associated with these values are Movie objects.
 
     Returns:
-        dict: str keys paired with Movie objects.
+        tuple: A tuple containing filenames for the posters of the three recommended movies.
     """
+
+    separator: str = ':::'
+
+    filenames: list = []
+    for link, movie in dictionary.items():
+        information: str = movie.title + separator + link
+        information_bytes = information.encode('ascii')
+        information_base64 = base64.b64encode(information_bytes)
+        filenames.append(information_base64)
+
+    return tuple(filenames)
+
+
+@update_dict
+def generate_recommendations(movies: list[Movie]) -> tuple:
+    """Generates three Movie objects corresponding to film suggestions for the user using the web scraping module.
+
+    Args:
+        movies (list[Movie]): Movies to generate recommendations from.
+
+    Returns:
+        tuple: A tuple containing three Movie objects representing recommended films or nothing.
+    """
+
+    many_recommendations: set[str] = set()
+    for movie in movies:
+        scraper = MovieScraper(movie)
+        many_recommendations.update(scraper.get_recommendations())
+
+    if len(many_recommendations) < 3:
+        return ()
+
+    while len(many_recommendations) > 3:
+        many_recommendations.pop()
 
     dummy_year: int = 2000  # Year is required to create a Movie object.
     # In this specific case, a wrong year is not problematic.
 
-    for key, value in recommendations_dictionary.items():
-        movie_object: Movie = Movie(title=value, year=dummy_year)
-        recommendations_dictionary[key] = movie_object
+    recommended_movies: list = []
+    for recommendation in many_recommendations:
+        movie_object: Movie = Movie(title=recommendation, year=dummy_year)
+        recommended_movies.append(movie_object)
 
-    return recommendations_dictionary
+    return tuple(recommended_movies)
 
 
 def main() -> None:
@@ -99,16 +152,6 @@ def main() -> None:
     for file in constants.PATHS.get('recommendations').iterdir():
         file.unlink()  # Removes old recommendations which may have become obsolete.
 
-    many_recommendations: set[str] = set()
-    for movie in selected_movies.values():
-        scraper = MovieScraper(movie)
-        many_recommendations.update(scraper.get_recommendations())
-
-    if len(many_recommendations) < 3:
-        return
-
-    for movie in selected_movies:
-        selected_movies[movie] = many_recommendations.pop()
-
-    selected_movies: dict = str_to_movie(selected_movies)
-    selected_movies: dict = collect_trailer_links(selected_movies)
+    recommendations: tuple[Movie] = generate_recommendations(selected_movies)
+    links: tuple[str] = collect_trailer_links(recommendations)
+    generate_image_filename(dict(zip(links, recommendations)))
