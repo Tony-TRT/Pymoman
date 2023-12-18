@@ -51,6 +51,27 @@ def film_picker() -> dict:
     return lucky_movies
 
 
+def str_to_movie(recommendations_dictionary: dict) -> dict:
+    """Converts strings into Movie objects.
+    This operation is necessary in order to be able to use web scraping module which needs a Movie object.
+
+    Args:
+        recommendations_dictionary (dict): str keys paired with str objects.
+
+    Returns:
+        dict: str keys paired with Movie objects.
+    """
+
+    dummy_year: int = 2000  # Year is required to create a Movie object.
+    # In this specific case, a wrong year is not problematic.
+
+    for key, value in recommendations_dictionary.items():
+        movie_object: Movie = Movie(title=value, year=dummy_year)
+        recommendations_dictionary[key] = movie_object
+
+    return recommendations_dictionary
+
+
 def main() -> None:
     directory = check_folder()
     selected_movies = film_picker()
@@ -66,5 +87,9 @@ def main() -> None:
         scraper = MovieScraper(movie)
         many_recommendations.update(scraper.get_recommendations())
 
-    if not many_recommendations:
+    if len(many_recommendations) < 3:
         return
+
+    for movie in selected_movies:
+        selected_movies[movie] = many_recommendations.pop()
+    selected_movies: dict = str_to_movie(selected_movies)
