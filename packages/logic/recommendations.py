@@ -27,6 +27,23 @@ def check_folder() -> bool:
     return False
 
 
+def collect_trailer_links(recommendations_dictionary: dict) -> dict:
+    """Adds trailer links to movies in the dictionary.
+
+    Args:
+        recommendations_dictionary (dict): str keys paired with Movie objects.
+
+    Returns:
+        dict: str keys paired with a tuple containing Movie and str objects.
+    """
+
+    for key, value in recommendations_dictionary.items():
+        scraper = MovieScraper(value)
+        recommendations_dictionary[key] = (value, scraper.get_youtube_link(year=False))
+
+    return recommendations_dictionary
+
+
 def film_picker() -> dict:
     """Chooses three random movies from the user's personal collections.
     These movies will be the ones used to get recommendations.
@@ -92,4 +109,6 @@ def main() -> None:
 
     for movie in selected_movies:
         selected_movies[movie] = many_recommendations.pop()
+
     selected_movies: dict = str_to_movie(selected_movies)
+    selected_movies: dict = collect_trailer_links(selected_movies)

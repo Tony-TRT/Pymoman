@@ -308,14 +308,17 @@ class MovieScraper(Movie):
 
         return valid_recommendations
 
-    def get_youtube_link(self) -> str:
+    def get_youtube_link(self, year: bool = True) -> str:
         """Generates an embedded YouTube link corresponding to the movie trailer.
+
+        Args:
+            year (bool): Decide whether to include the year in the YouTube query or not.
 
         Returns:
             str: Embedded YouTube link.
         """
 
-        sanitized_query = f"{self.title.strip().replace(' ', '+')}+{self.year}"
+        sanitized_query = f"{self.title.strip().replace(' ', '+')}{f'+{self.year}' if year else ''}"
         base_link = f"{self.sources_websites.get('SD')}embed/"
         page = f"{self.sources_websites.get('SD')}results?search_query={sanitized_query}+trailer"
 
