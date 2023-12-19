@@ -104,7 +104,8 @@ def generate_image_filename(dictionary: dict) -> tuple:
         information: str = movie.title + separator + link
         information_bytes = information.encode('ascii')
         information_base64 = base64.b64encode(information_bytes)
-        filenames.append(information_base64)
+        hex_str = information_base64.decode('unicode_escape')
+        filenames.append(hex_str)
 
     return tuple(filenames)
 
@@ -155,3 +156,11 @@ def main() -> None:
     recommendations: tuple[Movie] = generate_recommendations(selected_movies)
     links: tuple[str] = collect_trailer_links(recommendations)
     generate_image_filename(dict(zip(links, recommendations)))
+
+    for movie, _, filename in SUGGESTED_MOVIES.values():
+        scraper = MovieScraper(movie)
+        scraper.download_poster(
+            override=True,
+            dir_path=constants.PATHS.get('recommendations'),
+            filename=filename + '.jpg',
+            year=False)

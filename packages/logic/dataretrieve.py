@@ -5,8 +5,9 @@ The information retrieved and the manner in which it is retrieved is legal and t
 to respect the source websites by deliberately slowing down the program.
 """
 
-import json
 import re
+import json
+from pathlib import Path
 from random import shuffle
 from time import sleep
 
@@ -122,26 +123,35 @@ class MovieScraper(Movie):
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)
 
-    def download_poster(self, override=False) -> None:
+    def download_poster(self, override: bool = False, dir_path=None, filename="thumb.jpg", year: bool = True) -> None:
         """Downloads movie poster.
 
         Args:
-            override (bool): True = replace current poster, False = do not replace current poster.
+            override (bool): Set to True to replace existing images.
+            dir_path (Path): Allows specifying a destination path for the downloaded image.
+            filename (str): Allows specifying a filename for the downloaded image.
+            year (bool): Set to True to include the release year in the queries. If year is uncertain, set it to False.
 
         Returns:
             None: None.
         """
 
-        if self.thumb.exists() and not override:
+        dir_path: Path = self.storage if dir_path is None else dir_path
+        path: Path = Path.joinpath(dir_path, filename)
+
+        if path.exists() and not override:
             return
 
-        links = self.generate_cnm_link() + self.generate_imp_links(end='jpg') + self.generate_movie_pdb_link()
+        if year:
+            links = self.generate_cnm_link() + self.generate_imp_links(end='jpg') + self.generate_movie_pdb_link()
+        else:
+            links = self.generate_cnm_link() + self.generate_movie_pdb_link()
         shuffle(links)
 
         for link in links:
             response = requests.get(link, headers=self.headers, timeout=10)
             if response.status_code == 200:
-                self._write_img_to_disk(response)
+                self._write_img_to_disk(url=response, path=path)
                 break
             else:
                 sleep(3)
@@ -334,17 +344,19 @@ class MovieScraper(Movie):
 
         return base_link + identifiers[0]
 
-    def _write_img_to_disk(self, url: requests.Response) -> None:
+    @staticmethod
+    def _write_img_to_disk(url: requests.Response, path: Path) -> None:
         """Writes image to disk.
 
         Args:
             url (requests.Response): Image link.
+            path (Path): Destination path.
 
         Returns:
             None: None.
         """
 
-        with open(self.thumb, "wb") as poster:
+        with open(path, "wb") as poster:
             poster.write(url.content)
 
-        modify_raw_poster(self.thumb)
+        modify_raw_poster(path)
