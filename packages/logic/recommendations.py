@@ -143,6 +143,31 @@ def generate_recommendations(movies: list[Movie]) -> tuple:
     return tuple(recommended_movies)
 
 
+def retrieve_information_from_files() -> dict:
+    """Retrieves information about recommended movies from file names.
+
+    Returns:
+        dict: Dictionary containing organized information about the movies.
+    """
+
+    files = constants.PATHS.get('recommendations').iterdir()
+    files = [file for file in files if file.suffix == '.jpg']
+
+    if len(files) != 3:
+        return {}
+
+    movies_data: dict = {}
+    for file in files:
+        information = file.stem
+        information_bytes = information.encode('unicode_escape')
+        decoded_bytes = base64.b64decode(information_bytes)
+        decoded_information = decoded_bytes.decode('ascii')
+        data = decoded_information.split(':::')
+        movies_data[str(file.resolve())] = data
+
+    return movies_data
+
+
 def main() -> None:
     directory = check_folder()
     selected_movies = film_picker()
