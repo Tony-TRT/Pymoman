@@ -23,6 +23,7 @@ from packages.ui.dirimporter import DirectoryImporter
 from packages.ui.movieappender import MovieAppender
 from packages.ui.ratingadjuster import RatingAdjuster
 from packages.ui.minibrowser import MiniBrowser
+from packages.ui.suggester import RecPanel
 
 # This code is for the splash image when the application is launched from an executable.
 pyi_splash = None
@@ -89,6 +90,7 @@ class MainWindow(AestheticWindow):
         self.directory_importer = None
         self.rating_adjuster = None
         self.mini_browser = None
+        self.rec_panel = None
 
         self.ui_manage_widgets()
 
@@ -229,6 +231,7 @@ class MainWindow(AestheticWindow):
         self.movie_appender = MovieAppender()
         self.rating_adjuster = RatingAdjuster()
         self.panel = DisplayPanel()
+        self.rec_panel = RecPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -599,7 +602,6 @@ class MainWindow(AestheticWindow):
         """
 
         self.mini_browser = MiniBrowser(movie=movie, content=content)
-        self.mini_browser.setAttribute(Qt.WA_DeleteOnClose)
         self.mini_browser.show()
 
     def logic_modify_poster(self, movie: Movie, use_default=False) -> None:
