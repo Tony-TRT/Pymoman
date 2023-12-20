@@ -150,6 +150,9 @@ def retrieve_information_from_files() -> dict:
         dict: Dictionary containing organized information about the movies.
     """
 
+    if not constants.PATHS.get('recommendations').exists():
+        return {}
+
     files = constants.PATHS.get('recommendations').iterdir()
     files = [file for file in files if file.suffix == '.jpg']
 
