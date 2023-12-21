@@ -24,7 +24,7 @@ def update_dict(func):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         if not (isinstance(result, tuple) and len(result) == 3):
-            raise ValueError
+            raise ValueError("The returned value cannot be added to the dictionary.")
         for index, key in enumerate(SUGGESTED_MOVIES):
             SUGGESTED_MOVIES[key].append(result[index])
         return result

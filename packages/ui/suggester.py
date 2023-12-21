@@ -1,3 +1,7 @@
+"""
+This module contains code for the window that displays movie recommendations at startup.
+"""
+
 import threading
 from functools import partial
 
@@ -65,6 +69,7 @@ class RecPanel(AestheticWindow):
             self.logic_connect_widgets()
             self.show()
 
+        # Whether the window is displayed or hidden, we must refresh recommendations.
         threading.Thread(target=recommendations.main, daemon=True).start()
 
     def logic_connect_widgets(self) -> None:
