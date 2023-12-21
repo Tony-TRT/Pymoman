@@ -21,6 +21,8 @@ def save_settings(settings: dict) -> None:
         None:None.
     """
 
+    constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True, parents=True)
+
     with open(constants.PATHS.get("settings"), "w", encoding="UTF-8") as settings_file:
         json.dump(obj=settings, fp=settings_file, indent=4)
 

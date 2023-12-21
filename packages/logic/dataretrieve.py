@@ -5,8 +5,9 @@ The information retrieved and the manner in which it is retrieved is legal and t
 to respect the source websites by deliberately slowing down the program.
 """
 
-import json
 import re
+import json
+from pathlib import Path
 from random import shuffle
 from time import sleep
 
@@ -26,7 +27,8 @@ class MovieScraper(Movie):
         "SA": "http://www.impawards.com/",
         "SB": "https://www.movieposterdb.com/",
         "SC": "https://www.cinematerial.com/",
-        "SD": "https://www.youtube.com/"
+        "SD": "https://www.youtube.com/",
+        "SE": "https://tastedive.com/"
     }
 
     def __init__(self, movie: Movie):
@@ -121,26 +123,35 @@ class MovieScraper(Movie):
         with open(self.data_file, 'w', encoding="UTF-8") as file:
             json.dump(data, file, indent=4)
 
-    def download_poster(self, override=False) -> None:
+    def download_poster(self, override: bool = False, dir_path=None, filename="thumb.jpg", year: bool = True) -> None:
         """Downloads movie poster.
 
         Args:
-            override (bool): True = replace current poster, False = do not replace current poster.
+            override (bool): Set to True to replace existing images.
+            dir_path (Path): Allows specifying a destination path for the downloaded image.
+            filename (str): Allows specifying a filename for the downloaded image.
+            year (bool): Set to True to include the release year in the queries. If year is uncertain, set it to False.
 
         Returns:
             None: None.
         """
 
-        if self.thumb.exists() and not override:
+        dir_path: Path = self.storage if dir_path is None else dir_path
+        path: Path = Path.joinpath(dir_path, filename)
+
+        if path.exists() and not override:
             return
 
-        links = self.generate_cnm_link() + self.generate_imp_links(end='jpg') + self.generate_movie_pdb_link()
+        if year:
+            links = self.generate_cnm_link() + self.generate_imp_links(end='jpg') + self.generate_movie_pdb_link()
+        else:
+            links = self.generate_cnm_link() + self.generate_movie_pdb_link()
         shuffle(links)
 
         for link in links:
             response = requests.get(link, headers=self.headers, timeout=10)
             if response.status_code == 200:
-                self._write_img_to_disk(response)
+                self._write_img_to_disk(url=response, path=path)
                 break
             else:
                 sleep(3)
@@ -273,14 +284,51 @@ class MovieScraper(Movie):
             return imdb_base_url.format(imdb_identifier[1])
         return ""
 
-    def get_youtube_link(self) -> str:
+    def get_recommendations(self) -> list[str]:
+        """Retrieves movie titles that the user might like.
+
+        Returns:
+            list[str]: Recommendations in a list.
+        """
+
+        sanitized_title: list[str] = self.title.replace(f"({self.year})", '').strip().split()
+        sanitized_title: str = '-'.join([item.title() for item in sanitized_title])
+        queries: list[str] = [f"{sanitized_title}-Movie", f"{sanitized_title}-{self.year}", sanitized_title]
+
+        response = ""
+        for attempt in queries:
+            url = f"{self.sources_websites.get('SE')}movies/like/{attempt}"
+            response = requests.get(url, headers=self.headers, timeout=10)
+            if response.status_code != 200:
+                continue
+            else:
+                break
+
+        regex = r'"recommendations":"(.*?), (.*?)?, (.*?)?"'
+        recommendations = re.search(regex, response.text)
+
+        if recommendations is None:
+            return []
+
+        valid_recommendations: list[str] = []
+        for i in range(1, 4):
+            suggestion: str = recommendations.group(i)
+            if suggestion:
+                valid_recommendations.append(suggestion.strip())
+
+        return valid_recommendations
+
+    def get_youtube_link(self, year: bool = True) -> str:
         """Generates an embedded YouTube link corresponding to the movie trailer.
+
+        Args:
+            year (bool): Decide whether to include the year in the YouTube query or not.
 
         Returns:
             str: Embedded YouTube link.
         """
 
-        sanitized_query = f"{self.title.strip().replace(' ', '+')}+{self.year}"
+        sanitized_query = f"{self.title.strip().replace(' ', '+')}{f'+{self.year}' if year else ''}"
         base_link = f"{self.sources_websites.get('SD')}embed/"
         page = f"{self.sources_websites.get('SD')}results?search_query={sanitized_query}+trailer"
 
@@ -296,17 +344,19 @@ class MovieScraper(Movie):
 
         return base_link + identifiers[0]
 
-    def _write_img_to_disk(self, url: requests.Response) -> None:
+    @staticmethod
+    def _write_img_to_disk(url: requests.Response, path: Path) -> None:
         """Writes image to disk.
 
         Args:
             url (requests.Response): Image link.
+            path (Path): Destination path.
 
         Returns:
             None: None.
         """
 
-        with open(self.thumb, "wb") as poster:
+        with open(path, "wb") as poster:
             poster.write(url.content)
 
-        modify_raw_poster(self.thumb)
+        modify_raw_poster(path)

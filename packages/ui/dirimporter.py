@@ -1,12 +1,11 @@
-"""This module is used when importing videos contained in a folder."""
-
+"""
+This module is used when importing videos contained in a folder.
+"""
 
 from pathlib import Path
 
-
 from PySide6 import QtWidgets
 from PySide6.QtCore import Qt
-
 
 from packages.constants import constants
 from packages.logic.collection import Collection
