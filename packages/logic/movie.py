@@ -62,6 +62,9 @@ class Movie:
             str: Aesthetic movie rating.
         """
 
+        if not self.rating:
+            return constants.MOVIE_RATINGS.get('-')
+
         for key, value in constants.MOVIE_RATINGS.items():
             if self.rating == key:
                 return value

@@ -50,6 +50,14 @@ class YearChecker(unittest.TestCase):
 
 class MethodsChecker(unittest.TestCase):
 
+    def test_aesthetic_rating_is_str(self):
+        movie = Movie(title="Movie", year=2000, rating='5')
+        self.assertTrue(type(movie.aesthetic_rating) is str)
+
+    def test_aesthetic_rating_default_when_rating_not_specified(self):
+        movie = Movie(title="Movie", year=2000)
+        self.assertEqual(movie.aesthetic_rating, "☆☆☆☆☆")
+
     def test_storage_path(self):
         from pathlib import Path
         expected_a: Path = Path.joinpath(Path.home(), '.pymoman', 'cache', 'my_movie')
