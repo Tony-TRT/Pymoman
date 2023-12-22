@@ -13,7 +13,7 @@ from packages.logic.dataprocess import filter_name
 
 class Movie:
 
-    def __init__(self, title: str, year: int, path=None, rating=None):
+    def __init__(self, title: str, year: int, path=None, rating="-"):
 
         if len(title) < 2 or not isinstance(year, int) or not 1900 <= year <= (datetime.now().year + 5):
             raise ValueError
@@ -61,9 +61,6 @@ class Movie:
         Returns:
             str: Aesthetic movie rating.
         """
-
-        if not self.rating:
-            return constants.MOVIE_RATINGS.get('-')
 
         for key, value in constants.MOVIE_RATINGS.items():
             if self.rating == key:
