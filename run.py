@@ -47,6 +47,7 @@ class MainWindow(AestheticWindow):
 
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
+        self.setAcceptDrops(True)
         self.commands: dict = {
             "/set_default_theme": partial(self.ui_apply_style, "default"),
             "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
@@ -111,6 +112,26 @@ class MainWindow(AestheticWindow):
         ##################################################
 
         self.logic_list_display(MainWindow.all_collections)
+
+    def dragEnterEvent(self, event):
+        event.accept()
+
+    def dropEvent(self, event):
+        event.accept()
+
+        file = event.mimeData().urls()[0]
+        file = file.toLocalFile()
+        collection_is_open: bool = True if MainWindow.last_collection_opened else False
+        file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
+
+        try:
+            selected_movie = self.lw_main.selectedItems()[0].attr
+        except IndexError:
+            return
+
+        if collection_is_open and file_is_ok and isinstance(selected_movie, Movie):
+            dataprocess.set_local_poster(file=file, movie=selected_movie)
+            self.ui_information_panel(selected_movie)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
         """Displays the correct information in the right information panel.
