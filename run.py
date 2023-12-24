@@ -41,6 +41,7 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
+    last_movie_displayed: list[Movie] = []
 
     def __init__(self):
         super().__init__()
@@ -121,17 +122,12 @@ class MainWindow(AestheticWindow):
 
         file = event.mimeData().urls()[0]
         file = file.toLocalFile()
-        collection_is_open: bool = True if MainWindow.last_collection_opened else False
+        movie_to_process: Movie | None = MainWindow.last_movie_displayed[0] if MainWindow.last_movie_displayed else None
         file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
 
-        try:
-            selected_movie = self.lw_main.selectedItems()[0].attr
-        except IndexError:
-            return
-
-        if collection_is_open and file_is_ok and isinstance(selected_movie, Movie):
-            dataprocess.set_local_poster(file=file, movie=selected_movie)
-            self.ui_information_panel(selected_movie)
+        if movie_to_process and file_is_ok:
+            dataprocess.set_local_poster(file=file, movie=movie_to_process)
+            self.ui_information_panel(movie_to_process)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
         """Displays the correct information in the right information panel.
@@ -142,6 +138,8 @@ class MainWindow(AestheticWindow):
         Returns:
             None: None.
         """
+
+        MainWindow.last_movie_displayed.clear()
 
         image = QPixmap(constants.STR_PATHS.get('default poster'))
         collection: Collection | bool = item if isinstance(item, Collection) else False
@@ -156,6 +154,8 @@ class MainWindow(AestheticWindow):
             top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
 
         else:
+            MainWindow.last_movie_displayed.append(movie)
+
             if movie.thumb.exists():
                 image = QPixmap(str(movie.thumb))
 
