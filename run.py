@@ -41,12 +41,14 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
+    last_movie_displayed: list[Movie] = []
 
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
+        self.setAcceptDrops(True)
         self.commands: dict = {
             "/set_default_theme": partial(self.ui_apply_style, "default"),
             "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
@@ -112,6 +114,21 @@ class MainWindow(AestheticWindow):
 
         self.logic_list_display(MainWindow.all_collections)
 
+    def dragEnterEvent(self, event):
+        event.accept()
+
+    def dropEvent(self, event):
+        event.accept()
+
+        file = event.mimeData().urls()[0]
+        file = file.toLocalFile()
+        movie_to_process: Movie | None = MainWindow.last_movie_displayed[0] if MainWindow.last_movie_displayed else None
+        file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
+
+        if movie_to_process and file_is_ok:
+            dataprocess.set_local_poster(file=file, movie=movie_to_process)
+            self.ui_information_panel(movie_to_process)
+
     def ui_information_panel(self, item: Collection | Movie) -> None:
         """Displays the correct information in the right information panel.
 
@@ -121,6 +138,8 @@ class MainWindow(AestheticWindow):
         Returns:
             None: None.
         """
+
+        MainWindow.last_movie_displayed.clear()
 
         image = QPixmap(constants.STR_PATHS.get('default poster'))
         collection: Collection | bool = item if isinstance(item, Collection) else False
@@ -135,6 +154,8 @@ class MainWindow(AestheticWindow):
             top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
 
         else:
+            MainWindow.last_movie_displayed.append(movie)
+
             if movie.thumb.exists():
                 image = QPixmap(str(movie.thumb))
 
