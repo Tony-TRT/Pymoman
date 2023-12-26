@@ -41,7 +41,7 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened: list[Collection] = []
-    last_movie_displayed: list[Movie] = []
+    last_movie_displayed = None
 
     def __init__(self):
         super().__init__()
@@ -122,7 +122,7 @@ class MainWindow(AestheticWindow):
 
         file = event.mimeData().urls()[0]
         file = file.toLocalFile()
-        movie_to_process: Movie | None = MainWindow.last_movie_displayed[0] if MainWindow.last_movie_displayed else None
+        movie_to_process: Movie | None = MainWindow.last_movie_displayed
         file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
 
         if movie_to_process and file_is_ok:
@@ -139,7 +139,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        MainWindow.last_movie_displayed.clear()
+        MainWindow.last_movie_displayed = None
 
         image = QPixmap(constants.STR_PATHS.get('default poster'))
         collection: Collection | bool = item if isinstance(item, Collection) else False
@@ -154,7 +154,7 @@ class MainWindow(AestheticWindow):
             top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
 
         else:
-            MainWindow.last_movie_displayed.append(movie)
+            MainWindow.last_movie_displayed = movie
 
             if movie.thumb.exists():
                 image = QPixmap(str(movie.thumb))
