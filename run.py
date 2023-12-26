@@ -120,14 +120,11 @@ class MainWindow(AestheticWindow):
     def dropEvent(self, event):
         event.accept()
 
-        file = event.mimeData().urls()[0]
-        file = file.toLocalFile()
-        movie_to_process: Movie | None = MainWindow.last_movie_displayed
-        file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
+        dropped_file = event.mimeData().urls()[0].toLocalFile()
 
-        if movie_to_process and file_is_ok:
-            dataprocess.set_local_poster(file=file, movie=movie_to_process)
-            self.ui_information_panel(movie_to_process)
+        if MainWindow.last_movie_displayed and dropped_file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png', 'bmp']:
+            dataprocess.set_local_poster(file=dropped_file, movie=MainWindow.last_movie_displayed)
+            self.ui_information_panel(MainWindow.last_movie_displayed)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
         """Displays the correct information in the right information panel.
