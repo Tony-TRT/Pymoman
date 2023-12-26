@@ -40,7 +40,7 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
-    last_collection_opened: list[Collection] = []
+    last_collection_opened: None
     last_movie_displayed = None
 
     def __init__(self):
@@ -288,10 +288,8 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if not MainWindow.last_collection_opened:
-            return
-
-        self.movie_appender.show()
+        if MainWindow.last_collection_opened:
+            self.movie_appender.show()
 
     def logic_add_movie_validation(self) -> None:
         """Validate whether to add the movie or not based on whether the user input is correct or incorrect.
@@ -304,7 +302,7 @@ class MainWindow(AestheticWindow):
         year: str = self.movie_appender.le_movie_year.text()
         year: int | None = int(year) if year and year.isdigit() else None
         rating: str = self.movie_appender.cbb_movie_rating.currentText()
-        collection: Collection = MainWindow.last_collection_opened[0]
+        collection: Collection | None = MainWindow.last_collection_opened
         movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
         if movie:
@@ -603,7 +601,7 @@ class MainWindow(AestheticWindow):
         elif not items and MainWindow.all_collections:
             display_list = [previous_item]
         elif all(isinstance(item, Collection) for item in items):
-            self.last_collection_opened.clear()
+            MainWindow.last_collection_opened = None
             display_list = [self.logic_generate_list_item(collection) for collection in items]
         else:
             display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
@@ -656,8 +654,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.last_collection_opened.clear()
-        self.last_collection_opened.append(collection)
+        MainWindow.last_collection_opened = collection
         self.logic_list_display(collection.movies)
         self.btn_add_movie.setEnabled(True)
         self.btn_remove_movie.setEnabled(True)
@@ -669,7 +666,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        collection = MainWindow.last_collection_opened[0] if MainWindow.last_collection_opened else None
+        collection = MainWindow.last_collection_opened
         selected_items = self.lw_main.selectedItems()
 
         if collection and selected_items and isinstance(selected_items[0].attr, Movie):
@@ -763,7 +760,7 @@ class MainWindow(AestheticWindow):
             suffix += 1
 
         # Define the collection in which to add the scanned files
-        collection = MainWindow.last_collection_opened[0] \
+        collection = MainWindow.last_collection_opened \
             if MainWindow.last_collection_opened else Collection(name=dir_name)
 
         self.directory_importer = DirectoryImporter(collection, dir_path)
@@ -787,7 +784,7 @@ class MainWindow(AestheticWindow):
             return
 
         if MainWindow.last_collection_opened:
-            collection = MainWindow.last_collection_opened[0]
+            collection = MainWindow.last_collection_opened
             requested_items = [m for m in collection.movies if m.title.casefold().startswith(query)]
         else:
             requested_items = [c for c in MainWindow.all_collections if c.name.casefold().startswith(query)]
@@ -833,13 +830,11 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if not MainWindow.last_collection_opened:
-            return
+        collection: Collection | None = MainWindow.last_collection_opened
 
-        collection: Collection = MainWindow.last_collection_opened[0]
-        collection.movies.sort()
-
-        self.logic_list_display(collection.movies)
+        if collection:
+            collection.movies.sort()
+            self.logic_list_display(collection.movies)
 
     def logic_update_list_widget(self) -> None:
         """Refreshes the current items in the list widget.
