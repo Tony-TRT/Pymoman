@@ -127,7 +127,7 @@ class MainWindow(AestheticWindow):
             self.ui_information_panel(MainWindow.last_movie_displayed)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
-        """Displays the correct information in the right information panel.
+        """Displays information about the received item.
 
         Args:
             item: Collection or Movie object.
@@ -136,36 +136,24 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        MainWindow.last_movie_displayed = None
-
-        image = QPixmap(constants.STR_PATHS.get('default poster'))
-        collection: Collection | bool = item if isinstance(item, Collection) else False
-        movie: Movie | bool = item if isinstance(item, Movie) else False
-
-        if collection and collection.name == 'My Wishlist':
-            image = QPixmap(constants.STR_PATHS.get('wishlist'))
-
-        if collection and not movie:
-            title: str = f"→ {collection.name.upper()}"
-            summary: str = "\n".join([f"- {movie.title}" for movie in collection.movies[:7]] + ['...'])
-            top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
-
+        if isinstance(item, Collection):
+            MainWindow.last_movie_displayed = None
+            image = QPixmap(constants.STR_PATHS.get('wishlist')) \
+                if item.name == 'My Wishlist' else QPixmap(constants.STR_PATHS.get('default poster'))
+            title: str = f"→ {item.name.upper()}"
+            summary: str = "\n".join([f"- {movie.title}" for movie in item.movies[:7]] + ['...'])
+            top_right_text: str = f"{len(item.movies)} movie{'s' if len(item.movies) > 1 else ''}."
         else:
-            MainWindow.last_movie_displayed = movie
+            MainWindow.last_movie_displayed = item
+            image = QPixmap(str(item.thumb)) \
+                if item.thumb.exists() else QPixmap(constants.STR_PATHS.get('default poster'))
+            content: dict = item.load_data_file()
+            title: str = content.get('title', f"{item.title.title()} ({item.year})")
+            summary: str = content.get('summary', "Summary is being retrieved...")
+            top_right_text: str = item.aesthetic_rating
 
-            if movie.thumb.exists():
-                image = QPixmap(str(movie.thumb))
-
-            title: str = f"{movie.title.title()} ({movie.year})"
-            summary: str = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-            top_right_text: str = movie.aesthetic_rating
-
-            content: dict = movie.load_data_file()
-            title: str = content.get('title', title)
-            summary: str = content.get('summary', summary)
-
-        self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_top_right.setText(top_right_text)
+        self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_title.setText(title)
         self.panel.te_summary.setText(summary)
 
