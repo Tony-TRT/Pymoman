@@ -305,12 +305,12 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if 'My Wishlist' not in [collection.name for collection in MainWindow.all_collections]:
-            MainWindow.all_collections.append(Collection(name='My Wishlist'))
+        wishlist: Collection = next((item for item in MainWindow.all_collections if item.name == 'My Wishlist'), None)
+        if wishlist is None:
+            wishlist = Collection(name='My Wishlist')
+            MainWindow.all_collections.append(wishlist)
 
-        wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
         wishlist.add_movie(movie)
-
         self.ui_progress_bar_animation()
 
     def logic_commands(self) -> None:
