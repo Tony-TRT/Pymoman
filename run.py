@@ -320,9 +320,6 @@ class MainWindow(AestheticWindow):
             None:None.
         """
 
-        if self.le_search.text() not in self.commands:
-            return
-
         for command, action in self.commands.items():
             if self.le_search.text() == command:
                 self.le_search.clear()
