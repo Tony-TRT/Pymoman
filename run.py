@@ -40,8 +40,7 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
-    last_collection_opened: None
-    last_movie_displayed = None
+    last_collection_opened = last_movie_displayed = None
 
     def __init__(self):
         super().__init__()
@@ -285,12 +284,12 @@ class MainWindow(AestheticWindow):
 
         title: str = self.movie_appender.le_movie_title.text()
         year: str = self.movie_appender.le_movie_year.text()
-        year: int | None = int(year) if year and year.isdigit() else None
+        year: int = int(year) if year and year.isdigit() else 0
         rating: str = self.movie_appender.cbb_movie_rating.currentText()
-        collection: Collection | None = MainWindow.last_collection_opened
+        collection: Collection = MainWindow.last_collection_opened
         movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
-        if movie:
+        if collection and movie:
             collection.add_movie(movie)
             self.logic_list_display(collection.movies)
 
