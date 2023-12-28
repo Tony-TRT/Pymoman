@@ -519,7 +519,6 @@ class MainWindow(AestheticWindow):
             lw_item = QtWidgets.QListWidgetItem(item.name)
             if item.path.exists():
                 lw_item.setIcon(self.icons.get('collection'))
-
         else:
             lw_item = QtWidgets.QListWidgetItem(item.title)
             lw_item.setIcon(self.icons.get('movie'))
