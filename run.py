@@ -465,13 +465,10 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        selected_items = self.lw_main.selectedItems()
-        if not selected_items or not isinstance(selected_items[0].attr, Movie):
-            return
-
-        selected_movie: Movie = selected_items[0].attr
-        selected_movie.rating = self.rating_adjuster.cbb_movie_rating.currentText()
-        self.ui_information_panel(selected_movie)
+        if self.lw_main.selectedItems() and isinstance(self.lw_main.selectedItems()[0].attr, Movie):
+            selected_movie: Movie = self.lw_main.selectedItems()[0].attr
+            selected_movie.rating = self.rating_adjuster.cbb_movie_rating.currentText()
+            self.ui_information_panel(selected_movie)
 
     def logic_export_collection(self, collection: Collection) -> None:
         """Allows to export a collection.
