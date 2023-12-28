@@ -564,21 +564,17 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
+        self.lw_main.clear()
         previous_item = QtWidgets.QListWidgetItem("GO BACK")
         previous_item.attr = None
-        previous_item.setTextAlignment(Qt.AlignCenter)
         previous_item.setIcon(self.icons.get('previous'))
-        self.lw_main.clear()
+        previous_item.setTextAlignment(Qt.AlignCenter)
 
-        if not items and not MainWindow.all_collections:
-            display_list = []
-        elif not items and MainWindow.all_collections:
-            display_list = [previous_item]
-        elif all(isinstance(item, Collection) for item in items):
+        display_list = [self.logic_generate_list_item(item) for item in items]
+        if (not items and MainWindow.all_collections) or (items and all(isinstance(item, Movie) for item in items)):
+            display_list.insert(0, previous_item)
+        else:  # When displaying collections.
             MainWindow.last_collection_opened = None
-            display_list = [self.logic_generate_list_item(collection) for collection in items]
-        else:
-            display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
 
         for item in display_list:
             self.lw_main.addItem(item)
