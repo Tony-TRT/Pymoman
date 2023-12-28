@@ -491,16 +491,15 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        all_movies = [m for c in MainWindow.all_collections for m in c.movies]
-        query_g = self.cbb_genre.currentText()
-        query_a = self.cbb_actors.currentText()
+        all_movies: list[Movie] = [movie for collection in MainWindow.all_collections for movie in collection.movies]
+        query_g, query_a = self.cbb_genre.currentText(), self.cbb_actors.currentText()
 
         if query_g == "Genre" and query_a != "Actors":
-            matching_movies = [mov for mov in all_movies if query_a in mov.actors]
+            matching_movies = [movie for movie in all_movies if query_a in movie.actors]
         elif query_g != "Genre" and query_a == "Actors":
-            matching_movies = [mov for mov in all_movies if query_g in mov.genre]
+            matching_movies = [movie for movie in all_movies if query_g in movie.genre]
         elif query_g != "Genre" and query_a != "Actors":
-            matching_movies = [mov for mov in all_movies if (query_g in mov.genre) and (query_a in mov.actors)]
+            matching_movies = [movie for movie in all_movies if (query_g in movie.genre) and (query_a in movie.actors)]
         else:
             matching_movies = all_movies
 
