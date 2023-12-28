@@ -535,20 +535,18 @@ class MainWindow(AestheticWindow):
         """
 
         collection: Collection = self.directory_importer.collection
-        to_import = [self.directory_importer.lw_main.item(i) for i in range(self.directory_importer.lw_main.count())]
-        imported_items: list[tuple] = []
+        number_of_files: int = self.directory_importer.lw_main.count()
+        list_of_files: list = [self.directory_importer.lw_main.item(i) for i in range(number_of_files)]
 
-        for item in to_import:
+        for item in list_of_files:
             title: str = item.title
-            year: int | None = int(item.year) if item.year and item.year.isdigit() else None
+            year: int = int(item.year) if item.year and item.year.isdigit() else 0
             path: str = item.text()
             rating: str = item.rating
-            imported_items.append(dataimport.make_movie(title=title, year=year, path=path, rating=rating))
+            result: tuple = dataimport.make_movie(title=title, year=year, path=path, rating=rating)
 
-        movies: list[Movie] = [item[0] for item in imported_items if item[0]]
-
-        for movie in movies:
-            collection.add_movie(movie)
+            if result[0]:
+                collection.add_movie(result[0])
 
         if collection not in MainWindow.all_collections:
             MainWindow.all_collections.append(collection)
