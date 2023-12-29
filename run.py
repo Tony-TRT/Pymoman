@@ -733,21 +733,23 @@ class MainWindow(AestheticWindow):
         """
 
         completer = QtWidgets.QCompleter(self.commands, self)
-        # Not using the .qss file here to avoid a lot of complicated code.
-        completer.popup().setStyleSheet("color: #FFA500; background-color: #3F3F3F;")
+        theme: dict = dataimport.load_file_content(constants.PATHS.get('settings'))
+
+        style: str = "color: #FFA500; background-color: #3F3F3F;"
+        if theme.get('theme') == 'cyber':
+            style: str = "color: #EF745C; background-color: #531942;"
+
+        completer.popup().setStyleSheet(style)  # Not using the .qss file here to avoid a lot of complicated code.
         self.le_search.setCompleter(completer)
 
         query: str = self.le_search.text().strip().lower()
-        if query.startswith('/'):
-            return
+        if not query.startswith('/'):
+            collection: Collection | None = MainWindow.last_collection_opened
+            requested_items = [item for item in MainWindow.all_collections if item.name.casefold().startswith(query)]
+            if collection:
+                requested_items = [movie for movie in collection.movies if movie.title.casefold().startswith(query)]
 
-        if MainWindow.last_collection_opened:
-            collection = MainWindow.last_collection_opened
-            requested_items = [m for m in collection.movies if m.title.casefold().startswith(query)]
-        else:
-            requested_items = [c for c in MainWindow.all_collections if c.name.casefold().startswith(query)]
-
-        self.logic_list_display(requested_items)
+            self.logic_list_display(requested_items)
 
     def logic_show_rating_modifier(self) -> None:
         """Shows rating modification dialog.
