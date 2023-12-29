@@ -710,25 +710,20 @@ class MainWindow(AestheticWindow):
         """
 
         dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
+        if dialog:
+            directory_path: Path = Path(dialog).resolve()
+            directory_name: str = directory_path.stem
 
-        if not dialog:
-            return
+            suffix: int = 0
+            while directory_name in [collection.name for collection in MainWindow.all_collections]:
+                directory_name: str = directory_name.rsplit('_', 1)[0] + f'_{str(suffix).zfill(3)}'
+                suffix += 1
 
-        dir_path = Path(dialog).resolve()
-        dir_name = dir_path.stem
-        suffix = 0
+            collection: Collection = MainWindow.last_collection_opened or Collection(name=directory_name)
 
-        while dir_name in [collection.name for collection in MainWindow.all_collections]:
-            dir_name = f"{dir_name}_{suffix}"
-            suffix += 1
-
-        # Define the collection in which to add the scanned files
-        collection = MainWindow.last_collection_opened \
-            if MainWindow.last_collection_opened else Collection(name=dir_name)
-
-        self.directory_importer = DirectoryImporter(collection, dir_path)
-        self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
-        self.directory_importer.show()
+            self.directory_importer = DirectoryImporter(collection, directory_path)
+            self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
+            self.directory_importer.show()
 
     def logic_search_bar(self) -> None:
         """Search bar logic is managed here.
