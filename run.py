@@ -693,9 +693,6 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if not MainWindow.all_collections:
-            return
-
         if self.sender() is self.btn_save_col:
             for collection in MainWindow.all_collections:
                 collection.save()
