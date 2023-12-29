@@ -672,17 +672,13 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        res = True
         if user_choice:
             new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
-
-            if new_name and value:
-                res = movie.rename(new_name)
-
+            success: bool = movie.rename(new_name) if new_name and value else True
         else:
-            res = movie.rename(movie.official_title)
+            success: bool = movie.rename(movie.official_title)
 
-        if not res:
+        if not success:
             QtWidgets.QMessageBox.about(self, "Warning", constants.CACHE_WARNING)
 
         self.logic_update_list_widget()
