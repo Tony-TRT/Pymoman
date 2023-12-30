@@ -823,7 +823,6 @@ class MainWindow(AestheticWindow):
     def closeEvent(self, event):
 
         dataprocess.clear_cache()
-        super().closeEvent(event)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 
