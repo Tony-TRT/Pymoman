@@ -829,14 +829,12 @@ class MainWindow(AestheticWindow):
         if event.type() == QEvent.ContextMenu and watched is self.lw_main:
             list_item = watched.itemAt(event.pos())
 
-            if list_item is None:
-                return False
-
-            if isinstance(list_item.attr, Collection):
+            if list_item and isinstance(list_item.attr, Collection):
                 self.logic_create_collection_menu(event.globalPos(), list_item.attr)
-
-            elif isinstance(list_item.attr, Movie):  # Can't put 'else' because of previous_item
+            elif list_item and isinstance(list_item.attr, Movie):
                 self.logic_create_movie_menu(event.globalPos(), list_item.attr)
+            else:
+                return False
 
         return super().eventFilter(watched, event)
 
