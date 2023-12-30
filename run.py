@@ -789,7 +789,6 @@ class MainWindow(AestheticWindow):
         """
 
         collection: Collection | None = MainWindow.last_collection_opened
-
         if collection:
             collection.movies.sort()
             self.logic_list_display(collection.movies)
