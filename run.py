@@ -801,9 +801,8 @@ class MainWindow(AestheticWindow):
         """
 
         selected_item_row = self.lw_main.row(self.lw_main.currentItem())
+        items = [self.lw_main.item(i).attr for i in range(self.lw_main.count()) if self.lw_main.item(i).attr]
 
-        items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
-        items = [item.attr for item in items if item.attr is not None]
         self.logic_list_display(items)
 
         if selected_item_row:
