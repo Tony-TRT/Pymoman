@@ -770,14 +770,12 @@ class MainWindow(AestheticWindow):
 
         if isinstance(clicked_item.attr, Collection):
             self.ui_information_panel(clicked_item.attr)
-
         elif isinstance(clicked_item.attr, Movie):
             self.clr_reload_cbb_actors()
             scraper = dataretrieve.MovieScraper(clicked_item.attr)
             threading.Thread(target=scraper.download_poster, daemon=True).start()
             threading.Thread(target=scraper.download_info, daemon=True).start()
             self.ui_information_panel(clicked_item.attr)
-
         else:  # clicked_item is 'GO BACK'
             self.logic_list_display(MainWindow.all_collections)
             self.btn_add_movie.setEnabled(False)
