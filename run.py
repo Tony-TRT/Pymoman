@@ -40,8 +40,7 @@ dataprocess.clear_cache()  # Remove unused cache folders before loading anything
 
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
-    last_collection_opened: list[Collection] = []
-    last_movie_displayed: list[Movie] = []
+    last_collection_opened = last_movie_displayed = None
 
     def __init__(self):
         super().__init__()
@@ -120,17 +119,14 @@ class MainWindow(AestheticWindow):
     def dropEvent(self, event):
         event.accept()
 
-        file = event.mimeData().urls()[0]
-        file = file.toLocalFile()
-        movie_to_process: Movie | None = MainWindow.last_movie_displayed[0] if MainWindow.last_movie_displayed else None
-        file_is_ok: bool = file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png']
+        dropped_file = event.mimeData().urls()[0].toLocalFile()
 
-        if movie_to_process and file_is_ok:
-            dataprocess.set_local_poster(file=file, movie=movie_to_process)
-            self.ui_information_panel(movie_to_process)
+        if MainWindow.last_movie_displayed and dropped_file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png', 'bmp']:
+            dataprocess.set_local_poster(file=dropped_file, movie=MainWindow.last_movie_displayed)
+            self.ui_information_panel(MainWindow.last_movie_displayed)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
-        """Displays the correct information in the right information panel.
+        """Displays information about the received item.
 
         Args:
             item: Collection or Movie object.
@@ -139,36 +135,24 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        MainWindow.last_movie_displayed.clear()
-
-        image = QPixmap(constants.STR_PATHS.get('default poster'))
-        collection: Collection | bool = item if isinstance(item, Collection) else False
-        movie: Movie | bool = item if isinstance(item, Movie) else False
-
-        if collection and collection.name == 'My Wishlist':
-            image = QPixmap(constants.STR_PATHS.get('wishlist'))
-
-        if collection and not movie:
-            title: str = f"→ {collection.name.upper()}"
-            summary: str = "\n".join([f"- {movie.title}" for movie in collection.movies[:7]] + ['...'])
-            top_right_text: str = f"{len(collection.movies)} movie{'s' if len(collection.movies) > 1 else ''}."
-
+        if isinstance(item, Collection):
+            MainWindow.last_movie_displayed = None
+            image = QPixmap(constants.STR_PATHS.get('wishlist')) \
+                if item.name == 'My Wishlist' else QPixmap(constants.STR_PATHS.get('default poster'))
+            title: str = f"→ {item.name.upper()}"
+            summary: str = "\n".join([f"- {movie.title}" for movie in item.movies[:7]] + ['...'])
+            top_right_text: str = f"{len(item.movies)} movie{'s' if len(item.movies) > 1 else ''}."
         else:
-            MainWindow.last_movie_displayed.append(movie)
+            MainWindow.last_movie_displayed = item
+            image = QPixmap(str(item.thumb)) \
+                if item.thumb.exists() else QPixmap(constants.STR_PATHS.get('default poster'))
+            content: dict = item.load_data_file()
+            title: str = content.get('title', f"{item.title.title()} ({item.year})")
+            summary: str = content.get('summary', "Summary is being retrieved...")
+            top_right_text: str = item.aesthetic_rating
 
-            if movie.thumb.exists():
-                image = QPixmap(str(movie.thumb))
-
-            title: str = f"{movie.title.title()} ({movie.year})"
-            summary: str = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-            top_right_text: str = movie.aesthetic_rating
-
-            content: dict = movie.load_data_file()
-            title: str = content.get('title', title)
-            summary: str = content.get('summary', summary)
-
-        self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_top_right.setText(top_right_text)
+        self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_title.setText(title)
         self.panel.te_summary.setText(summary)
 
@@ -288,10 +272,8 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if not MainWindow.last_collection_opened:
-            return
-
-        self.movie_appender.show()
+        if MainWindow.last_collection_opened:
+            self.movie_appender.show()
 
     def logic_add_movie_validation(self) -> None:
         """Validate whether to add the movie or not based on whether the user input is correct or incorrect.
@@ -302,12 +284,12 @@ class MainWindow(AestheticWindow):
 
         title: str = self.movie_appender.le_movie_title.text()
         year: str = self.movie_appender.le_movie_year.text()
-        year: int | None = int(year) if year and year.isdigit() else None
+        year: int = int(year) if year and year.isdigit() else 0
         rating: str = self.movie_appender.cbb_movie_rating.currentText()
-        collection: Collection = MainWindow.last_collection_opened[0]
+        collection: Collection = MainWindow.last_collection_opened
         movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
 
-        if movie:
+        if collection and movie:
             collection.add_movie(movie)
             self.logic_list_display(collection.movies)
 
@@ -323,12 +305,12 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if 'My Wishlist' not in [collection.name for collection in MainWindow.all_collections]:
-            MainWindow.all_collections.append(Collection(name='My Wishlist'))
+        wishlist: Collection = next((item for item in MainWindow.all_collections if item.name == 'My Wishlist'), None)
+        if wishlist is None:
+            wishlist = Collection(name='My Wishlist')
+            MainWindow.all_collections.append(wishlist)
 
-        wishlist = [collection for collection in MainWindow.all_collections if collection.name == 'My Wishlist'][0]
         wishlist.add_movie(movie)
-
         self.ui_progress_bar_animation()
 
     def logic_commands(self) -> None:
@@ -337,9 +319,6 @@ class MainWindow(AestheticWindow):
         Returns:
             None:None.
         """
-
-        if self.le_search.text() not in self.commands:
-            return
 
         for command, action in self.commands.items():
             if self.le_search.text() == command:
@@ -486,13 +465,10 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        selected_items = self.lw_main.selectedItems()
-        if not selected_items or not isinstance(selected_items[0].attr, Movie):
-            return
-
-        selected_movie: Movie = selected_items[0].attr
-        selected_movie.rating = self.rating_adjuster.cbb_movie_rating.currentText()
-        self.ui_information_panel(selected_movie)
+        if self.lw_main.selectedItems() and isinstance(self.lw_main.selectedItems()[0].attr, Movie):
+            selected_movie: Movie = self.lw_main.selectedItems()[0].attr
+            selected_movie.rating = self.rating_adjuster.cbb_movie_rating.currentText()
+            self.ui_information_panel(selected_movie)
 
     def logic_export_collection(self, collection: Collection) -> None:
         """Allows to export a collection.
@@ -515,16 +491,15 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        all_movies = [m for c in MainWindow.all_collections for m in c.movies]
-        query_g = self.cbb_genre.currentText()
-        query_a = self.cbb_actors.currentText()
+        all_movies: list[Movie] = [movie for collection in MainWindow.all_collections for movie in collection.movies]
+        query_g, query_a = self.cbb_genre.currentText(), self.cbb_actors.currentText()
 
         if query_g == "Genre" and query_a != "Actors":
-            matching_movies = [mov for mov in all_movies if query_a in mov.actors]
+            matching_movies = [movie for movie in all_movies if query_a in movie.actors]
         elif query_g != "Genre" and query_a == "Actors":
-            matching_movies = [mov for mov in all_movies if query_g in mov.genre]
+            matching_movies = [movie for movie in all_movies if query_g in movie.genre]
         elif query_g != "Genre" and query_a != "Actors":
-            matching_movies = [mov for mov in all_movies if (query_g in mov.genre) and (query_a in mov.actors)]
+            matching_movies = [movie for movie in all_movies if (query_g in movie.genre) and (query_a in movie.actors)]
         else:
             matching_movies = all_movies
 
@@ -544,7 +519,6 @@ class MainWindow(AestheticWindow):
             lw_item = QtWidgets.QListWidgetItem(item.name)
             if item.path.exists():
                 lw_item.setIcon(self.icons.get('collection'))
-
         else:
             lw_item = QtWidgets.QListWidgetItem(item.title)
             lw_item.setIcon(self.icons.get('movie'))
@@ -561,20 +535,18 @@ class MainWindow(AestheticWindow):
         """
 
         collection: Collection = self.directory_importer.collection
-        to_import = [self.directory_importer.lw_main.item(i) for i in range(self.directory_importer.lw_main.count())]
-        imported_items: list[tuple] = []
+        number_of_files: int = self.directory_importer.lw_main.count()
+        list_of_files: list = [self.directory_importer.lw_main.item(i) for i in range(number_of_files)]
 
-        for item in to_import:
+        for item in list_of_files:
             title: str = item.title
-            year: int | None = int(item.year) if item.year and item.year.isdigit() else None
+            year: int = int(item.year) if item.year and item.year.isdigit() else 0
             path: str = item.text()
             rating: str = item.rating
-            imported_items.append(dataimport.make_movie(title=title, year=year, path=path, rating=rating))
+            result: tuple = dataimport.make_movie(title=title, year=year, path=path, rating=rating)
 
-        movies: list[Movie] = [item[0] for item in imported_items if item[0]]
-
-        for movie in movies:
-            collection.add_movie(movie)
+            if result[0]:
+                collection.add_movie(result[0])
 
         if collection not in MainWindow.all_collections:
             MainWindow.all_collections.append(collection)
@@ -592,21 +564,17 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
+        self.lw_main.clear()
         previous_item = QtWidgets.QListWidgetItem("GO BACK")
         previous_item.attr = None
-        previous_item.setTextAlignment(Qt.AlignCenter)
         previous_item.setIcon(self.icons.get('previous'))
-        self.lw_main.clear()
+        previous_item.setTextAlignment(Qt.AlignCenter)
 
-        if not items and not MainWindow.all_collections:
-            display_list = []
-        elif not items and MainWindow.all_collections:
-            display_list = [previous_item]
-        elif all(isinstance(item, Collection) for item in items):
-            self.last_collection_opened.clear()
-            display_list = [self.logic_generate_list_item(collection) for collection in items]
-        else:
-            display_list = [previous_item] + [self.logic_generate_list_item(movie) for movie in items]
+        display_list = [self.logic_generate_list_item(item) for item in items]
+        if (not items and MainWindow.all_collections) or (items and all(isinstance(item, Movie) for item in items)):
+            display_list.insert(0, previous_item)
+        else:  # When displaying collections.
+            MainWindow.last_collection_opened = None
 
         for item in display_list:
             self.lw_main.addItem(item)
@@ -656,8 +624,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        self.last_collection_opened.clear()
-        self.last_collection_opened.append(collection)
+        MainWindow.last_collection_opened = collection
         self.logic_list_display(collection.movies)
         self.btn_add_movie.setEnabled(True)
         self.btn_remove_movie.setEnabled(True)
@@ -669,7 +636,7 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        collection = MainWindow.last_collection_opened[0] if MainWindow.last_collection_opened else None
+        collection = MainWindow.last_collection_opened
         selected_items = self.lw_main.selectedItems()
 
         if collection and selected_items and isinstance(selected_items[0].attr, Movie):
@@ -705,17 +672,13 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        res = True
         if user_choice:
             new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
-
-            if new_name and value:
-                res = movie.rename(new_name)
-
+            success: bool = movie.rename(new_name) if new_name and value else True
         else:
-            res = movie.rename(movie.official_title)
+            success: bool = movie.rename(movie.official_title)
 
-        if not res:
+        if not success:
             QtWidgets.QMessageBox.about(self, "Warning", constants.CACHE_WARNING)
 
         self.logic_update_list_widget()
@@ -729,9 +692,6 @@ class MainWindow(AestheticWindow):
         Returns:
             None: None.
         """
-
-        if not MainWindow.all_collections:
-            return
 
         if self.sender() is self.btn_save_col:
             for collection in MainWindow.all_collections:
@@ -750,25 +710,20 @@ class MainWindow(AestheticWindow):
         """
 
         dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
+        if dialog:
+            directory_path: Path = Path(dialog).resolve()
+            directory_name: str = directory_path.stem
 
-        if not dialog:
-            return
+            suffix: int = 0
+            while directory_name in [collection.name for collection in MainWindow.all_collections]:
+                directory_name: str = directory_name.rsplit('_', 1)[0] + f'_{str(suffix).zfill(3)}'
+                suffix += 1
 
-        dir_path = Path(dialog).resolve()
-        dir_name = dir_path.stem
-        suffix = 0
+            collection: Collection = MainWindow.last_collection_opened or Collection(name=directory_name)
 
-        while dir_name in [collection.name for collection in MainWindow.all_collections]:
-            dir_name = f"{dir_name}_{suffix}"
-            suffix += 1
-
-        # Define the collection in which to add the scanned files
-        collection = MainWindow.last_collection_opened[0] \
-            if MainWindow.last_collection_opened else Collection(name=dir_name)
-
-        self.directory_importer = DirectoryImporter(collection, dir_path)
-        self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
-        self.directory_importer.show()
+            self.directory_importer = DirectoryImporter(collection, directory_path)
+            self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
+            self.directory_importer.show()
 
     def logic_search_bar(self) -> None:
         """Search bar logic is managed here.
@@ -778,21 +733,23 @@ class MainWindow(AestheticWindow):
         """
 
         completer = QtWidgets.QCompleter(self.commands, self)
-        # Not using the .qss file here to avoid a lot of complicated code.
-        completer.popup().setStyleSheet("color: #FFA500; background-color: #3F3F3F;")
+        theme: dict = dataimport.load_file_content(constants.PATHS.get('settings'))
+
+        style: str = "color: #FFA500; background-color: #3F3F3F;"
+        if theme.get('theme') == 'cyber':
+            style: str = "color: #EF745C; background-color: #531942;"
+
+        completer.popup().setStyleSheet(style)  # Not using the .qss file here to avoid a lot of complicated code.
         self.le_search.setCompleter(completer)
 
         query: str = self.le_search.text().strip().lower()
-        if query.startswith('/'):
-            return
+        if not query.startswith('/'):
+            collection: Collection | None = MainWindow.last_collection_opened
+            requested_items = [item for item in MainWindow.all_collections if item.name.casefold().startswith(query)]
+            if collection:
+                requested_items = [movie for movie in collection.movies if movie.title.casefold().startswith(query)]
 
-        if MainWindow.last_collection_opened:
-            collection = MainWindow.last_collection_opened[0]
-            requested_items = [m for m in collection.movies if m.title.casefold().startswith(query)]
-        else:
-            requested_items = [c for c in MainWindow.all_collections if c.name.casefold().startswith(query)]
-
-        self.logic_list_display(requested_items)
+            self.logic_list_display(requested_items)
 
     def logic_show_rating_modifier(self) -> None:
         """Shows rating modification dialog.
@@ -813,14 +770,12 @@ class MainWindow(AestheticWindow):
 
         if isinstance(clicked_item.attr, Collection):
             self.ui_information_panel(clicked_item.attr)
-
         elif isinstance(clicked_item.attr, Movie):
             self.clr_reload_cbb_actors()
             scraper = dataretrieve.MovieScraper(clicked_item.attr)
             threading.Thread(target=scraper.download_poster, daemon=True).start()
             threading.Thread(target=scraper.download_info, daemon=True).start()
             self.ui_information_panel(clicked_item.attr)
-
         else:  # clicked_item is 'GO BACK'
             self.logic_list_display(MainWindow.all_collections)
             self.btn_add_movie.setEnabled(False)
@@ -833,13 +788,10 @@ class MainWindow(AestheticWindow):
             None: None.
         """
 
-        if not MainWindow.last_collection_opened:
-            return
-
-        collection: Collection = MainWindow.last_collection_opened[0]
-        collection.movies.sort()
-
-        self.logic_list_display(collection.movies)
+        collection: Collection | None = MainWindow.last_collection_opened
+        if collection:
+            collection.movies.sort()
+            self.logic_list_display(collection.movies)
 
     def logic_update_list_widget(self) -> None:
         """Refreshes the current items in the list widget.
@@ -849,9 +801,8 @@ class MainWindow(AestheticWindow):
         """
 
         selected_item_row = self.lw_main.row(self.lw_main.currentItem())
+        items = [self.lw_main.item(i).attr for i in range(self.lw_main.count()) if self.lw_main.item(i).attr]
 
-        items = [self.lw_main.item(i) for i in range(self.lw_main.count())]
-        items = [item.attr for item in items if item.attr is not None]
         self.logic_list_display(items)
 
         if selected_item_row:
@@ -872,21 +823,18 @@ class MainWindow(AestheticWindow):
     def closeEvent(self, event):
 
         dataprocess.clear_cache()
-        super().closeEvent(event)
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 
         if event.type() == QEvent.ContextMenu and watched is self.lw_main:
             list_item = watched.itemAt(event.pos())
 
-            if list_item is None:
-                return False
-
-            if isinstance(list_item.attr, Collection):
+            if list_item and isinstance(list_item.attr, Collection):
                 self.logic_create_collection_menu(event.globalPos(), list_item.attr)
-
-            elif isinstance(list_item.attr, Movie):  # Can't put 'else' because of previous_item
+            elif list_item and isinstance(list_item.attr, Movie):
                 self.logic_create_movie_menu(event.globalPos(), list_item.attr)
+            else:
+                return False
 
         return super().eventFilter(watched, event)
 
