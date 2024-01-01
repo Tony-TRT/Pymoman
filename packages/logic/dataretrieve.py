@@ -328,21 +328,20 @@ class MovieScraper(Movie):
             str: Embedded YouTube link.
         """
 
-        sanitized_query = f"{self.title.strip().replace(' ', '+')}{f'+{self.year}' if year else ''}"
-        base_link = f"{self.sources_websites.get('SD')}embed/"
-        page = f"{self.sources_websites.get('SD')}results?search_query={sanitized_query}+trailer"
+        sanitized_query: str = f"{self.title.strip().replace(' ', '+')}{f'+{self.year}' if year else ''}"
+        base_link: str = f"{self.sources_websites.get('SD')}embed/"
+        page: str = f"{self.sources_websites.get('SD')}results?search_query={sanitized_query}+trailer"
 
         response = requests.get(page, timeout=10)
-
         if response.status_code == 200:
-            identifiers: list[str] = re.findall(r"watch\?v=(\S{11})", response.text)
+            regex = r"watch\?v=(\S{11})"
+            identifier = re.search(regex, response.text)
         else:
-            identifiers: list[str] = []
+            identifier = None
 
-        if not (identifiers and len(identifiers[0]) == 11):
-            return ""
-
-        return base_link + identifiers[0]
+        if identifier:
+            return base_link + identifier[1]
+        return ""
 
     @staticmethod
     def _write_img_to_disk(url: requests.Response, path: Path) -> None:
