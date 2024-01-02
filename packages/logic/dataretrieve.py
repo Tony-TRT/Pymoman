@@ -12,7 +12,7 @@ from random import shuffle
 from time import sleep
 
 import requests
-import wikipedia
+import wikipedia as wiki
 from bs4 import BeautifulSoup
 
 from packages.constants import constants
@@ -42,86 +42,63 @@ class MovieScraper(Movie):
         self.storage.mkdir(exist_ok=True, parents=True)
 
     def download_info(self) -> None:
-        """Gathers information about the movie, such as title, summary, actors, genre and trailer link.
+        """Gathers information about the movie. This information is then stored in a json file.
 
         Returns:
             None: None.
         """
 
-        if self.data_file.exists():
+        if self.load_data_file():
             return
 
-        official_title = f"{self.title.title()} ({self.year})"
-        summary = "The summary could not be retrieved, movie title may be incomplete, incorrect or too vague"
-        movie_gse = None
+        title: str = f"{self.title.title()} ({self.year})"
+        summary: str = "The summary could not be retrieved."
         actors: list[str] = []
-        genres: list[str] = []
-        imdb_link: str = ""
+        genre: list[str] = []
+        trailer: str = self.get_youtube_link()
+        imdb: str = ''
 
-        query = f"{self.title} {self.year}"
-        wikipedia.set_lang("en")
+        wiki.set_lang("en")
 
-        # Let's try 2 times
+        search_query: str = f"{self.title} {self.year}"
+        page = None
         for _ in range(2):
             try:
-                page = wikipedia.page(query)
-            except wikipedia.exceptions.DisambiguationError:
-                query = f"{self.title} film"
+                page = wiki.page(search_query) if page is None else page
+                if summary == "The summary could not be retrieved.":
+                    summary = wiki.summary(search_query, 3)
+            except (wiki.exceptions.DisambiguationError, wiki.exceptions.PageError, wiki.exceptions.RedirectError):
+                search_query = f"{self.title} film"
                 continue
-            except wikipedia.exceptions.HTTPTimeoutError:
+            except wiki.exceptions.HTTPTimeoutError:
                 break
-            except wikipedia.exceptions.PageError:
-                query = f"{self.title} film"
-                continue
-            except wikipedia.exceptions.RedirectError:
-                query = f"{self.title} film"
-                continue
             else:
-                official_title = page.title
+                title = page.title
                 actors = self.get_actors(page)
                 break
 
-        query = f"{self.title} {self.year}"
-        # Let's try 2 times again
-        for _ in range(2):
-            try:
-                summary = wikipedia.summary(query, 3)
-            except wikipedia.exceptions.DisambiguationError:
-                query = f"{self.title} film"
-                continue
-            except wikipedia.exceptions.HTTPTimeoutError:
-                break
-            except wikipedia.exceptions.PageError:
-                query = f"{self.title} film"
-                continue
-            except wikipedia.exceptions.RedirectError:
-                query = f"{self.title} film"
-                continue
-            else:
-                movie_gse = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
-
+        sentence_containing_genres: str = summary.split('.')[0].casefold().replace(self.title.casefold(), '')
         for key, value in constants.MOVIE_GENRES.items():
-            if key in movie_gse or value in movie_gse:
-                genres.append(key.title())
+            if key in sentence_containing_genres or value in sentence_containing_genres:
+                genre.append(key.title())
 
         for link in self.generate_imp_links(end='html'):
-            imdb_link: str = self.get_imdb_page_link(link)
-
-            if imdb_link:
+            imdb: str = self.get_imdb_page_link(link)
+            if imdb:
+                sleep(1)
                 break
-            sleep(1)
 
-        data = {
-            "title": official_title,
+        data_to_store: dict = {
+            "title": title,
             "summary": summary,
             "actors": actors,
-            "genre": genres,
-            "trailer": self.get_youtube_link(),
-            "imdb": imdb_link
+            "genre": genre,
+            "trailer": trailer,
+            "imdb": imdb
         }
 
         with open(self.data_file, 'w', encoding="UTF-8") as file:
-            json.dump(data, file, indent=4)
+            json.dump(data_to_store, file, indent=4)
 
     def download_poster(self, override: bool = False, dir_path=None, filename="thumb.jpg", year: bool = True) -> None:
         """Downloads movie poster.
@@ -227,7 +204,7 @@ class MovieScraper(Movie):
         return []
 
     @staticmethod
-    def get_actors(page: wikipedia.WikipediaPage) -> list[str]:
+    def get_actors(page: wiki.WikipediaPage) -> list[str]:
         """Retrieves movie's actors from the wikipedia page.
 
         Args:
