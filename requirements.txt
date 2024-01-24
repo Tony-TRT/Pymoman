@@ -1,5 +1,5 @@
-PySide6==6.6.0
-beautifulsoup4==4.12.2
+PySide6==6.6.1
+beautifulsoup4==4.12.3
 requests==2.31.0
 wikipedia==1.4.0
-Pillow==10.1.0
+pillow==10.2.0
