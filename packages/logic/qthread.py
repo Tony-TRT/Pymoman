@@ -4,7 +4,6 @@ to execute methods on a MovieScraper object in a separate thread. The thread sig
 when it finishes or encounters an error.
 """
 
-
 from typing import List, Tuple, Any
 
 from PySide6.QtCore import QThread, Signal
@@ -31,13 +30,20 @@ class ScraperThread(QThread):
                    Subsequent arguments should be tuples (method_name, argument).
 
         Raises:
-            ValueError: If the arguments are not correctly formatted.
+            ValueError: If the arguments are not enough.
+            TypeError: If the arguments are not of the required type.
         """
 
-        if not len(args) >= 2 and all(isinstance(item, tuple) for item in args[1:]):
-            raise ValueError("At least two arguments are required, with methods in tuple form (method, argument).")
+        if len(args) < 2:
+            raise ValueError("At least two arguments are required.")
 
-        self._movie_scraper_object = args[0] if isinstance(args[0], MovieScraper) else None
+        elif not isinstance(args[0], MovieScraper):
+            raise TypeError("The first argument should be an instance of MovieScraper.")
+
+        elif not all(isinstance(item, tuple) for item in args[1:]):
+            raise TypeError("Subsequent arguments should be tuples (method_name, argument).")
+
+        self._movie_scraper_object: MovieScraper = args[0]
         self._methods_to_call = list(filter(lambda x: hasattr(self._movie_scraper_object, x[0]), args[1:]))
 
     def run(self) -> None:
