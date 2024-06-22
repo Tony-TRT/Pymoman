@@ -252,19 +252,27 @@ class MainWindow(AestheticWindow):
         self.list_layout.addWidget(self.lw_main)
         self.panel_frame_layout.addWidget(self.panel)
 
-    def ui_progress_bar_animation(self) -> None:
-        """Creates a small animation for the progress bar.
+    def ui_progress_bar_animation(self, flag: bool = None) -> None:
+        """Creates a small animation for the progress bar."""
 
-        Returns:
-            None: None.
-        """
+        if flag is None:
 
-        for i in range(1, 101):         # The interface freezes for
-            self.prg_bar.setValue(i)    # such a short time that using a
-            sleep(0.003)                # thread here seems unnecessary.
+            for i in range(1, 101):         # The interface freezes for
+                self.prg_bar.setValue(i)    # such a short time that using a
+                sleep(0.003)                # thread here seems unnecessary.
 
-        sleep(0.3)
-        self.prg_bar.reset()
+            sleep(0.3)
+            self.prg_bar.reset()
+
+        elif flag:
+
+            self.prg_bar.setValue(100)
+            sleep(0.3)
+            self.prg_bar.reset()
+
+        else:
+
+            ...
 
     def logic_add_movie(self) -> None:
         """Opens the window which allows to add a movie.
@@ -346,6 +354,8 @@ class MainWindow(AestheticWindow):
         self.le_search.returnPressed.connect(self.logic_commands)
         self.lw_main.itemClicked.connect(self.logic_single_click)
         self.rating_adjuster.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
+        self.thread.thread_finished.connect(partial(self.ui_progress_bar_animation, True))
+        self.thread.thread_failed.connect(partial(self.ui_progress_bar_animation, False))
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
