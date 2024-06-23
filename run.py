@@ -1,6 +1,5 @@
 """Main application file."""
 
-import sys
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -11,9 +10,7 @@ from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 from packages.constants import constants
-from packages.logic import dataimport
-from packages.logic import dataprocess
-from packages.logic import dataretrieve
+from packages.logic import dataimport, dataprocess, dataretrieve
 from packages.logic.qthread import ScraperThread
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
@@ -24,14 +21,6 @@ from packages.ui.movieappender import MovieAppender
 from packages.ui.ratingadjuster import RatingAdjuster
 from packages.ui.minibrowser import MiniBrowser
 from packages.ui.suggester import RecPanel
-
-# This code is for the splash image when the application is launched from an executable.
-pyi_splash = None
-if getattr(sys, 'frozen', False):
-    try:
-        import pyi_splash
-    except ImportError:
-        pyi_splash = None
 
 
 constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True)
@@ -853,9 +842,5 @@ class MainWindow(AestheticWindow):
 if __name__ == '__main__':
     root = QtWidgets.QApplication()
     application = MainWindow()
-
-    if pyi_splash and hasattr(pyi_splash, 'close') and callable(pyi_splash.close) and getattr(sys, 'frozen', False):
-        pyi_splash.close()
-
     application.show()
     root.exec()
