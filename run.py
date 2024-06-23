@@ -1,7 +1,6 @@
 """Main application file."""
 
 import sys
-import threading
 from functools import partial
 from pathlib import Path
 from time import sleep
@@ -15,6 +14,7 @@ from packages.constants import constants
 from packages.logic import dataimport
 from packages.logic import dataprocess
 from packages.logic import dataretrieve
+from packages.logic.qthread import ScraperThread
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.ui.aesthetic import AestheticWindow
@@ -48,6 +48,7 @@ class MainWindow(AestheticWindow):
         self.setWindowTitle("Python Movie Manager")
         self.setFixedSize(950, 450)
         self.setAcceptDrops(True)
+        self.thread = ScraperThread()
         self.commands: dict = {
             "/set_default_theme": partial(self.ui_apply_style, "default"),
             "/set_cyber_theme": partial(self.ui_apply_style, "cyber"),
@@ -251,19 +252,27 @@ class MainWindow(AestheticWindow):
         self.list_layout.addWidget(self.lw_main)
         self.panel_frame_layout.addWidget(self.panel)
 
-    def ui_progress_bar_animation(self) -> None:
-        """Creates a small animation for the progress bar.
+    def ui_progress_bar_animation(self, flag: bool = None) -> None:
+        """Creates a small animation for the progress bar."""
 
-        Returns:
-            None: None.
-        """
+        if flag is None:
 
-        for i in range(1, 101):         # The interface freezes for
-            self.prg_bar.setValue(i)    # such a short time that using a
-            sleep(0.003)                # thread here seems unnecessary.
+            for i in range(1, 101):         # The interface freezes for
+                self.prg_bar.setValue(i)    # such a short time that using a
+                sleep(0.003)                # thread here seems unnecessary.
 
-        sleep(0.3)
-        self.prg_bar.reset()
+            sleep(0.3)
+            self.prg_bar.reset()
+
+        elif flag:
+
+            self.prg_bar.setValue(100)
+            sleep(0.3)
+            self.prg_bar.reset()
+
+        else:
+
+            ...
 
     def logic_add_movie(self) -> None:
         """Opens the window which allows to add a movie.
@@ -345,6 +354,8 @@ class MainWindow(AestheticWindow):
         self.le_search.returnPressed.connect(self.logic_commands)
         self.lw_main.itemClicked.connect(self.logic_single_click)
         self.rating_adjuster.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
+        self.thread.thread_finished.connect(partial(self.ui_progress_bar_animation, True))
+        self.thread.thread_failed.connect(partial(self.ui_progress_bar_animation, False))
 
     def logic_create_collection(self) -> None:
         """Creates a new collection.
@@ -608,8 +619,8 @@ class MainWindow(AestheticWindow):
         if use_default:
             movie.set_default_poster()
         else:
-            scraper = dataretrieve.MovieScraper(movie)
-            threading.Thread(target=scraper.download_poster, args=(True,), daemon=True).start()
+            self.thread.define_thread_settings(dataretrieve.MovieScraper(movie), ("download_poster", True))
+            self.thread.start()
             self.ui_progress_bar_animation()
 
         self.ui_information_panel(movie)
@@ -772,9 +783,9 @@ class MainWindow(AestheticWindow):
             self.ui_information_panel(clicked_item.attr)
         elif isinstance(clicked_item.attr, Movie):
             self.clr_reload_cbb_actors()
-            scraper = dataretrieve.MovieScraper(clicked_item.attr)
-            threading.Thread(target=scraper.download_poster, daemon=True).start()
-            threading.Thread(target=scraper.download_info, daemon=True).start()
+            scraper: dataretrieve.MovieScraper = dataretrieve.MovieScraper(clicked_item.attr)
+            self.thread.define_thread_settings(scraper, ("download_poster", None), ("download_info", None))
+            self.thread.start()
             self.ui_information_panel(clicked_item.attr)
         else:  # clicked_item is 'GO BACK'
             self.logic_list_display(MainWindow.all_collections)
