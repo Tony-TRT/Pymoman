@@ -23,10 +23,6 @@ from packages.ui.minibrowser import MiniBrowser
 from packages.ui.suggester import RecPanel
 
 
-constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True)
-dataprocess.clear_cache()  # Remove unused cache folders before loading anything.
-
-
 class MainWindow(AestheticWindow):
     all_collections: list[Collection] = Collection.retrieve_collections()
     last_collection_opened = last_movie_displayed = None
@@ -840,6 +836,8 @@ class MainWindow(AestheticWindow):
 
 
 if __name__ == '__main__':
+    constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True)
+    dataprocess.clear_cache()
     root = QtWidgets.QApplication()
     application = MainWindow()
     application.show()
