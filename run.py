@@ -722,30 +722,23 @@ class MainWindow(AestheticWindow):
             self.directory_importer.show()
 
     def logic_search_bar(self) -> None:
-        """Search bar logic is managed here.
-
-        Returns:
-            None: None.
-        """
+        """Search bar logic is managed here."""
 
         completer = QtWidgets.QCompleter(self.commands, self)
-        theme: dict = dataimport.load_file_content(constants.PATHS.get('settings'))
+        theme: dict = dataimport.load_file_content(constants.PATHS["settings"])
+        color: str = "color: #FFA500;" if theme["theme"] == "default" else "color: #EF745C;"
+        background: str = "background: #3F3F3F" if theme["theme"] == "default" else "background: #531942"
 
-        style: str = "color: #FFA500; background-color: #3F3F3F;"
-        if theme.get('theme') == 'cyber':
-            style: str = "color: #EF745C; background-color: #531942;"
-
-        completer.popup().setStyleSheet(style)  # Not using the .qss file here to avoid a lot of complicated code.
+        completer.popup().setStyleSheet(color + background)
         self.le_search.setCompleter(completer)
 
-        query: str = self.le_search.text().strip().lower()
-        if not query.startswith('/'):
-            collection: Collection | None = MainWindow.last_collection_opened
-            requested_items = [item for item in MainWindow.all_collections if item.name.casefold().startswith(query)]
-            if collection:
-                requested_items = [movie for movie in collection.movies if movie.title.casefold().startswith(query)]
+        query: str = self.le_search.text().strip().casefold()
 
-            self.logic_list_display(requested_items)
+        if not query.startswith("/"):
+            box: list = self.last_collection_opened.movies if self.last_collection_opened else self.all_collections
+            attribute: str = "title" if self.last_collection_opened else "name"
+            items: list = [x for x in box if getattr(x, attribute).casefold().startswith(query)]
+            self.logic_list_display(items)
 
     def logic_show_rating_modifier(self) -> None:
         """Shows rating modification dialog.
