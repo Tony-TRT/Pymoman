@@ -699,24 +699,19 @@ class MainWindow(AestheticWindow):
         self.logic_update_list_widget()
 
     def logic_scan_dir(self) -> None:
-        """Creates all variables needed to scan a folder.
+        """This method is called after clicking the button to scan a folder."""
 
-        Returns:
-            None: None.
-        """
+        dialog = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Python Movie Manager - Select Directory")
 
-        dialog = QtWidgets.QFileDialog.getExistingDirectory(self, "Python Movie Manager - Select Directory")
         if dialog:
             directory_path: Path = Path(dialog).resolve()
             directory_name: str = directory_path.stem
-
             suffix: int = 0
+
             while directory_name in [collection.name for collection in MainWindow.all_collections]:
-                directory_name: str = directory_name.rsplit('_', 1)[0] + f'_{str(suffix).zfill(3)}'
+                directory_name: str = directory_name.rsplit(sep='_', maxsplit=1)[0] + f"_{str(suffix).zfill(3)}"
                 suffix += 1
-
             collection: Collection = MainWindow.last_collection_opened or Collection(name=directory_name)
-
             self.directory_importer = DirectoryImporter(collection, directory_path)
             self.directory_importer.btn_validate.clicked.connect(self.logic_import_directory)
             self.directory_importer.show()
@@ -728,10 +723,8 @@ class MainWindow(AestheticWindow):
         theme: dict = dataimport.load_file_content(constants.PATHS["settings"])
         color: str = "color: #FFA500;" if theme["theme"] == "default" else "color: #EF745C;"
         background: str = "background: #3F3F3F" if theme["theme"] == "default" else "background: #531942"
-
         completer.popup().setStyleSheet(color + background)
         self.le_search.setCompleter(completer)
-
         query: str = self.le_search.text().strip().casefold()
 
         if not query.startswith("/"):
