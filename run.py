@@ -679,21 +679,19 @@ class MainWindow(AestheticWindow):
 
         self.logic_update_list_widget()
 
-    def logic_save_collection(self, collection_to_save: Collection) -> None:
+    def logic_save_collection(self, collection: Collection) -> None:
         """Saves the created collections.
 
         Args:
-            collection_to_save (Collection): Collection to save.
-
-        Returns:
-            None: None.
+            collection (Collection): Collection to save.
         """
 
         if self.sender() is self.btn_save_col:
-            for collection in MainWindow.all_collections:
-                collection.save()
+            for item in MainWindow.all_collections:
+                item.save()
+
         else:
-            collection_to_save.save()
+            collection.save()
 
         self.ui_progress_bar_animation()
         self.logic_update_list_widget()
