@@ -116,27 +116,23 @@ class MainWindow(AestheticWindow):
 
         Args:
             item: Collection or Movie object.
-
-        Returns:
-            None: None.
         """
 
-        if isinstance(item, Collection):
-            MainWindow.last_movie_displayed = None
-            image = QPixmap(constants.STR_PATHS.get('wishlist')) \
-                if item.name == 'My Wishlist' else QPixmap(constants.STR_PATHS.get('default poster'))
-            title: str = f"→ {item.name.upper()}"
-            summary: str = "\n".join([f"- {movie.title}" for movie in item.movies[:7]] + ['...'])
-            top_right_text: str = f"{len(item.movies)} movie{'s' if len(item.movies) > 1 else ''}."
-        else:
-            MainWindow.last_movie_displayed = item
-            image = QPixmap(str(item.thumb)) \
-                if item.thumb.exists() else QPixmap(constants.STR_PATHS.get('default poster'))
-            content: dict = item.load_data_file()
-            title: str = content.get('title', f"{item.title.title()} ({item.year})")
-            summary: str = content.get('summary', "Summary is being retrieved...")
-            top_right_text: str = item.aesthetic_rating
+        is_collection: bool = isinstance(item, Collection)
+        MainWindow.last_movie_displayed = None if is_collection else item
+        img_path = constants.STR_PATHS["wishlist" if is_collection and item.name == "My Wishlist" else "default poster"]
+        image = QPixmap(img_path if is_collection else str(item.thumb))
 
+        if is_collection:
+            title: str = f"→ {item.name.upper()}"
+            summary: str = "\n".join([f"- {movie.title}" for movie in item.movies[:7]] + ["..."])
+            top_right_text: str = f"{len(item.movies)} movie{'s' if len(item.movies) > 1 else ''}."
+
+        else:
+            content = item.load_data_file()
+            title = content.get("title", f"{item.title.title()} ({item.year})")
+            summary = content.get("summary", "Summary is being retrieved...")
+            top_right_text = item.aesthetic_rating
         self.panel.lbl_top_right.setText(top_right_text)
         self.panel.lbl_image.setPixmap(image)
         self.panel.lbl_title.setText(title)
