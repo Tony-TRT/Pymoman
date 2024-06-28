@@ -139,19 +139,15 @@ class MainWindow(AestheticWindow):
         self.panel.te_summary.setText(summary)
 
     def ui_manage_icons(self) -> None:
-        """Icons are managed here.
-
-        Returns:
-            None: None.
-        """
+        """Icons are managed here."""
 
         super().ui_manage_icons()
-        self.btn_create_col.setIcon(self.icons.get('note'))
-        self.btn_save_col.setIcon(self.icons.get('save'))
-        self.btn_scan_dir.setIcon(self.icons.get('folder'))
-        self.btn_add_movie.setIcon(self.icons.get('add'))
-        self.btn_remove_movie.setIcon(self.icons.get('rem'))
-        self.le_search.addAction(self.icons.get('search'), self.le_search.ActionPosition.LeadingPosition)
+        self.le_search.addAction(self.icons["search"], self.le_search.ActionPosition.LeadingPosition)
+        self.btn_create_col.setIcon(self.icons["note"])
+        self.btn_save_col.setIcon(self.icons["save"])
+        self.btn_scan_dir.setIcon(self.icons["folder"])
+        self.btn_add_movie.setIcon(self.icons["add"])
+        self.btn_remove_movie.setIcon(self.icons["rem"])
 
     def ui_manage_layouts_and_frames(self) -> None:
         """Frames and layouts are managed here.
