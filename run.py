@@ -69,7 +69,7 @@ class MainWindow(AestheticWindow):
         self.lbl_filter = None
         self.cbb_genre = None
         self.cbb_actors = None
-        self.prg_bar = None
+        self.progress_bar = None
         self.le_search = None
         self.lw_main = None
         self.movie_appender = None
@@ -100,11 +100,12 @@ class MainWindow(AestheticWindow):
         self.logic_list_display(MainWindow.all_collections)
 
     def dragEnterEvent(self, event):
+
         event.accept()
 
     def dropEvent(self, event):
-        event.accept()
 
+        event.accept()
         dropped_file = event.mimeData().urls()[0].toLocalFile()
 
         if MainWindow.last_movie_displayed and dropped_file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png', 'bmp']:
@@ -150,23 +151,19 @@ class MainWindow(AestheticWindow):
         self.btn_remove_movie.setIcon(self.icons["rem"])
 
     def ui_manage_layouts_and_frames(self) -> None:
-        """Frames and layouts are managed here.
-
-        Returns:
-            None: None.
-        """
+        """Frames and layouts are managed here."""
 
         self.panel_frame = QtWidgets.QFrame()
-        self.panel_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.header_layout = QtWidgets.QHBoxLayout()
         self.body_layout = QtWidgets.QHBoxLayout()
         self.menu_layout = QtWidgets.QVBoxLayout()
         self.list_layout = QtWidgets.QVBoxLayout()
-        self.list_layout.setContentsMargins(10, 0, 0, 0)
         self.information_layout = QtWidgets.QHBoxLayout()
         self.panel_frame_layout = QtWidgets.QHBoxLayout(self.panel_frame)
+
+        self.panel_frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.list_layout.setContentsMargins(10, 0, 0, 0)
 
         self.main_layout.addLayout(self.header_layout)
         self.main_layout.addLayout(self.body_layout)
@@ -176,45 +173,42 @@ class MainWindow(AestheticWindow):
         self.information_layout.addWidget(self.panel_frame)
 
     def ui_manage_widgets(self) -> None:
-        """Widgets are managed here.
-
-        Returns:
-            None: None.
-        """
+        """Widgets are managed here."""
 
         self.btn_create_col = QtWidgets.QPushButton("Create collection")
         self.btn_save_col = QtWidgets.QPushButton("Save all collections")
         self.btn_scan_dir = QtWidgets.QPushButton("Scan directory")
         self.btn_add_movie = QtWidgets.QPushButton("Add movie")
-        self.btn_add_movie.setEnabled(False)
         self.btn_remove_movie = QtWidgets.QPushButton("Remove movie")
-        self.btn_remove_movie.setEnabled(False)
         self.lbl_filter = QtWidgets.QLabel(f"{12 * '-'} Filter {12 * '-'}")
-        self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre = QtWidgets.QComboBox()
+        self.cbb_actors = QtWidgets.QComboBox()
+        self.progress_bar = QtWidgets.QProgressBar()
+        self.le_search = QtWidgets.QLineEdit()
+        self.lw_main = QtWidgets.QListWidget()
+        self.movie_appender = MovieAppender()
+        self.rating_adjuster = RatingAdjuster()
+        self.panel = DisplayPanel()
+        self.rec_panel = RecPanel()
+
+        self.btn_add_movie.setEnabled(False)
+        self.btn_remove_movie.setEnabled(False)
+        self.lbl_filter.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.cbb_genre.setMaxVisibleItems(5)
         self.cbb_genre.addItems(["Genre"] + [genre.title() for genre in constants.MOVIE_GENRES])
-        self.cbb_actors = QtWidgets.QComboBox()
         self.cbb_actors.setMaxVisibleItems(5)
         self.clr_reload_cbb_actors()
-        self.prg_bar = QtWidgets.QProgressBar()
-        self.prg_bar.setTextVisible(False)
-        self.prg_bar.setFixedHeight(5)
-        self.prg_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        self.le_search = QtWidgets.QLineEdit()
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setFixedHeight(5)
+        self.progress_bar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.le_search.setClearButtonEnabled(True)
         self.le_search.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
         self.le_search.setPlaceholderText("Search  or  run  '/'  commands.")
-        self.lw_main = QtWidgets.QListWidget()
         self.lw_main.installEventFilter(self)
         self.lw_main.setAlternatingRowColors(True)
         self.lw_main.setFocusPolicy(Qt.NoFocus)
         self.lw_main.setWordWrap(True)
         self.lw_main.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.movie_appender = MovieAppender()
-        self.rating_adjuster = RatingAdjuster()
-        self.panel = DisplayPanel()
-        self.rec_panel = RecPanel()
 
         self.header_layout.addWidget(self.btn_create_col)
         self.header_layout.addWidget(self.btn_save_col)
@@ -224,7 +218,7 @@ class MainWindow(AestheticWindow):
         self.menu_layout.addWidget(self.lbl_filter)
         self.menu_layout.addWidget(self.cbb_genre)
         self.menu_layout.addWidget(self.cbb_actors)
-        self.menu_layout.addWidget(self.prg_bar)
+        self.menu_layout.addWidget(self.progress_bar)
         self.list_layout.addWidget(self.le_search)
         self.list_layout.addWidget(self.lw_main)
         self.panel_frame_layout.addWidget(self.panel)
@@ -234,18 +228,18 @@ class MainWindow(AestheticWindow):
 
         if flag is None:
 
-            for i in range(1, 101):         # The interface freezes for
-                self.prg_bar.setValue(i)    # such a short time that using a
-                sleep(0.003)                # thread here seems unnecessary.
+            for i in range(1, 101):              # The interface freezes for
+                self.progress_bar.setValue(i)    # such a short time that using a
+                sleep(0.003)                     # thread here seems unnecessary.
 
             sleep(0.3)
-            self.prg_bar.reset()
+            self.progress_bar.reset()
 
         elif flag:
 
-            self.prg_bar.setValue(100)
+            self.progress_bar.setValue(100)
             sleep(0.3)
-            self.prg_bar.reset()
+            self.progress_bar.reset()
 
         else:
 
