@@ -280,16 +280,13 @@ class MainWindow(AestheticWindow):
 
         Args:
             movie (Movie): Movie to add.
-
-        Returns:
-            None: None.
         """
 
-        wishlist: Collection = next((item for item in MainWindow.all_collections if item.name == 'My Wishlist'), None)
+        wishlist = next((item for item in MainWindow.all_collections if item.name == 'My Wishlist'), None)
+
         if wishlist is None:
             wishlist = Collection(name='My Wishlist')
             MainWindow.all_collections.append(wishlist)
-
         wishlist.add_movie(movie)
         self.ui_progress_bar_animation()
 
