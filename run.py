@@ -256,23 +256,19 @@ class MainWindow(AestheticWindow):
             self.movie_appender.show()
 
     def logic_add_movie_validation(self) -> None:
-        """Validate whether to add the movie or not based on whether the user input is correct or incorrect.
-
-        Returns:
-            None: None.
+        """Attempts to create a 'Movie' object from the information entered
+        by the user and adds this object to the currently open collection.
         """
 
         title: str = self.movie_appender.le_movie_title.text()
         year: str = self.movie_appender.le_movie_year.text()
-        year: int = int(year) if year and year.isdigit() else 0
         rating: str = self.movie_appender.cbb_movie_rating.currentText()
         collection: Collection = MainWindow.last_collection_opened
-        movie: Movie | bool = dataimport.make_movie(title=title, year=year, rating=rating, path=None)[0]
+        movie: Movie = Movie(title=title, year=year, rating=rating)
 
-        if collection and movie:
+        if collection:
             collection.add_movie(movie)
             self.logic_list_display(collection.movies)
-
         self.movie_appender.close()
 
     def logic_add_to_wishlist(self, movie: Movie) -> None:

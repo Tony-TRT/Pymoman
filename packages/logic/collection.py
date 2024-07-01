@@ -40,7 +40,7 @@ class Collection:
             None: None.
         """
 
-        if isinstance(movie, Movie) and not any(movie == movie_to_check for movie_to_check in self.movies):
+        if isinstance(movie, Movie) and not any(movie == other for other in self.movies):
             self.movies.append(movie)
 
     def export_as_txt(self, output_file: str | Path) -> None:
