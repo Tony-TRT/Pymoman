@@ -287,17 +287,13 @@ class MainWindow(AestheticWindow):
         self.ui_progress_bar_animation()
 
     def logic_commands(self) -> None:
-        """Search bar commands logic is managed here.
+        """Search bar commands logic is managed here."""
 
-        Returns:
-            None:None.
-        """
+        function = self.commands.get(self.le_search.text())
 
-        for command, action in self.commands.items():
-            if self.le_search.text() == command:
-                self.le_search.clear()
-                action()
-                break
+        if function:
+            self.le_search.clear()
+            function()
 
     def logic_connect_widgets(self) -> None:
         """Connections are managed here.
