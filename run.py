@@ -749,15 +749,10 @@ class MainWindow(AestheticWindow):
             self.logic_list_display(collection.movies)
 
     def logic_update_list_widget(self) -> None:
-        """Refreshes the current items in the list widget.
+        """Refreshes the current items in the list widget."""
 
-        Returns:
-            None: None.
-        """
-
-        selected_item_row = self.lw_main.row(self.lw_main.currentItem())
+        selected_item_row: int = self.lw_main.row(self.lw_main.currentItem())
         items = [self.lw_main.item(i).attr for i in range(self.lw_main.count()) if self.lw_main.item(i).attr]
-
         self.logic_list_display(items)
 
         if selected_item_row:
