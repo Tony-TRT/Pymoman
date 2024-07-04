@@ -246,11 +246,7 @@ class MainWindow(AestheticWindow):
             ...
 
     def logic_add_movie(self) -> None:
-        """Opens the window which allows to add a movie.
-
-        Returns:
-            None: None.
-        """
+        """Opens the window which allows to add a movie."""
 
         if MainWindow.last_collection_opened:
             self.movie_appender.show()
@@ -296,11 +292,7 @@ class MainWindow(AestheticWindow):
             function()
 
     def logic_connect_widgets(self) -> None:
-        """Connections are managed here.
-
-        Returns:
-            None: None.
-        """
+        """Connections are managed here."""
 
         self.btn_create_col.clicked.connect(self.logic_create_collection)
         self.btn_save_col.clicked.connect(self.logic_save_collection)
@@ -737,16 +729,12 @@ class MainWindow(AestheticWindow):
             self.btn_remove_movie.setEnabled(False)
 
     def logic_sort_collection(self) -> None:
-        """Sorts a collection alphabetically.
+        """Sorts a collection alphabetically."""
 
-        Returns:
-            None: None.
-        """
-
-        collection: Collection | None = MainWindow.last_collection_opened
-        if collection:
-            collection.movies.sort()
-            self.logic_list_display(collection.movies)
+        if MainWindow.last_collection_opened:
+            movies: list[Movie] = MainWindow.last_collection_opened.movies
+            movies.sort()
+            self.logic_list_display(movies)
 
     def logic_update_list_widget(self) -> None:
         """Refreshes the current items in the list widget."""
@@ -759,11 +747,7 @@ class MainWindow(AestheticWindow):
             self.lw_main.scrollToItem(self.lw_main.item(selected_item_row))
 
     def clr_reload_cbb_actors(self) -> None:
-        """Reloads a list of all actors in the combobox.
-
-        Returns:
-            None: None.
-        """
+        """Reloads a list of all actors in the combobox."""
 
         self.cbb_actors.blockSignals(True)
         self.cbb_actors.clear()
