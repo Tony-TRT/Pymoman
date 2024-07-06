@@ -688,24 +688,20 @@ class MainWindow(AestheticWindow):
         self.rtg_st_wn.show()
 
     def logic_single_click(self, clicked_item) -> None:
-        """Handle a single click on items in the QListWidget.
+        """Handle a single click on items in the QListWidget."""
 
-        Returns:
-            None: None.
-        """
+        if clicked_item.attr is None:
+            self.logic_list_display(MainWindow.all_collections)
+            self.btn_ad_mv.setEnabled(False)
+            self.btn_rm_mv.setEnabled(False)
+            return
 
-        if isinstance(clicked_item.attr, Collection):
-            self.ui_information_panel(clicked_item.attr)
         elif isinstance(clicked_item.attr, Movie):
             self.clr_reload_cbb_actors()
             scraper: dataretrieve.MovieScraper = dataretrieve.MovieScraper(clicked_item.attr)
             self.thread.define_thread_settings(scraper, ("download_poster", None), ("download_info", None))
             self.thread.start()
-            self.ui_information_panel(clicked_item.attr)
-        else:  # clicked_item is 'GO BACK'
-            self.logic_list_display(MainWindow.all_collections)
-            self.btn_ad_mv.setEnabled(False)
-            self.btn_rm_mv.setEnabled(False)
+        self.ui_information_panel(clicked_item.attr)
 
     def logic_sort_collection(self) -> None:
         """Sorts a collection alphabetically."""
