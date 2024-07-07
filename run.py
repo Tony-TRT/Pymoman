@@ -565,9 +565,6 @@ class MainWindow(AestheticWindow):
 
         Args:
             collection (Collection): Collection to open.
-
-        Returns:
-            None: None.
         """
 
         MainWindow.last_collection_opened = collection
@@ -576,20 +573,15 @@ class MainWindow(AestheticWindow):
         self.btn_rm_mv.setEnabled(True)
 
     def logic_remove_movie(self) -> None:
-        """Removes a selected movie.
+        """Removes a selected movie."""
 
-        Returns:
-            None: None.
-        """
+        collection: Collection | None = MainWindow.last_collection_opened
+        movie: Movie | None = self.lsw_mn_wg.selectedItems()[0].attr if self.lsw_mn_wg.selectedItems() else None
 
-        collection = MainWindow.last_collection_opened
-        selected_items = self.lsw_mn_wg.selectedItems()
-
-        if collection and selected_items and isinstance(selected_items[0].attr, Movie):
-            movie_to_remove: Movie = selected_items[0].attr
-            collection.remove_movie(movie_to_remove)
-            movie_to_remove.remove_cache()
-            del movie_to_remove
+        if collection and movie:
+            collection.remove_movie(movie)
+            collection.save()
+            movie.remove_cache()
             self.logic_list_display(collection.movies)
 
     def logic_rename_collection(self, collection: Collection) -> None:
@@ -597,36 +589,31 @@ class MainWindow(AestheticWindow):
 
         Args:
             collection (Collection): Collection to rename.
-
-        Returns:
-            None: None.
         """
 
         new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
+
         if new_name and new_name not in [c.name for c in MainWindow.all_collections] and value:
             collection.rename(new_name)
             self.logic_update_list_widget()
 
-    def logic_rename_movie(self, movie: Movie, user_choice: bool) -> None:
+    def logic_rename_movie(self, movie: Movie, flag: bool) -> None:
         """Renames a movie.
 
         Args:
             movie (Movie): Movie to rename.
-            user_choice (bool): True for personal renaming, False to automatically rename with the official title.
-
-        Returns:
-            None: None.
+            flag (bool): True for personal renaming, False to automatically rename with the official title.
         """
 
-        if user_choice:
+        if flag:
             new_name, value = QtWidgets.QInputDialog.getText(self, "Rename movie", "Enter new title:")
             success: bool = movie.rename(new_name) if new_name and value else True
+
         else:
             success: bool = movie.rename(movie.official_title)
 
         if not success:
             QtWidgets.QMessageBox.about(self, "Warning", constants.CACHE_WARNING)
-
         self.logic_update_list_widget()
 
     def logic_save_collection(self, collection: Collection) -> None:
