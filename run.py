@@ -260,7 +260,7 @@ class MainWindow(AestheticWindow):
         wishlist = next((item for item in MainWindow.all_collections if item.name == 'My Wishlist'), None)
 
         if wishlist is None:
-            wishlist = Collection(name='My Wishlist')
+            wishlist = Collection(name="My Wishlist")
             MainWindow.all_collections.append(wishlist)
         wishlist.add_movie(movie)
         self.ui_progress_bar_animation()
@@ -277,7 +277,7 @@ class MainWindow(AestheticWindow):
     def logic_connect_widgets(self) -> None:
         """Connections are managed here."""
 
-        self.btn_cr_cl.clicked.connect(self.logic_create_collection)
+        self.btn_cr_cl.clicked.connect(self.logic_handle_collection)
         self.btn_sv_cl.clicked.connect(self.logic_save_collection)
         self.btn_sc_dr.clicked.connect(self.logic_scan_dir)
         self.btn_ad_mv.clicked.connect(self.logic_add_movie)
@@ -291,18 +291,6 @@ class MainWindow(AestheticWindow):
         self.rtg_st_wn.cbb_movie_rating.currentTextChanged.connect(self.logic_edit_movie_rating)
         self.thread.thread_finished.connect(partial(self.ui_progress_bar_animation, True))
         self.thread.thread_failed.connect(partial(self.ui_progress_bar_animation, False))
-
-    def logic_create_collection(self) -> None:
-        """Creates a new collection.
-
-        Returns:
-            None: None.
-        """
-
-        name, value = QtWidgets.QInputDialog.getText(self, "New collection", "Enter name:")
-        if name and name not in [c.name for c in MainWindow.all_collections] and value:
-            MainWindow.all_collections.append(Collection(name=name))
-            self.logic_list_display(MainWindow.all_collections)
 
     def logic_create_collection_menu(self, pos, item: Collection) -> None:
         """Create a context menu for collections.
@@ -326,7 +314,7 @@ class MainWindow(AestheticWindow):
         save_collection = QAction(self.icons.get('save'), "Save")
         save_collection.triggered.connect(partial(self.logic_save_collection, item))
         rename_collection = QAction(self.icons.get('note'), "Rename")
-        rename_collection.triggered.connect(partial(self.logic_rename_collection, item))
+        rename_collection.triggered.connect(partial(self.logic_handle_collection, item))
         export_collection = QAction(self.icons.get('export'), "Export as text")
         export_collection.triggered.connect(partial(self.logic_export_collection, item))
         delete_collection = QAction(self.icons.get('delete'), "Delete")
@@ -473,6 +461,25 @@ class MainWindow(AestheticWindow):
         lw_item.attr = item
         return lw_item
 
+    def logic_handle_collection(self, collection: Collection = None) -> None:
+        """Creates or renames a collection.
+
+        Args:
+            collection (Collection): The collection to rename. If None, a new collection will be created.
+        """
+
+        taken_names: list[str] = [collection.name for collection in MainWindow.all_collections]
+        title: str = "Rename collection" if collection else "New collection"
+        message: str = "Enter new name:" if collection else "Enter name:"
+        name, value = QtWidgets.QInputDialog.getText(self, title, message)
+
+        if name and name not in taken_names and value and not collection:
+            MainWindow.all_collections.append(Collection(name=name))
+
+        elif name and name not in taken_names and value and collection:
+            collection.rename(name)
+        self.logic_list_display(MainWindow.all_collections)
+
     def logic_import_directory(self) -> None:
         """Retrieves scanned movies from a folder and add them to a collection.
 
@@ -583,19 +590,6 @@ class MainWindow(AestheticWindow):
             collection.save()
             movie.remove_cache()
             self.logic_list_display(collection.movies)
-
-    def logic_rename_collection(self, collection: Collection) -> None:
-        """Renames a collection.
-
-        Args:
-            collection (Collection): Collection to rename.
-        """
-
-        new_name, value = QtWidgets.QInputDialog.getText(self, "Rename collection", "Enter new name:")
-
-        if new_name and new_name not in [c.name for c in MainWindow.all_collections] and value:
-            collection.rename(new_name)
-            self.logic_update_list_widget()
 
     def logic_rename_movie(self, movie: Movie, flag: bool) -> None:
         """Renames a movie.
