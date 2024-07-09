@@ -11,15 +11,16 @@ from PySide6.QtCore import Qt, QEvent
 
 from packages.constants import constants
 from packages.logic import dataimport, dataprocess, dataretrieve
-from packages.logic.qthread import ScraperThread
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
+from packages.logic.qthread import ScraperThread
 from packages.ui.aesthetic import AestheticWindow
-from packages.ui.displaypanel import DisplayPanel
+from packages.ui.custom_qmenu import CustomQMenu
 from packages.ui.dirimporter import DirectoryImporter
+from packages.ui.displaypanel import DisplayPanel
+from packages.ui.minibrowser import MiniBrowser
 from packages.ui.movieappender import MovieAppender
 from packages.ui.ratingadjuster import RatingAdjuster
-from packages.ui.minibrowser import MiniBrowser
 from packages.ui.suggester import RecPanel
 
 
@@ -292,42 +293,24 @@ class MainWindow(AestheticWindow):
         self.thread.thread_finished.connect(partial(self.ui_progress_bar_animation, True))
         self.thread.thread_failed.connect(partial(self.ui_progress_bar_animation, False))
 
-    def logic_create_collection_menu(self, pos, item: Collection) -> None:
-        """Create a context menu for collections.
-
-        This method generates a context menu with specific actions for collections
+    def logic_create_collection_menu(self, position, item: Collection) -> None:
+        """This method generates a context menu with specific actions for collections
         within the QListWidget. It is triggered by a right-click event at the given
-        position 'pos' within the list widget.
+        position 'position' within the list widget.
 
         Args:
-            pos: Event position.
+            position: Event position.
             item (Collection): Clicked item.
-
-        Returns:
-            None: None.
         """
 
-        collection_menu = QtWidgets.QMenu(self)
-
-        open_collection = QAction(self.icons.get('folder'), "Open")
-        open_collection.triggered.connect(partial(self.logic_open_collection, item))
-        save_collection = QAction(self.icons.get('save'), "Save")
-        save_collection.triggered.connect(partial(self.logic_save_collection, item))
-        rename_collection = QAction(self.icons.get('note'), "Rename")
-        rename_collection.triggered.connect(partial(self.logic_handle_collection, item))
-        export_collection = QAction(self.icons.get('export'), "Export as text")
-        export_collection.triggered.connect(partial(self.logic_export_collection, item))
-        delete_collection = QAction(self.icons.get('delete'), "Delete")
-        delete_collection.triggered.connect(partial(self.logic_delete_collection, item))
-
-        collection_menu.addAction(open_collection)
-        collection_menu.addAction(save_collection)
-        collection_menu.addAction(rename_collection)
-        collection_menu.addAction(export_collection)
-        collection_menu.addAction(delete_collection)
-
-        collection_menu.exec(pos)
-        collection_menu.deleteLater()
+        menu: CustomQMenu = CustomQMenu(parent=self, clicked_item=item)
+        menu.new_action("op", self.icons["folder"], "Open", self.logic_open_collection)
+        menu.new_action("sv", self.icons["save"], "Save", self.logic_save_collection)
+        menu.new_action("rn", self.icons["note"], "Rename", self.logic_handle_collection)
+        menu.new_action("ex", self.icons["export"], "Export as text", self.logic_export_collection)
+        menu.new_action("dl", self.icons["delete"], "Delete", self.logic_delete_collection)
+        menu.exec(position)
+        menu.deleteLater()
 
     def logic_create_movie_menu(self, pos, item: Movie) -> None:
         """Create a context menu for movies.
