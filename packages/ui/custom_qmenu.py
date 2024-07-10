@@ -23,7 +23,11 @@ class CustomQMenu(QMenu):
                 - function (callable): The function to call when the action is triggered.
         """
 
-        key, icon, text, function = args
+        is_collection: bool = hasattr(self.clicked_item, "name")
+        key, icon, text = args[:3]
+        function = args[3] if is_collection else None
         self.menu_actions[key] = QAction(icon, text)
         self.addAction(self.menu_actions[key])
-        self.menu_actions[key].triggered.connect(partial(function, self.clicked_item))
+
+        if is_collection and function:
+            self.menu_actions[key].triggered.connect(partial(function, self.clicked_item))

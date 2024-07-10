@@ -312,54 +312,37 @@ class MainWindow(AestheticWindow):
         menu.exec(position)
         menu.deleteLater()
 
-    def logic_create_movie_menu(self, pos, item: Movie) -> None:
-        """Create a context menu for movies.
-
-        This method generates a context menu with specific actions for movies
+    def logic_create_movie_menu(self, position, item: Movie) -> None:
+        """This method generates a context menu with specific actions for movies
         within the QListWidget. It is triggered by a right-click event at the given
-        position 'pos' within the list widget.
+        position 'position' within the list widget.
 
         Args:
-            pos: Event position.
+            position: Event position.
             item (Movie): Clicked item.
-
-        Returns:
-            None: None.
         """
 
-        movie_menu = QtWidgets.QMenu(self)
-
-        official_title = QAction(self.icons.get('official'), "Assign official title")
-        official_title.triggered.connect(partial(self.logic_rename_movie, item, False))
-        rename_movie = QAction(self.icons.get('note'), "Rename")
-        rename_movie.triggered.connect(partial(self.logic_rename_movie, item, True))
-        edit_rating = QAction(self.icons.get('star'), "Edit rating")
-        edit_rating.triggered.connect(partial(self.logic_show_rating_modifier))
-        load_new_poster = QAction(self.icons.get('new_poster'), "Load new poster")
-        load_new_poster.triggered.connect(partial(self.logic_modify_poster, item))
-        load_default_poster = QAction(self.icons.get('default_poster'), "Set default poster")
-        load_default_poster.triggered.connect(partial(self.logic_modify_poster, item, True))
-        wishlist = QAction(self.icons.get('wishlist'), "Add to Wishlist")
-        wishlist.triggered.connect(partial(self.logic_add_to_wishlist, item))
-        watch_trailer = QAction(self.icons.get('trailer'), "Watch trailer")
-        watch_trailer.triggered.connect(partial(self.logic_mini_browser, item, 'trailer'))
-        see_on_imdb = QAction(self.icons.get('imdb'), "See on IMDb")
-        see_on_imdb.triggered.connect(partial(self.logic_mini_browser, item, 'imdb'))
-        delete_cache = QAction(self.icons.get('delete'), "Delete cached data")
-        delete_cache.triggered.connect(item.remove_cache)
-
-        movie_menu.addAction(official_title)
-        movie_menu.addAction(rename_movie)
-        movie_menu.addAction(edit_rating)
-        movie_menu.addAction(load_new_poster)
-        movie_menu.addAction(load_default_poster)
-        movie_menu.addAction(wishlist)
-        movie_menu.addAction(watch_trailer)
-        movie_menu.addAction(see_on_imdb)
-        movie_menu.addAction(delete_cache)
-
-        movie_menu.exec(pos)
-        movie_menu.deleteLater()
+        menu: CustomQMenu = CustomQMenu(parent=self, clicked_item=item)
+        menu.new_action("ot", self.icons["official"], "Assign official title")
+        menu.new_action("rn", self.icons["note"], "Rename")
+        menu.new_action("er", self.icons["star"], "Edit rating")
+        menu.new_action("ln", self.icons["new_poster"], "Load new poster")
+        menu.new_action("ld", self.icons["default_poster"], "Set default poster")
+        menu.new_action("wl", self.icons["wishlist"], "Add to Wishlist")
+        menu.new_action("wt", self.icons["trailer"], "Watch trailer")
+        menu.new_action("im", self.icons["imdb"], "See on IMDb")
+        menu.new_action("dl", self.icons["delete"], "Delete cached data")
+        menu.menu_actions["ot"].triggered.connect(partial(self.logic_rename_movie, item, False))
+        menu.menu_actions["rn"].triggered.connect(partial(self.logic_rename_movie, item, True))
+        menu.menu_actions["er"].triggered.connect(self.logic_show_rating_modifier)
+        menu.menu_actions["ln"].triggered.connect(partial(self.logic_modify_poster, item))
+        menu.menu_actions["ld"].triggered.connect(partial(self.logic_modify_poster, item, True))
+        menu.menu_actions["wl"].triggered.connect(partial(self.logic_add_to_wishlist, item))
+        menu.menu_actions["wt"].triggered.connect(partial(self.logic_mini_browser, item, "trailer"))
+        menu.menu_actions["im"].triggered.connect(partial(self.logic_mini_browser, item, "imdb"))
+        menu.menu_actions["dl"].triggered.connect(item.remove_cache)
+        menu.exec(position)
+        menu.deleteLater()
 
     def logic_delete_collection(self, collection: Collection) -> None:
         """Deletes a collection.
