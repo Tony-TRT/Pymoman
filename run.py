@@ -213,7 +213,7 @@ class MainWindow(AestheticWindow):
         if flag is None:
 
             for i in range(1, 101):              # The interface freezes for
-                self.prg_br_wg.setValue(i)    # such a short time that using a
+                self.prg_br_wg.setValue(i)       # such a short time that using a
                 sleep(0.003)                     # thread here seems unnecessary.
 
             sleep(0.3)
@@ -349,9 +349,6 @@ class MainWindow(AestheticWindow):
 
         Args:
             collection (Collection): Collection to delete.
-
-        Returns:
-            None: None.
         """
 
         if collection.remove():
@@ -359,16 +356,13 @@ class MainWindow(AestheticWindow):
             self.logic_list_display(MainWindow.all_collections)
 
     def logic_edit_movie_rating(self) -> None:
-        """Lets the user change their rating of the selected movie.
+        """Lets the user change their rating of the selected movie."""
 
-        Returns:
-            None: None.
-        """
+        selected = self.lsw_mn_wg.selectedItems()[0].attr if self.lsw_mn_wg.selectedItems() else None
 
-        if self.lsw_mn_wg.selectedItems() and isinstance(self.lsw_mn_wg.selectedItems()[0].attr, Movie):
-            selected_movie: Movie = self.lsw_mn_wg.selectedItems()[0].attr
-            selected_movie.rating = self.rtg_st_wn.cbb_movie_rating.currentText()
-            self.ui_information_panel(selected_movie)
+        if isinstance(selected, Movie):
+            selected.rating = self.rtg_st_wn.cbb_movie_rating.currentText()
+            self.ui_information_panel(selected)
 
     def logic_export_collection(self, collection: Collection) -> None:
         """Allows to export a collection.
