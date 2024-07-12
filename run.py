@@ -369,35 +369,24 @@ class MainWindow(AestheticWindow):
 
         Args:
             collection (Collection): Collection to export.
-
-        Returns:
-            None: None.
         """
 
-        dialog = QtWidgets.QFileDialog.getSaveFileName(self, 'Python Movie Manager - Save text file')
+        dialog = QtWidgets.QFileDialog.getSaveFileName(self, "Python Movie Manager - Save text file")
         if dialog[0]:
             collection.export_as_txt(Path(f"{dialog[0]}.txt"))
 
     def logic_filter(self) -> None:
-        """Filters logic is managed here.
+        """Filters logic is managed here."""
 
-        Returns:
-            None: None.
-        """
-
-        all_movies: list[Movie] = [movie for collection in MainWindow.all_collections for movie in collection.movies]
-        query_g, query_a = self.cbb_ls_gn.currentText(), self.cbb_ls_ac.currentText()
-
-        if query_g == "Genre" and query_a != "Actors":
-            matching_movies = [movie for movie in all_movies if query_a in movie.actors]
-        elif query_g != "Genre" and query_a == "Actors":
-            matching_movies = [movie for movie in all_movies if query_g in movie.genre]
-        elif query_g != "Genre" and query_a != "Actors":
-            matching_movies = [movie for movie in all_movies if (query_g in movie.genre) and (query_a in movie.actors)]
-        else:
-            matching_movies = all_movies
-
-        self.logic_list_display(matching_movies)
+        movies: list[Movie] = [movie for collection in MainWindow.all_collections for movie in collection.movies]
+        qg, qa = self.cbb_ls_gn.currentText(), self.cbb_ls_ac.currentText()
+        results: dict = {
+            qg == "Genre" and qa != "Actors": [m for m in movies if qa in m.actors],
+            qg != "Genre" and qa == "Actors": [m for m in movies if qg in m.genre],
+            qg != "Genre" and qa != "Actors": [m for m in movies if (qg in m.genre) and (qa in m.actors)],
+            qg == "Genre" and qa == "Actors": movies
+        }
+        self.logic_list_display(results[True])
 
     def logic_generate_list_item(self, item: Collection | Movie) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
