@@ -398,16 +398,15 @@ class MainWindow(AestheticWindow):
             QtWidgets.QListWidgetItem: Item ready for display.
         """
 
-        if isinstance(item, Collection):
-            lw_item = QtWidgets.QListWidgetItem(item.name)
-            if item.path.exists():
-                lw_item.setIcon(self.icons.get('collection'))
-        else:
-            lw_item = QtWidgets.QListWidgetItem(item.title)
-            lw_item.setIcon(self.icons.get('movie'))
-
+        lw_item = QtWidgets.QListWidgetItem(item.name if isinstance(item, Collection) else item.title)
         lw_item.setTextAlignment(Qt.AlignCenter)
         lw_item.attr = item
+
+        if isinstance(item, Collection) and item.path.exists():
+            lw_item.setIcon(self.icons["collection"])
+
+        elif isinstance(item, Movie):
+            lw_item.setIcon(self.icons["movie"])
         return lw_item
 
     def logic_handle_collection(self, collection: Collection = None) -> None:
