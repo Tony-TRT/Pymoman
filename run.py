@@ -383,10 +383,9 @@ class MainWindow(AestheticWindow):
         results: dict = {
             qg == "Genre" and qa != "Actors": [m for m in movies if qa in m.actors],
             qg != "Genre" and qa == "Actors": [m for m in movies if qg in m.genre],
-            qg != "Genre" and qa != "Actors": [m for m in movies if (qg in m.genre) and (qa in m.actors)],
-            qg == "Genre" and qa == "Actors": movies
+            qg != "Genre" and qa != "Actors": [m for m in movies if (qg in m.genre) and (qa in m.actors)]
         }
-        self.logic_list_display(results[True])
+        self.logic_list_display(results.get(True, movies))
 
     def logic_generate_list_item(self, item: Collection | Movie) -> QtWidgets.QListWidgetItem:
         """Generates a QListWidgetItem from the received object.
