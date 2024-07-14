@@ -459,24 +459,22 @@ class MainWindow(AestheticWindow):
 
         Args:
             items: List of Collection objects or Movie objects.
-
-        Returns:
-            None: None.
         """
 
         self.lsw_mn_wg.clear()
-        previous_item = QtWidgets.QListWidgetItem("GO BACK")
-        previous_item.attr = None
-        previous_item.setIcon(self.icons.get('previous'))
-        previous_item.setTextAlignment(Qt.AlignCenter)
+        processed_list: list[QtWidgets.QListWidgetItem] = [self.logic_generate_list_item(item) for item in items]
 
-        display_list = [self.logic_generate_list_item(item) for item in items]
         if (not items and MainWindow.all_collections) or (items and all(isinstance(item, Movie) for item in items)):
-            display_list.insert(0, previous_item)
-        else:  # When displaying collections.
+            previous_item = QtWidgets.QListWidgetItem("GO BACK")
+            previous_item.setTextAlignment(Qt.AlignCenter)
+            previous_item.attr = None
+            previous_item.setIcon(self.icons["previous"])
+            processed_list.insert(0, previous_item)
+
+        else:
             MainWindow.last_collection_opened = None
 
-        for item in display_list:
+        for item in processed_list:
             self.lsw_mn_wg.addItem(item)
 
     def logic_mini_browser(self, movie: Movie, content: str) -> None:
