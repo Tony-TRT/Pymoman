@@ -483,33 +483,27 @@ class MainWindow(AestheticWindow):
         Args:
             movie (Movie): The movie whose user wants to open a corresponding link.
             content (str): The link that should be loaded; 'trailer' or 'imdb'.
-
-        Returns:
-            None: None.
         """
 
         self.min_br_wn = MiniBrowser(movie=movie, content=content)
         self.min_br_wn.show()
 
-    def logic_modify_poster(self, movie: Movie, use_default=False) -> None:
+    def logic_modify_poster(self, movie: Movie, default=False) -> None:
         """Allows the user to display a new image for the movie,
         (for example if they don't like the current image.)
 
         Args:
             movie (Movie): Movie to work on.
-            use_default (bool): True to use default image, False to scrape a new image.
-
-        Returns:
-            None: None.
+            default (bool): True to use default image, False to scrape a new image.
         """
 
-        if use_default:
+        if default:
             movie.set_default_poster()
+
         else:
             self.thread.define_thread_settings(dataretrieve.MovieScraper(movie), ("download_poster", True))
             self.thread.start()
             self.ui_progress_bar_animation()
-
         self.ui_information_panel(movie)
 
     def logic_open_collection(self, collection: Collection) -> None:
