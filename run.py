@@ -428,11 +428,7 @@ class MainWindow(AestheticWindow):
         self.logic_list_display(MainWindow.all_collections)
 
     def logic_import_directory(self) -> None:
-        """Retrieves scanned movies from a folder and add them to a collection.
-
-        Returns:
-            None: None.
-        """
+        """Retrieves scanned movies from a folder and add them to a collection."""
 
         collection: Collection = self.dir_im_wn.collection
         number_of_files: int = self.dir_im_wn.lw_main.count()
