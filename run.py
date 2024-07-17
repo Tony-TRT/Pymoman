@@ -427,6 +427,21 @@ class MainWindow(AestheticWindow):
             collection.rename(name)
         self.logic_list_display(MainWindow.all_collections)
 
+    # def logic_import_directory(self) -> None:
+    #     """Retrieves scanned movies from a folder and add them to a collection."""
+    #
+    #     collection: Collection = self.dir_im_wn.collection
+    #     video_files: list = [self.dir_im_wn.lw_main.item(i) for i in range(self.dir_im_wn.lw_main.count())]
+    #
+    #     for item in video_files:
+    #         movie: Movie | None = Movie.no_errors(item.title, item.year, item.text(), item.rating)
+    #         collection.add_movie(movie)
+    #
+    #     if collection not in MainWindow.all_collections:
+    #         MainWindow.all_collections.append(collection)
+    #     self.logic_list_display(collection.movies)
+    #     self.dir_im_wn.close()
+
     def logic_import_directory(self) -> None:
         """Retrieves scanned movies from a folder and add them to a collection."""
 
