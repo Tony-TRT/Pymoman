@@ -172,8 +172,8 @@ class Movie:
 
         return load_file_content(self.data_file)
 
-    @staticmethod
-    def no_errors(*args) -> "Movie" | None:
+    @classmethod
+    def no_errors(cls, *args) -> "Movie" | None:
         """Creates a Movie instance if no exceptions are raised during instantiation.
         If a ValueError or FileNotFoundError is encountered during the creation process,
         the method returns None instead of raising the exception.
@@ -187,7 +187,7 @@ class Movie:
         """
 
         try:
-            movie = Movie(*args)
+            movie = cls(*args)
 
         except (ValueError, FileNotFoundError):
             return None
