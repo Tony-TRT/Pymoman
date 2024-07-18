@@ -2,6 +2,8 @@
 This module is dedicated to the creation and management of movies.
 """
 
+from __future__ import annotations
+
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -169,6 +171,27 @@ class Movie:
         """
 
         return load_file_content(self.data_file)
+
+    @staticmethod
+    def no_errors(*args) -> "Movie" | None:
+        """Creates a Movie instance if no exceptions are raised during instantiation.
+        If a ValueError or FileNotFoundError is encountered during the creation process,
+        the method returns None instead of raising the exception.
+
+        Args:
+            *args: Variable length argument list used to initialize the Movie object.
+
+        Returns:
+            Movie | None: A new Movie instance if creation is successful, None if a
+            ValueError or FileNotFoundError is raised.
+        """
+
+        try:
+            movie = Movie(*args)
+
+        except (ValueError, FileNotFoundError):
+            return None
+        return movie
 
     @property
     def official_title(self) -> str:
