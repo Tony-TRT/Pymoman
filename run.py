@@ -427,41 +427,18 @@ class MainWindow(AestheticWindow):
             collection.rename(name)
         self.logic_list_display(MainWindow.all_collections)
 
-    # def logic_import_directory(self) -> None:
-    #     """Retrieves scanned movies from a folder and add them to a collection."""
-    #
-    #     collection: Collection = self.dir_im_wn.collection
-    #     video_files: list = [self.dir_im_wn.lw_main.item(i) for i in range(self.dir_im_wn.lw_main.count())]
-    #
-    #     for item in video_files:
-    #         movie: Movie | None = Movie.no_errors(item.title, item.year, item.text(), item.rating)
-    #         collection.add_movie(movie)
-    #
-    #     if collection not in MainWindow.all_collections:
-    #         MainWindow.all_collections.append(collection)
-    #     self.logic_list_display(collection.movies)
-    #     self.dir_im_wn.close()
-
     def logic_import_directory(self) -> None:
         """Retrieves scanned movies from a folder and add them to a collection."""
 
         collection: Collection = self.dir_im_wn.collection
-        number_of_files: int = self.dir_im_wn.lw_main.count()
-        list_of_files: list = [self.dir_im_wn.lw_main.item(i) for i in range(number_of_files)]
+        video_files: list = [self.dir_im_wn.lw_main.item(i) for i in range(self.dir_im_wn.lw_main.count())]
 
-        for item in list_of_files:
-            title: str = item.title
-            year: int = int(item.year) if item.year and item.year.isdigit() else 0
-            path: str = item.text()
-            rating: str = item.rating
-            result: tuple = dataimport.make_movie(title=title, year=year, path=path, rating=rating)
-
-            if result[0]:
-                collection.add_movie(result[0])
+        for item in video_files:
+            movie: Movie | None = Movie.no_errors(item.title, item.year, item.text(), item.rating)
+            collection.add_movie(movie)
 
         if collection not in MainWindow.all_collections:
             MainWindow.all_collections.append(collection)
-
         self.logic_list_display(collection.movies)
         self.dir_im_wn.close()
 
