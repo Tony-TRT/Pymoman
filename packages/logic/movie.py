@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from packages.constants import constants
-from packages.logic.dataimport import load_file_content
+from packages.logic.data_import import load_file_content
 from packages.logic.dataprocess import filter_name
 
 

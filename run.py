@@ -10,7 +10,7 @@ from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 from packages.constants import constants
-from packages.logic import dataimport, dataprocess, dataretrieve
+from packages.logic import data_import, dataprocess, dataretrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.logic.qthread import ScraperThread
@@ -576,7 +576,7 @@ class MainWindow(AestheticWindow):
         """Search bar logic is managed here."""
 
         completer = QtWidgets.QCompleter(self.commands, self)
-        theme: dict = dataimport.load_file_content(constants.PATHS["settings"])
+        theme: dict = data_import.load_file_content(constants.PATHS["settings"])
         color: str = "color: #FFA500;" if theme["theme"] == "default" else "color: #EF745C;"
         background: str = "background: #3F3F3F" if theme["theme"] == "default" else "background: #531942"
         completer.popup().setStyleSheet(color + background)
@@ -634,7 +634,7 @@ class MainWindow(AestheticWindow):
 
         self.cbb_ls_ac.blockSignals(True)
         self.cbb_ls_ac.clear()
-        self.cbb_ls_ac.addItems(["Actors"] + dataimport.load_all_actors())
+        self.cbb_ls_ac.addItems(["Actors"] + data_import.load_all_actors())
         self.cbb_ls_ac.blockSignals(False)
 
     def closeEvent(self, event):

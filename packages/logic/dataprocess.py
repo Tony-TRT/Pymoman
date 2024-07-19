@@ -9,7 +9,7 @@ from shutil import rmtree, copy
 from PIL import Image
 
 from packages.constants import constants
-from packages.logic import dataimport
+from packages.logic import data_import
 
 
 def clear_cache() -> None:
@@ -22,7 +22,7 @@ def clear_cache() -> None:
     if not constants.PATHS.get('cache').exists():
         return
 
-    saved_movies = dataimport.load_all_movies()
+    saved_movies = data_import.load_all_movies()
     saved_movies_cache_paths = [movie.storage for movie in saved_movies]
 
     for path in constants.PATHS.get('cache').iterdir():

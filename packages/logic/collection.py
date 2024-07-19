@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Self
 
 from packages.constants import constants
-from packages.logic.dataimport import load_collection_movies
+from packages.logic.data_import import load_collection_movies
 from packages.logic.dataprocess import filter_name
 from packages.logic.movie import Movie
 
