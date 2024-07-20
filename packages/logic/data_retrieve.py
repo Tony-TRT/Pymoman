@@ -16,7 +16,7 @@ import wikipedia as wiki
 from bs4 import BeautifulSoup
 
 from packages.constants import constants
-from packages.logic.dataprocess import modify_raw_poster
+from packages.logic.data_process import modify_raw_poster
 from packages.logic.movie import Movie
 
 

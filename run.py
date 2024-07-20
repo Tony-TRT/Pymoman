@@ -10,7 +10,7 @@ from PySide6.QtGui import QPixmap, QAction
 from PySide6.QtCore import Qt, QEvent
 
 from packages.constants import constants
-from packages.logic import data_import, dataprocess, dataretrieve
+from packages.logic import data_import, data_process, data_retrieve
 from packages.logic.collection import Collection
 from packages.logic.movie import Movie
 from packages.logic.qthread import ScraperThread
@@ -93,7 +93,7 @@ class MainWindow(AestheticWindow):
         dropped_file = event.mimeData().urls()[0].toLocalFile()
 
         if MainWindow.last_movie_displayed and dropped_file.split('.')[-1].casefold() in ['jpg', 'jpeg', 'png', 'bmp']:
-            dataprocess.set_local_poster(file=dropped_file, movie=MainWindow.last_movie_displayed)
+            data_process.set_local_poster(file=dropped_file, movie=MainWindow.last_movie_displayed)
             self.ui_information_panel(MainWindow.last_movie_displayed)
 
     def ui_information_panel(self, item: Collection | Movie) -> None:
@@ -489,7 +489,7 @@ class MainWindow(AestheticWindow):
             movie.set_default_poster()
 
         else:
-            self.thread.define_thread_settings(dataretrieve.MovieScraper(movie), ("download_poster", True))
+            self.thread.define_thread_settings(data_retrieve.MovieScraper(movie), ("download_poster", True))
             self.thread.start()
             self.ui_progress_bar_animation()
         self.ui_information_panel(movie)
@@ -606,7 +606,7 @@ class MainWindow(AestheticWindow):
 
         elif isinstance(clicked_item.attr, Movie):
             self.clr_reload_cbb_actors()
-            scraper: dataretrieve.MovieScraper = dataretrieve.MovieScraper(clicked_item.attr)
+            scraper: data_retrieve.MovieScraper = data_retrieve.MovieScraper(clicked_item.attr)
             self.thread.define_thread_settings(scraper, ("download_poster", None), ("download_info", None))
             self.thread.start()
         self.ui_information_panel(clicked_item.attr)
@@ -639,7 +639,7 @@ class MainWindow(AestheticWindow):
 
     def closeEvent(self, event):
 
-        dataprocess.clear_cache()
+        data_process.clear_cache()
 
     def eventFilter(self, watched, event: QEvent) -> bool:
 
@@ -659,7 +659,7 @@ class MainWindow(AestheticWindow):
 
 if __name__ == '__main__':
     constants.APP_HIDDEN_FOLDER.mkdir(exist_ok=True)
-    dataprocess.clear_cache()
+    data_process.clear_cache()
     root = QtWidgets.QApplication()
     application = MainWindow()
     application.show()
