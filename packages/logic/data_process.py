@@ -13,19 +13,13 @@ from packages.logic import data_import
 
 
 def clear_cache() -> None:
-    """Clear unused cache data.
+    """Clear unused cache data."""
 
-    Returns:
-        None: None.
-    """
-
-    if not constants.PATHS.get('cache').exists():
+    if not constants.PATHS["cache"].exists():
         return
+    saved_movies_cache_paths = [movie.storage for movie in data_import.load_all_movies()]
 
-    saved_movies = data_import.load_all_movies()
-    saved_movies_cache_paths = [movie.storage for movie in saved_movies]
-
-    for path in constants.PATHS.get('cache').iterdir():
+    for path in constants.PATHS["cache"].iterdir():
         if path not in saved_movies_cache_paths and path.is_dir():
             rmtree(path)
 
