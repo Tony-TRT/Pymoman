@@ -45,7 +45,6 @@ def filter_name(name: str, limit: int = 25) -> str:
     for regex, error_message in forbidden_names.items():
         if re.match(regex, name):
             raise ValueError(error_message)
-
     unwanted_characters: str = '/\\:;"'
 
     for unwanted_character in unwanted_characters:
