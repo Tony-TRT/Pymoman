@@ -61,17 +61,12 @@ def modify_raw_poster(poster: Path) -> None:
 
     Args:
         poster (Path): Raw file's path.
-
-    Returns:
-        None: None.
     """
 
-    if not poster.exists():
-        return
-
-    movie_poster = Image.open(poster)
-    movie_poster_resized = movie_poster.resize((185, 275))
-    movie_poster_resized.save(poster)
+    if poster.exists():
+        movie_poster = Image.open(poster)
+        movie_poster_resized = movie_poster.resize((185, 275))
+        movie_poster_resized.save(poster)
 
 
 def set_local_poster(file, movie) -> None:
@@ -80,17 +75,15 @@ def set_local_poster(file, movie) -> None:
     Args:
         file: Image file's path.
         movie (Movie): Concerned movie.
-
-    Returns:
-        None: None.
     """
 
     try:
         copy(file, movie.thumb)
+
     except FileNotFoundError:
         return
+
     except FileExistsError:
         movie.thumb.unlink()
         set_local_poster(file, movie)
-
     modify_raw_poster(movie.thumb)
