@@ -8,7 +8,7 @@ from typing import List, Tuple, Any
 
 from PySide6.QtCore import QThread, Signal
 
-from packages.logic.dataretrieve import MovieScraper
+from packages.logic.data_retrieve import MovieScraper
 
 
 class ScraperThread(QThread):

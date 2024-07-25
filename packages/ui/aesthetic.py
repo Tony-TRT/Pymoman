@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtGui import QIcon, QFontDatabase, QFont
 
 from packages.constants import constants
-from packages.logic.dataimport import load_file_content
+from packages.logic.data_import import load_file_content
 
 
 def save_settings(settings: dict) -> None:

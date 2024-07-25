@@ -8,8 +8,8 @@ from pathlib import Path
 import base64
 
 from packages.constants import constants
-from packages.logic.dataimport import load_all_movies
-from packages.logic.dataretrieve import MovieScraper
+from packages.logic.data_import import load_all_movies
+from packages.logic.data_retrieve import MovieScraper
 from packages.logic.movie import Movie
 
 

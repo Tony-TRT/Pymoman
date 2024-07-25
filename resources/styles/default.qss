@@ -169,7 +169,7 @@ QScrollBar::handle:vertical
 /* QMenu                                                                      */
 /*----------------------------------------------------------------------------*/
 
-.QMenu::item:selected
+QMenu::item:selected
 {
     background-color: #2B5370;
 }

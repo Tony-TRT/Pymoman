@@ -9,23 +9,17 @@ from shutil import rmtree, copy
 from PIL import Image
 
 from packages.constants import constants
-from packages.logic import dataimport
+from packages.logic import data_import
 
 
 def clear_cache() -> None:
-    """Clear unused cache data.
+    """Clear unused cache data."""
 
-    Returns:
-        None: None.
-    """
-
-    if not constants.PATHS.get('cache').exists():
+    if not constants.PATHS["cache"].exists():
         return
+    saved_movies_cache_paths = [movie.storage for movie in data_import.load_all_movies()]
 
-    saved_movies = dataimport.load_all_movies()
-    saved_movies_cache_paths = [movie.storage for movie in saved_movies]
-
-    for path in constants.PATHS.get('cache').iterdir():
+    for path in constants.PATHS["cache"].iterdir():
         if path not in saved_movies_cache_paths and path.is_dir():
             rmtree(path)
 
@@ -51,7 +45,6 @@ def filter_name(name: str, limit: int = 25) -> str:
     for regex, error_message in forbidden_names.items():
         if re.match(regex, name):
             raise ValueError(error_message)
-
     unwanted_characters: str = '/\\:;"'
 
     for unwanted_character in unwanted_characters:
@@ -68,17 +61,12 @@ def modify_raw_poster(poster: Path) -> None:
 
     Args:
         poster (Path): Raw file's path.
-
-    Returns:
-        None: None.
     """
 
-    if not poster.exists():
-        return
-
-    movie_poster = Image.open(poster)
-    movie_poster_resized = movie_poster.resize((185, 275))
-    movie_poster_resized.save(poster)
+    if poster.exists():
+        movie_poster = Image.open(poster)
+        movie_poster_resized = movie_poster.resize((185, 275))
+        movie_poster_resized.save(poster)
 
 
 def set_local_poster(file, movie) -> None:
@@ -87,17 +75,15 @@ def set_local_poster(file, movie) -> None:
     Args:
         file: Image file's path.
         movie (Movie): Concerned movie.
-
-    Returns:
-        None: None.
     """
 
     try:
         copy(file, movie.thumb)
+
     except FileNotFoundError:
         return
+
     except FileExistsError:
         movie.thumb.unlink()
         set_local_poster(file, movie)
-
     modify_raw_poster(movie.thumb)

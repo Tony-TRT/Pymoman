@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Self
 
 from packages.constants import constants
-from packages.logic.dataimport import load_collection_movies
-from packages.logic.dataprocess import filter_name
+from packages.logic.data_import import load_collection_movies
+from packages.logic.data_process import filter_name
 from packages.logic.movie import Movie
 
 
@@ -40,7 +40,7 @@ class Collection:
             None: None.
         """
 
-        if isinstance(movie, Movie) and not any(movie == movie_to_check for movie_to_check in self.movies):
+        if isinstance(movie, Movie) and not any(movie == other for other in self.movies):
             self.movies.append(movie)
 
     def export_as_txt(self, output_file: str | Path) -> None:

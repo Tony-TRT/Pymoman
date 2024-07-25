@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt
 
 from packages.constants import constants
 from packages.logic.collection import Collection
-from packages.logic.dataimport import find_movie_files
+from packages.logic.data_import import find_movie_files
 from packages.ui.aesthetic import AestheticWindow
 
 
